@@ -10,7 +10,7 @@ mod tests {
     fn locate_test_data() -> PathBuf {
         let exe_path = ::std::env::current_exe().unwrap();
         let mut parent_path = exe_path.parent().unwrap().to_owned();
-        parent_path.push("../../../test-data");
+        parent_path.push("../../../test-data/akaze-test-data");
         parent_path
     }
 
