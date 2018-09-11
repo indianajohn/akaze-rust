@@ -16,5 +16,6 @@ fn extract_features() {
     test_image_path.push("1.jpg");
     // TODO: temp dir
     let output_path = Path::new("output.png");
-    akaze::extract_features(test_image_path, output_path.to_owned());
+    let options = akaze::Config::default();
+    akaze::extract_features(test_image_path, output_path.to_owned(), options);
 }
