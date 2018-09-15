@@ -1,6 +1,9 @@
 
 extern crate image;
 extern crate imageproc;
+#[macro_use]
+extern crate log;
+extern crate env_logger;
 
 use std::path::PathBuf;
 use image::GrayImage;
@@ -18,7 +21,7 @@ mod tests {
 
     #[test]
     fn test_locate_data() {
-        println!(
+        warn!(
             "Note: test data can be obtained from the akaze-test-data
             repository See README.md");
         let test_data_path = locate_test_data();
@@ -147,6 +150,6 @@ fn allocate_evolutions(width: u32, height: u32, options: Config) -> Vec<Evolutio
 /// 
 pub fn extract_features(input_image_path: PathBuf, _output_features_path: PathBuf, options: Config) {
     let input_image = image::open(input_image_path.as_os_str()).unwrap();
-    let _evolutions = allocate_evolutions(input_image.width(), input_image.height(), options);
-    println!("TODO: finish");
+    let evolutions = allocate_evolutions(input_image.width(), input_image.height(), options);
+    warn!("TODO: finish");
 }
