@@ -25,8 +25,8 @@ pub fn compute_contrast_factor(
     let mut hmax: f64 = 0.0;
     let mut histogram: Vec<f64> = vec![0f64; num_bins];
     let gaussian = image::imageops::blur(image, gradient_histogram_scale as f32);
-    let Lx = ops::derivatives::scharr(&gaussian, 1, 0);
-    let Ly = ops::derivatives::scharr(&gaussian, 0, 1);
+    let Lx = ops::derivatives::scharr(&gaussian, true, false);
+    let Ly = ops::derivatives::scharr(&gaussian, false, true);
     for y in 1..(gaussian.height() - 1) {
         for x in 1..(gaussian.width() - 1) {
             let Lx: f64 = Lx.get_pixel(x, y).channels()[0] as f64;
