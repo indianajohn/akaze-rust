@@ -1,7 +1,6 @@
 extern crate image;
 use image::Pixel;
 use ops;
-use types;
 use types::image::GrayFloatImage;
 #[allow(non_snake_case)]
 

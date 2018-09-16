@@ -4,6 +4,8 @@ extern crate log;
 extern crate env_logger;
 
 use image::GenericImage;
+use image::Luma;
+use image::Pixel;
 use std::path::PathBuf;
 
 pub mod ops;
@@ -46,19 +48,62 @@ mod tests {
     }
 }
 
+/// This function computes the Perona and Malik conductivity coefficient g2
+/// g2 = 1 / (1 + dL^2 / k^2)
+/// `Lx` First order image derivative in X-direction (horizontal)
+/// `Ly` First order image derivative in Y-direction (vertical)
+/// `k` Contrast factor parameter
+/// # Return value
+/// Output image
+#[allow(non_snake_case)]
+fn pm_g2(Lx: &GrayFloatImage, Ly: &GrayFloatImage, k: f64) -> GrayFloatImage {
+    let mut dst = GrayFloatImage::new(Lx.width(), Lx.height());
+    assert!(Lx.width() == Ly.width());
+    assert!(Lx.height() == Ly.height());
+    let inverse_k: f64 = 1.0f64 / (k * k);
+    for y in 0..Lx.height() {
+        for x in 0..Lx.width() {
+            let Lx_pixel: f64 = Lx.get_pixel(x, y).channels()[0] as f64;
+            let Ly_pixel: f64 = Ly.get_pixel(x, y).channels()[0] as f64;
+            let dst_pixel: f64 =
+                1.0f64 / (1.0f64 + inverse_k * (Lx_pixel * Lx_pixel + Ly_pixel * Ly_pixel));
+            dst.put_pixel(x, y, Luma([dst_pixel as f32]));
+        }
+    }
+    dst
+}
+
 fn create_nonlinear_scale_space(
     evolutions: &mut Vec<EvolutionStep>,
     image: &GrayFloatImage,
     options: Config,
 ) {
+    info!("Creating first evolution.");
     evolutions[0].Lt = image::imageops::blur(image, options.base_scale_offset as f32);
     evolutions[0].Lsmooth = evolutions[0].Lt.clone();
-    let mut _contrast_factor = ops::contrast_factor::compute_contrast_factor(
+    let contrast_factor = ops::contrast_factor::compute_contrast_factor(
         &evolutions[0].Lsmooth,
         options.contrast_percentile,
         1.0f64,
         options.contrast_factor_num_bins,
     );
+    for i in 1..evolutions.len() {
+        info!("Creating evolution {}.", i);
+        if evolutions[i].octave > evolutions[i - 1].octave {
+            evolutions[i].Lt = image::imageops::resize(
+                &evolutions[i - 1].Lt,
+                evolutions[i].Lt.width(),
+                evolutions[i].Lt.height(),
+                image::FilterType::Gaussian,
+            );
+        } else {
+            evolutions[i].Lt = evolutions[i - 1].Lt.clone();
+        }
+        evolutions[0].Lsmooth = image::imageops::blur(&evolutions[0].Lt, 1.0f32);
+        evolutions[i].Lx = ops::derivatives::scharr(&evolutions[0].Lsmooth, true, false);
+        evolutions[i].Ly = ops::derivatives::scharr(&evolutions[0].Lsmooth, false, true);
+        evolutions[i].Lflow = pm_g2(&evolutions[i].Lx, &evolutions[i].Ly, contrast_factor);
+    }
     warn!("TODO: finish");
 }
 
