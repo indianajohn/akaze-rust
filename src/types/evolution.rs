@@ -75,12 +75,15 @@ impl EvolutionStep {
         sublevel: u32,
         options: Config,
     ) -> EvolutionStep {
+        //step.esigma = options_.soffset*pow(2.0f, (float)(j)/(float)(options_.nsublevels) + i);
         let esigma = options.base_scale_offset * f64::powf(
             2.0f64,
-            (sublevel as f64) / ((options.num_sublevels + octave) as f64),
+            (sublevel as f64) / (options.num_sublevels as f64) + (octave as f64),
         );
+        let etime = 0.5*(esigma*esigma);
+        info!("etime: {}", etime);
         EvolutionStep {
-            etime: 0.0f64,
+            etime: etime,
             esigma: esigma,
             octave: octave,
             sublevel: sublevel,
