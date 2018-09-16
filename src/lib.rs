@@ -6,8 +6,13 @@ extern crate log;
 extern crate env_logger;
 
 use std::path::PathBuf;
-use image::GrayImage;
+use image::DynamicImage;
 use image::GenericImage;
+use image::GrayImage;
+use image::ImageBuffer;
+use image::Luma;
+use image::Pixel;
+type GrayFloatImage = ImageBuffer<Luma<f32>, Vec<f32>>;
 
 #[cfg(test)]
 mod tests {
@@ -76,25 +81,25 @@ struct EvolutionStep {
     /// Integer sigma. For computing the feature detector responses
     sigma_size: u32,
     /// Evolution image
-    Lt: GrayImage,
+    Lt: GrayFloatImage,
     /// Smoothed image
-    Lsmooth: GrayImage,
+    Lsmooth: GrayFloatImage,
     /// First order spatial derivative
-    Lx: GrayImage,
+    Lx: GrayFloatImage,
     /// First order spatial derivatives
-    Ly: GrayImage,
+    Ly: GrayFloatImage,
     /// Second order spatial derivative
-    Lxx: GrayImage,
+    Lxx: GrayFloatImage,
     /// Second order spatial derivatives
-    Lyy: GrayImage,
+    Lyy: GrayFloatImage,
     /// Second order spatial derivatives
-    Lxy: GrayImage,
+    Lxy: GrayFloatImage,
     /// Diffusivity image
-    Lflow: GrayImage,
+    Lflow: GrayFloatImage,
     /// Evolution step update
-    Lstep: GrayImage,
+    Lstep: GrayFloatImage,
     /// Detector response
-    Ldet: GrayImage,
+    Ldet: GrayFloatImage,
 }
 
 impl EvolutionStep {
@@ -108,16 +113,16 @@ impl EvolutionStep {
             octave: octave,
             sublevel: sublevel,
             sigma_size: esigma.round() as u32,
-            Lt: GrayImage::new(level_width, level_height),
-            Lsmooth: GrayImage::new(level_width, level_height),
-            Lx: GrayImage::new(level_width, level_height),
-            Ly: GrayImage::new(level_width, level_height),
-            Lxx: GrayImage::new(level_width, level_height),
-            Lyy: GrayImage::new(level_width, level_height),
-            Lxy: GrayImage::new(level_width, level_height),
-            Lflow: GrayImage::new(level_width, level_height),
-            Lstep: GrayImage::new(level_width, level_height),
-            Ldet: GrayImage::new(level_width, level_height),
+            Lt: GrayFloatImage::new(level_width, level_height),
+            Lsmooth: GrayFloatImage::new(level_width, level_height),
+            Lx: GrayFloatImage::new(level_width, level_height),
+            Ly: GrayFloatImage::new(level_width, level_height),
+            Lxx: GrayFloatImage::new(level_width, level_height),
+            Lyy: GrayFloatImage::new(level_width, level_height),
+            Lxy: GrayFloatImage::new(level_width, level_height),
+            Lflow: GrayFloatImage::new(level_width, level_height),
+            Lstep: GrayFloatImage::new(level_width, level_height),
+            Ldet: GrayFloatImage::new(level_width, level_height),
         }
     }
 }
@@ -141,15 +146,36 @@ fn allocate_evolutions(width: u32, height: u32, options: Config) -> Vec<Evolutio
     out_vec
 }
 
+fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
+    let gray_image: GrayImage = input_image.to_luma();
+    let mut output_image = GrayFloatImage::new(input_image.width(), input_image.height());
+    for (x, y, gray_pixel) in gray_image.enumerate_pixels() {
+        let pixel_value: u8 = gray_pixel.channels()[0];
+        let scaled_float = (pixel_value as f32) * 1f32 / 255f32;
+        output_image.put_pixel(x, y, image::Luma([scaled_float]));
+    }
+    output_image
+}
+
+fn create_nonlinear_scale_space(evolutions: &mut Vec<EvolutionStep>, image: &GrayFloatImage, _options: Config) {
+  evolutions[0].Lt = image.clone();
+  // TODO: blur with options.base_scale_offset
+  evolutions[0].Lsmooth = evolutions[0].Lt.clone();
+}
+
 /// Extract features using the Akaze feature extractor.
 /// 
 /// # Arguments
-/// `_input_image_path` - the input image for which to extract features.
-/// `_output_features_path` - the output path to which to write an output JSON file.
-/// `_options: the options for the algorithm.`
+/// `input_image_path` - the input image for which to extract features.
+/// `output_features_path` - the output path to which to write an output JSON file.
+/// `options: the options for the algorithm.`
 /// 
-pub fn extract_features(input_image_path: PathBuf, _output_features_path: PathBuf, options: Config) {
-    let input_image = image::open(input_image_path.as_os_str()).unwrap();
-    let evolutions = allocate_evolutions(input_image.width(), input_image.height(), options);
+pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf, options: Config) {
+    let input_image = image::open(input_image_path).unwrap();
+    let float_image = create_unit_float_image(&input_image);
+    info!("Loaded a {} x {} image", input_image.width(), input_image.height());
+    let mut evolutions = allocate_evolutions(input_image.width(), input_image.height(), options);
+    create_nonlinear_scale_space(&mut evolutions, &float_image, options);
     warn!("TODO: finish");
+    std::fs::write(output_features_path, "foo").unwrap(); // placeholder
 }
