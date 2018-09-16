@@ -2,6 +2,7 @@ extern crate image;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
+extern crate primal;
 
 use image::GenericImage;
 use image::Luma;
@@ -103,6 +104,11 @@ fn create_nonlinear_scale_space(
         evolutions[i].Lx = ops::derivatives::scharr(&evolutions[0].Lsmooth, true, false);
         evolutions[i].Ly = ops::derivatives::scharr(&evolutions[0].Lsmooth, false, true);
         evolutions[i].Lflow = pm_g2(&evolutions[i].Lx, &evolutions[i].Ly, contrast_factor);
+        for j in 0..evolutions[i].fed_tau_steps.len() {
+            let step_size: f64 = evolutions[i].fed_tau_steps[j];
+            ops::nonlinear_diffusion::calculate_step(
+                &mut evolutions[i], step_size);
+        }
     }
     warn!("TODO: finish");
 }

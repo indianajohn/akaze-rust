@@ -16,7 +16,7 @@ fn locate_test_data() -> PathBuf {
 
 #[test]
 fn extract_features() {
-    let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info");
+    let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug");
     env_logger::Builder::from_env(env).init();
     let mut test_image_path = locate_test_data();
     test_image_path.push("1.jpg");

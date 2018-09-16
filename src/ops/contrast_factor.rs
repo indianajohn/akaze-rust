@@ -2,7 +2,6 @@ extern crate image;
 use image::Pixel;
 use ops;
 use types::image::GrayFloatImage;
-#[allow(non_snake_case)]
 
 /// This function computes a good empirical value for the k contrast factor
 /// given an input image, the percentile (0-1), the gradient scale and the
@@ -13,6 +12,7 @@ use types::image::GrayFloatImage;
 /// `nbins` nbins Number of histogram bins
 /// # Return value
 /// k contrast factor
+#[allow(non_snake_case)]
 pub fn compute_contrast_factor(
     image: &GrayFloatImage,
     percentile: f64,

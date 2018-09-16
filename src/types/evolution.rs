@@ -1,4 +1,5 @@
 use types::image::GrayFloatImage;
+use ops::fed_tau;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Config {
@@ -62,6 +63,8 @@ pub struct EvolutionStep {
     pub Lstep: GrayFloatImage,
     /// Detector response
     pub Ldet: GrayFloatImage,
+    /// fed_tau steps
+    pub fed_tau_steps: Vec<f64>,
 }
 
 impl EvolutionStep {
@@ -92,6 +95,7 @@ impl EvolutionStep {
             Lflow: GrayFloatImage::new(level_width, level_height),
             Lstep: GrayFloatImage::new(level_width, level_height),
             Ldet: GrayFloatImage::new(level_width, level_height),
+            fed_tau_steps: vec![],
         }
     }
 }
@@ -111,6 +115,12 @@ pub fn allocate_evolutions(width: u32, height: u32, options: Config) -> Vec<Evol
         } else {
             break;
         }
+    }
+    for i in 1..out_vec.len() {
+        let ttime = out_vec[i].etime-out_vec[i-1].etime;
+        out_vec[i].fed_tau_steps = fed_tau::fed_tau_by_process_time(
+            ttime, 1, 0.25, true);
+        debug!("{} steps in evolution {}.", out_vec[i].fed_tau_steps.len(), i);
     }
     out_vec
 }
