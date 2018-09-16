@@ -38,3 +38,10 @@ pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
 pub fn gf(image: &GrayFloatImage, x: u32, y: u32) -> f32 {
     image.get_pixel(x, y).channels()[0]
 }
+
+/// put a float pixel to x, y
+/// `x` x coordinate.
+/// `y` y coordinate.
+pub fn pf(image: &mut GrayFloatImage, x: u32, y: u32, pixel_value: f32) {
+    image.put_pixel(x, y, Luma([pixel_value]));
+}
