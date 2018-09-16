@@ -109,7 +109,6 @@ fn create_nonlinear_scale_space(
             ops::nonlinear_diffusion::calculate_step(&mut evolutions[i], step_size);
         }
     }
-    warn!("TODO: finish");
 }
 
 /// Extract features using the Akaze feature extractor.
