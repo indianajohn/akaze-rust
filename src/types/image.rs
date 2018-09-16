@@ -17,12 +17,15 @@ pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
     output_image
 }
 
-pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage{
+pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
     let mut output_image = DynamicImage::new_luma8(input_image.width(), input_image.height());
     for (x, y, float_pixel) in input_image.enumerate_pixels() {
         let pixel_value: f32 = float_pixel.channels()[0];
         let u8_pixel: u8 = (pixel_value * 255f32) as u8;
-        output_image.as_mut_luma8().unwrap().put_pixel(x, y, Luma([u8_pixel]));
+        output_image
+            .as_mut_luma8()
+            .unwrap()
+            .put_pixel(x, y, Luma([u8_pixel]));
     }
     output_image
 }
