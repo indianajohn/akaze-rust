@@ -1,5 +1,5 @@
-use types::image::GrayFloatImage;
 use ops::fed_tau;
+use types::image::GrayFloatImage;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Config {
@@ -80,7 +80,7 @@ impl EvolutionStep {
             2.0f64,
             (sublevel as f64) / (options.num_sublevels as f64) + (octave as f64),
         );
-        let etime = 0.5*(esigma*esigma);
+        let etime = 0.5 * (esigma * esigma);
         info!("etime: {}", etime);
         EvolutionStep {
             etime: etime,
@@ -120,10 +120,13 @@ pub fn allocate_evolutions(width: u32, height: u32, options: Config) -> Vec<Evol
         }
     }
     for i in 1..out_vec.len() {
-        let ttime = out_vec[i].etime-out_vec[i-1].etime;
-        out_vec[i].fed_tau_steps = fed_tau::fed_tau_by_process_time(
-            ttime, 1, 0.25, true);
-        debug!("{} steps in evolution {}.", out_vec[i].fed_tau_steps.len(), i);
+        let ttime = out_vec[i].etime - out_vec[i - 1].etime;
+        out_vec[i].fed_tau_steps = fed_tau::fed_tau_by_process_time(ttime, 1, 0.25, true);
+        debug!(
+            "{} steps in evolution {}.",
+            out_vec[i].fed_tau_steps.len(),
+            i
+        );
     }
     out_vec
 }

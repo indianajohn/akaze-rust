@@ -1,8 +1,8 @@
-use std::f64::consts::PI;
 use primal;
+use std::f64::consts::PI;
 /// derived from C++ code by Pablo F. Alcantarilla, Jesus Nuevo in the
 /// AKAZE library. Notes from original author of the C++ code:
-/// 
+///
 /// This code is derived from FED/FJ library from Grewenig et al.,
 /// The FED/FJ library allows solving more advanced problems
 /// Please look at the following papers for more information about FED:
@@ -11,7 +11,7 @@ use primal;
 /// Saarland University, Saarbrücken, Germany, March 2013
 /// [2] S. Grewenig, J. Weickert, A. Bruhn. From box filtering to fast explicit diffusion.
 /// DAGM, 2010
-/// 
+///
 /// This function allocates an array of the least number of time steps such
 /// that a certain stopping time for the whole process can be obtained and fills
 /// it with the respective FED time step sizes for one cycle
@@ -22,13 +22,9 @@ use primal;
 /// # Return value
 /// The vector with the dynamic step sizes
 #[allow(non_snake_case)]
-pub fn fed_tau_by_process_time(
-    T: f64, M: i32, tau_max: f64,
-    reordering: bool,
-) -> Vec<f64> {
+pub fn fed_tau_by_process_time(T: f64, M: i32, tau_max: f64, reordering: bool) -> Vec<f64> {
     // All cycles have the same fraction of the stopping time
-    fed_tau_by_cycle_time(
-        T/(M as f64),tau_max,reordering)
+    fed_tau_by_cycle_time(T / (M as f64), tau_max, reordering)
 }
 
 /// This function allocates an array of the least number of time steps such
@@ -40,14 +36,11 @@ pub fn fed_tau_by_process_time(
 /// # Return value
 /// tau The vector with the dynamic step sizes
 #[allow(non_snake_case)]
-fn fed_tau_by_cycle_time(
-    t: f64, tau_max: f64,
-    reordering: bool,
-) -> Vec<f64> {
+fn fed_tau_by_cycle_time(t: f64, tau_max: f64, reordering: bool) -> Vec<f64> {
     // number of time steps
-    let n = (f64::ceil(f64::sqrt(3.0*t/tau_max+0.25)-0.5f64-1.0e-8)+ 0.5) as usize;
+    let n = (f64::ceil(f64::sqrt(3.0 * t / tau_max + 0.25) - 0.5f64 - 1.0e-8) + 0.5) as usize;
     // Ratio of t we search to maximal t
-    let scale = 3.0*t/(tau_max*((n*(n+1)) as f64));
+    let scale = 3.0 * t / (tau_max * ((n * (n + 1)) as f64));
     fed_tau_internal(n, scale, tau_max, reordering)
 }
 
@@ -59,10 +52,7 @@ fn fed_tau_by_cycle_time(
 /// `reordering` Reordering flag
 /// # Return value
 /// The vector with the dynamic step sizes
-fn fed_tau_internal(
-    n: usize, scale: f64, tau_max: f64,
-    reordering: bool,
-) -> Vec<f64> {
+fn fed_tau_internal(n: usize, scale: f64, tau_max: f64, reordering: bool) -> Vec<f64> {
     let mut tauh: Vec<f64> = vec![]; // unsorted tauh
     if reordering {
         tauh = vec![0f64; n];

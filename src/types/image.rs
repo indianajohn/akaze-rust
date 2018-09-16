@@ -29,3 +29,12 @@ pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
     }
     output_image
 }
+
+/// get a float pixel at x, y
+/// `x` x coordinate.
+/// `y` y coordinate.
+/// # Return value
+/// the value of the pixel.
+pub fn gf(image: &GrayFloatImage, x: u32, y: u32) -> f32 {
+    image.get_pixel(x, y).channels()[0]
+}
