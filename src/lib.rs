@@ -111,6 +111,7 @@ fn create_nonlinear_scale_space(
         evolutions[i].Lflow = pm_g2(&evolutions[i].Lx, &evolutions[i].Ly, contrast_factor);
         for j in 0..evolutions[i].fed_tau_steps.len() {
             let step_size: f64 = evolutions[i].fed_tau_steps[j];
+            debug!("Using step size {}", step_size);
             ops::nonlinear_diffusion::calculate_step(&mut evolutions[i], step_size);
         }
     }
