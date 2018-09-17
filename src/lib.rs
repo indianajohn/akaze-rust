@@ -129,6 +129,20 @@ pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf
     let mut evolutions =
         types::evolution::allocate_evolutions(input_image.width(), input_image.height(), options);
     create_nonlinear_scale_space(&mut evolutions, &float_image, options);
+    match std::env::var("AKAZE_SCALE_SPACE_DIR") {
+        Ok(val) => {
+            info!("Writing scale space; if you want to skip this step, undefine the env var AKAZE_SCALE_SPACE_DIR");
+            let string_to_pass = val.to_string();
+            std::fs::create_dir_all(&string_to_pass.clone()).unwrap();
+            types::evolution::write_evolutions(
+                &evolutions,
+                std::path::Path::new(&string_to_pass.clone()).to_owned(),
+            );
+        }
+        Err(_e) => {
+            info!("Not writing scale space; do write scale space, define the env var AKAZE_SCALE_SPACE_DIR");
+        }
+    }
     warn!("TODO: finish");
     std::fs::write(output_features_path, "foo").unwrap(); // placeholder
 }

@@ -4,6 +4,7 @@ use image::GrayImage;
 use image::ImageBuffer;
 use image::Luma;
 use image::Pixel;
+use std::path::PathBuf;
 pub type GrayFloatImage = ImageBuffer<Luma<f32>, Vec<f32>>;
 
 pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
@@ -28,6 +29,11 @@ pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
             .put_pixel(x, y, Luma([u8_pixel]));
     }
     output_image
+}
+
+pub fn save(input_image: &GrayFloatImage, path: PathBuf) {
+    let dynamic_image = create_dynamic_image(&input_image);
+    dynamic_image.save(path).unwrap();
 }
 
 /// get a float pixel at x, y

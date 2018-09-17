@@ -1,4 +1,7 @@
 use ops::fed_tau;
+use std::fmt::Write;
+use std::path::PathBuf;
+use types::image::save;
 use types::image::GrayFloatImage;
 
 #[derive(Debug, Copy, Clone)]
@@ -13,6 +16,7 @@ pub struct Config {
     pub initial_contrast: f64,
     /// Percentile level for the contrast factor
     pub contrast_percentile: f64,
+
     /// Number of bins for the contrast factor histogram
     pub contrast_factor_num_bins: usize,
 }
@@ -129,4 +133,49 @@ pub fn allocate_evolutions(width: u32, height: u32, options: Config) -> Vec<Evol
         );
     }
     out_vec
+}
+
+fn build_path(mut destination_dir: PathBuf, path_label: String, idx: usize) -> PathBuf {
+    let mut to_write = String::new();
+    write!(to_write, "{}{:05}.png", path_label, idx);
+    destination_dir.push(to_write);
+    destination_dir.set_extension(".png");
+    destination_dir
+}
+
+pub fn write_evolutions(evolutions: &Vec<EvolutionStep>, destination_dir: PathBuf) {
+    for i in 0..evolutions.len() {
+        save(
+            &evolutions[i].Lx,
+            build_path(destination_dir.clone(), "Lx_".to_string(), i),
+        );
+        save(
+            &evolutions[i].Ly,
+            build_path(destination_dir.clone(), "Ly_".to_string(), i),
+        );
+        save(
+            &evolutions[i].Lxx,
+            build_path(destination_dir.clone(), "Lxx_".to_string(), i),
+        );
+        save(
+            &evolutions[i].Lyy,
+            build_path(destination_dir.clone(), "Lyy_".to_string(), i),
+        );
+        save(
+            &evolutions[i].Lxy,
+            build_path(destination_dir.clone(), "Lxy_".to_string(), i),
+        );
+        save(
+            &evolutions[i].Lflow,
+            build_path(destination_dir.clone(), "Lflow_".to_string(), i),
+        );
+        save(
+            &evolutions[i].Lstep,
+            build_path(destination_dir.clone(), "Lstep_".to_string(), i),
+        );
+        save(
+            &evolutions[i].Ldet,
+            build_path(destination_dir.clone(), "Ldet_".to_string(), i),
+        );
+    }
 }
