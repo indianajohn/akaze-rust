@@ -82,6 +82,7 @@ fn create_nonlinear_scale_space(
     info!("Creating first evolution.");
     evolutions[0].Lt = image::imageops::blur(image, options.base_scale_offset as f32);
     evolutions[0].Lsmooth = evolutions[0].Lt.clone();
+    debug!("Convolving first evolution with sigma={} Gaussian.", options.base_scale_offset);
     let mut contrast_factor = ops::contrast_factor::compute_contrast_factor(
         &evolutions[0].Lsmooth,
         options.contrast_percentile,
