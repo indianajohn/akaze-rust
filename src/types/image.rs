@@ -5,6 +5,7 @@ use image::ImageBuffer;
 use image::Luma;
 use image::Pixel;
 use std::path::PathBuf;
+use std::f32;
 pub type GrayFloatImage = ImageBuffer<Luma<f32>, Vec<f32>>;
 
 pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
@@ -31,8 +32,38 @@ pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
     output_image
 }
 
+pub fn normalize(input_image: &GrayFloatImage
+) -> GrayFloatImage {
+    let mut min_pixel = f32::MAX;
+    let mut max_pixel = f32::MIN;
+    let mut output_image = GrayFloatImage::new(input_image.width(), input_image.height());
+    for x in 0..input_image.width() {
+        for y in 0..input_image.height() {
+            let pixel = gf(&input_image, x, y);
+            if pixel > max_pixel {
+                max_pixel = pixel;
+            }
+            if pixel < min_pixel {
+                min_pixel = pixel;
+            }
+        }
+    }
+
+    let new_max_pixel = max_pixel - min_pixel;
+    for x in 0..input_image.width() {
+        for y in 0..input_image.height() {
+            let mut pixel = gf(&input_image, x, y);
+            pixel = pixel - min_pixel;
+            pixel = pixel / new_max_pixel;
+            pf(&mut output_image, x, y, pixel);
+        }
+    }
+    output_image
+}
+
 pub fn save(input_image: &GrayFloatImage, path: PathBuf) {
-    let dynamic_image = create_dynamic_image(&input_image);
+    let normalized_image = normalize(&input_image);
+    let dynamic_image = create_dynamic_image(&normalized_image);
     dynamic_image.save(path).unwrap();
 }
 
