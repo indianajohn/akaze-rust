@@ -146,8 +146,12 @@ fn build_path(mut destination_dir: PathBuf, path_label: String, idx: usize) -> P
 pub fn write_evolutions(evolutions: &Vec<EvolutionStep>, destination_dir: PathBuf) {
     for i in 0..evolutions.len() {
         save(
-            &evolutions[i].Lx,
-            build_path(destination_dir.clone(), "Lx_".to_string(), i),
+            &evolutions[i].Lt,
+            build_path(destination_dir.clone(), "Lt_".to_string(), i),
+        );
+        save(
+            &evolutions[i].Lsmooth,
+            build_path(destination_dir.clone(), "Lsmooth_".to_string(), i),
         );
         save(
             &evolutions[i].Ly,
