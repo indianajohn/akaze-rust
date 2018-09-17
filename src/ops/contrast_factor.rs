@@ -19,8 +19,6 @@ pub fn compute_contrast_factor(
     gradient_histogram_scale: f64,
     num_bins: usize,
 ) -> f64 {
-    let mut bin_number: usize = 0;
-    let mut num_elements: usize = 0;
     let mut num_points: f64 = 0.0;
     let mut hmax: f64 = 0.0;
     let mut histogram: Vec<f64> = vec![0f64; num_bins];
@@ -43,21 +41,23 @@ pub fn compute_contrast_factor(
             let Ly: f64 = Ly.get_pixel(x, y).channels()[0] as f64;
             let modg: f64 = f64::sqrt(Lx * Lx + Ly * Ly);
             if modg != 0.0 {
-                bin_number = f64::floor((num_bins as f64) * (modg / hmax)) as usize;
+                let mut bin_number = f64::floor((num_bins as f64) * (modg / hmax)) as usize;
+                if bin_number == num_bins {
+                    bin_number = bin_number - 1;
+                }
+                histogram[bin_number] += 1f64;
+                num_points += 1f64;
             }
-            if bin_number == num_bins {
-                bin_number = bin_number - 1;
-            }
-            histogram[bin_number] += 1f64;
-            num_points += 1f64;
         }
     }
     let threshold: usize = (num_points * percentile) as usize;
     let mut k: usize = 0;
-    while k < threshold && k < num_bins {
+    let mut num_elements: usize = 0;
+    while num_elements < threshold && k < num_bins {
         num_elements = num_elements + histogram[k] as usize;
         k += 1;
     }
+    debug!("hmax: {}, threshold: {}, num_elements: {}", hmax, threshold, num_elements);
     let mut kperc: f64 = 0.03;
     if num_elements >= threshold {
         kperc = hmax * (k as f64) / (num_bins as f64);

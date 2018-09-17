@@ -89,7 +89,8 @@ fn create_nonlinear_scale_space(
         1.0f64,
         options.contrast_factor_num_bins,
     );
-    debug!("Initial contrast factor: {}", contrast_factor);
+    debug!("Contrast percentile={}, Num bins={}, Initial contrast factor={}", 
+    options.contrast_percentile, options.contrast_factor_num_bins, contrast_factor);
     for i in 1..evolutions.len() {
         info!("Creating evolution {}.", i);
         if evolutions[i].octave > evolutions[i - 1].octave {
