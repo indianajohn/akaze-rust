@@ -82,12 +82,13 @@ fn create_nonlinear_scale_space(
     info!("Creating first evolution.");
     evolutions[0].Lt = image::imageops::blur(image, options.base_scale_offset as f32);
     evolutions[0].Lsmooth = evolutions[0].Lt.clone();
-    let contrast_factor = ops::contrast_factor::compute_contrast_factor(
+    let mut contrast_factor = ops::contrast_factor::compute_contrast_factor(
         &evolutions[0].Lsmooth,
         options.contrast_percentile,
         1.0f64,
         options.contrast_factor_num_bins,
     );
+    debug!("Initial contrast factor: {}", contrast_factor);
     for i in 1..evolutions.len() {
         info!("Creating evolution {}.", i);
         if evolutions[i].octave > evolutions[i - 1].octave {
@@ -97,12 +98,16 @@ fn create_nonlinear_scale_space(
                 evolutions[i].Lt.height(),
                 image::FilterType::Gaussian,
             );
+            contrast_factor = contrast_factor*0.75;
+            debug!(
+                "New image size: {}x{}, new contrast factor: {}",
+                evolutions[i].Lt.width(), evolutions[i].Lt.height(), contrast_factor);
         } else {
             evolutions[i].Lt = evolutions[i - 1].Lt.clone();
         }
-        evolutions[0].Lsmooth = image::imageops::blur(&evolutions[0].Lt, 1.0f32);
-        evolutions[i].Lx = ops::derivatives::scharr(&evolutions[0].Lsmooth, true, false);
-        evolutions[i].Ly = ops::derivatives::scharr(&evolutions[0].Lsmooth, false, true);
+        evolutions[i].Lsmooth = image::imageops::blur(&evolutions[i].Lt, 1.0f32);
+        evolutions[i].Lx = ops::derivatives::scharr(&evolutions[i].Lsmooth, true, false);
+        evolutions[i].Ly = ops::derivatives::scharr(&evolutions[i].Lsmooth, false, true);
         evolutions[i].Lflow = pm_g2(&evolutions[i].Lx, &evolutions[i].Ly, contrast_factor);
         for j in 0..evolutions[i].fed_tau_steps.len() {
             let step_size: f64 = evolutions[i].fed_tau_steps[j];

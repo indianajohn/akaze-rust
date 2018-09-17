@@ -108,7 +108,7 @@ impl EvolutionStep {
 
 pub fn allocate_evolutions(width: u32, height: u32, options: Config) -> Vec<EvolutionStep> {
     let mut out_vec: Vec<EvolutionStep> = vec![];
-    for i in 0..(options.max_octave_evolution - 1u32) {
+    for i in 0..options.max_octave_evolution {
         let rfactor = 1.0f64 / f64::powf(2.0f64, i as f64);
         let level_height = ((height as f64) * rfactor) as u32;
         let level_width = ((width as f64) * rfactor) as u32;
