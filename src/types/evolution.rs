@@ -85,7 +85,6 @@ impl EvolutionStep {
             (sublevel as f64) / (options.num_sublevels as f64) + (octave as f64),
         );
         let etime = 0.5 * (esigma * esigma);
-        info!("etime: {}", etime);
         EvolutionStep {
             etime: etime,
             esigma: esigma,
