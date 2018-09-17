@@ -153,6 +153,10 @@ pub fn write_evolutions(evolutions: &Vec<EvolutionStep>, destination_dir: PathBu
             build_path(destination_dir.clone(), "Lsmooth_".to_string(), i),
         );
         save(
+            &evolutions[i].Lx,
+            build_path(destination_dir.clone(), "Lx_".to_string(), i),
+        );
+        save(
             &evolutions[i].Ly,
             build_path(destination_dir.clone(), "Ly_".to_string(), i),
         );
