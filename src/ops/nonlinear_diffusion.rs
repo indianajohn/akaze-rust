@@ -1,6 +1,7 @@
 use types::evolution::EvolutionStep;
 use types::image::GrayFloatImage;
 use types::image::{gf, pf};
+//use std::io;
 /// This function performs a scalar non-linear diffusion step
 /// `Ld` Output image in the evolution
 /// `c` Conductivity image. The function c is a scalar value that depends on the gradient norm
@@ -102,7 +103,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
                 &mut Lstep,
                 x,
                 y,
-                0.5 * (step_size as f32) * (-x_pos + y_pos - y_neg),
+                0.5 * (step_size as f32) * (x_pos + y_pos - y_neg),
             );
         }
         {
