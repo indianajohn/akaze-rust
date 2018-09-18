@@ -82,3 +82,66 @@ pub fn gf(image: &GrayFloatImage, x: u32, y: u32) -> f32 {
 pub fn pf(image: &mut GrayFloatImage, x: u32, y: u32, pixel_value: f32) {
     image.put_pixel(x, y, Luma([pixel_value]));
 }
+
+pub fn sqrt_squared(image_1: &GrayFloatImage, image_2: &GrayFloatImage) -> GrayFloatImage {
+    let mut result = GrayFloatImage::new(image_1.width(), image_1.height());
+    assert!(image_1.width() == image_2.width());
+    assert!(image_1.height() == image_2.height());
+    for x in 0..image_1.width() {
+        for y in 0..image_2.height() {
+            let p1: f32 = image_1.get_pixel(x, y).channels()[0];
+            let p2: f32 = image_2.get_pixel(x, y).channels()[0];
+            let mut pixel = image_1.get_pixel(x, y).clone();
+            pixel.channels_mut()[0] = f32::sqrt(p1 * p1 + p2 * p2);
+            result.put_pixel(x, y, pixel);
+        }
+    }
+    result
+}
+
+pub fn fill_border(mut output: &mut GrayFloatImage) {
+    // first and last row - copy nearest pixel
+    for x in 0..output.width() {
+        let plus = gf(&output, x, 1);
+        let minus = gf(&output, x, output.height() - 2);
+        pf(&mut output, x, 0, plus);
+        let y = output.height() - 1;
+        pf(&mut output, x, y, minus);
+    }
+    // first and last column - copy nearest pixel
+    for y in 0..output.height() {
+        let plus = gf(&output, 1, y);
+        let minus = gf(&output, output.width() - 2, y);
+        pf(&mut output, 0, y, plus);
+        let x = output.width() - 1;
+        pf(&mut output, x, y, minus);
+    }
+}
+
+pub fn horizontal_filter(image: &GrayFloatImage, kernel: &[f32; 3] ) -> GrayFloatImage {
+    assert!(kernel.len() == 3);
+    let mut output = GrayFloatImage::new(image.width(), image.height());
+    // center of image
+    for x in 1..(image.width() - 1) {
+        for y in 1..(image.height() - 1) {
+            let val = kernel[0] * gf(image,x - 1, y) + kernel[1] * gf(image, x, y) + kernel[2] * gf(image, x + 1, y);
+            pf(&mut output, x, y, val);
+        }
+    }
+    fill_border(&mut output);
+    output
+}
+
+pub fn vertical_filter(image: &GrayFloatImage, kernel: &[f32; 3] ) -> GrayFloatImage {
+    assert!(kernel.len() == 3);
+    let mut output = GrayFloatImage::new(image.width(), image.height());
+    // center of image
+    for x in 1..(image.width() - 1) {
+        for y in 1..(image.height() - 1) {
+            let val = kernel[0] * gf(image,x, y - 1) + kernel[1] * gf(image, x, y) + kernel[2] * gf(image, x, y + 1);
+            pf(&mut output, x, y, val);
+        }
+    }
+    fill_border(&mut output);
+    output
+}
