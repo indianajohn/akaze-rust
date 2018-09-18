@@ -73,8 +73,6 @@ pub struct EvolutionStep {
 
 impl EvolutionStep {
     fn new(
-        level_width: u32,
-        level_height: u32,
         octave: u32,
         sublevel: u32,
         options: Config,
@@ -91,16 +89,16 @@ impl EvolutionStep {
             octave: octave,
             sublevel: sublevel,
             sigma_size: esigma.round() as u32,
-            Lt: GrayFloatImage::new(level_width, level_height),
-            Lsmooth: GrayFloatImage::new(level_width, level_height),
-            Lx: GrayFloatImage::new(level_width, level_height),
-            Ly: GrayFloatImage::new(level_width, level_height),
-            Lxx: GrayFloatImage::new(level_width, level_height),
-            Lyy: GrayFloatImage::new(level_width, level_height),
-            Lxy: GrayFloatImage::new(level_width, level_height),
-            Lflow: GrayFloatImage::new(level_width, level_height),
-            Lstep: GrayFloatImage::new(level_width, level_height),
-            Ldet: GrayFloatImage::new(level_width, level_height),
+            Lt: GrayFloatImage::new(0, 0),
+            Lsmooth: GrayFloatImage::new(0, 0),
+            Lx: GrayFloatImage::new(0, 0),
+            Ly: GrayFloatImage::new(0, 0),
+            Lxx: GrayFloatImage::new(0, 0),
+            Lyy: GrayFloatImage::new(0, 0),
+            Lxy: GrayFloatImage::new(0, 0),
+            Lflow: GrayFloatImage::new(0, 0),
+            Lstep: GrayFloatImage::new(0, 0),
+            Ldet: GrayFloatImage::new(0, 0),
             fed_tau_steps: vec![],
         }
     }
@@ -115,7 +113,7 @@ pub fn allocate_evolutions(width: u32, height: u32, options: Config) -> Vec<Evol
         // Smallest possible octave and allow one scale if the image is small
         if (level_width >= 80 && level_height >= 40) || i == 0 {
             for j in 0..options.num_sublevels {
-                let evolution_step = EvolutionStep::new(level_width, level_height, i, j, options);
+                let evolution_step = EvolutionStep::new(i, j, options);
                 out_vec.push(evolution_step);
             }
         } else {

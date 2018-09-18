@@ -96,8 +96,8 @@ fn create_nonlinear_scale_space(
         if evolutions[i].octave > evolutions[i - 1].octave {
             evolutions[i].Lt = image::imageops::resize(
                 &evolutions[i - 1].Lt,
-                evolutions[i].Lt.width(),
-                evolutions[i].Lt.height(),
+                ( (evolutions[i-1].Lt.width() as f64) * 0.5) as u32,
+                ( (evolutions[i-1].Lt.height() as f64) * 0.5) as u32,
                 image::FilterType::Gaussian,
             );
             contrast_factor = contrast_factor*0.75;
@@ -111,6 +111,7 @@ fn create_nonlinear_scale_space(
         evolutions[i].Lx = ops::derivatives::scharr(&evolutions[i].Lsmooth, true, false);
         evolutions[i].Ly = ops::derivatives::scharr(&evolutions[i].Lsmooth, false, true);
         evolutions[i].Lflow = pm_g2(&evolutions[i].Lx, &evolutions[i].Ly, contrast_factor);
+        evolutions[i].Lstep = GrayFloatImage::new(evolutions[i].Lt.width(), evolutions[i].Lt.height());
         for j in 0..evolutions[i].fed_tau_steps.len() {
             let step_size: f64 = evolutions[i].fed_tau_steps[j];
             debug!("Using step size {}", step_size);

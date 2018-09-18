@@ -62,9 +62,11 @@ pub fn normalize(input_image: &GrayFloatImage
 }
 
 pub fn save(input_image: &GrayFloatImage, path: PathBuf) {
-    let normalized_image = normalize(&input_image);
-    let dynamic_image = create_dynamic_image(&normalized_image);
-    dynamic_image.save(path).unwrap();
+    if input_image.width() > 0 && input_image.height() > 0 {
+        let normalized_image = normalize(&input_image);
+        let dynamic_image = create_dynamic_image(&normalized_image);
+        dynamic_image.save(path).unwrap();
+    }
 }
 
 /// get a float pixel at x, y
