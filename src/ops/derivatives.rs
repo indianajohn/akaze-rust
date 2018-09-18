@@ -2,16 +2,16 @@ use types::image::{GrayFloatImage, sqrt_squared, horizontal_filter, vertical_fil
 
 fn scharr_horizontal(image: &GrayFloatImage) -> GrayFloatImage {
     // a separable Scharr kernel
-    let k_horizontal = [3f32, 10f32, 3f32];
-    let k_vertical = [-1f32, 0f32, 1f32];
+    let k_horizontal = vec![3f32, 10f32, 3f32];
+    let k_vertical = vec![-1f32, 0f32, 1f32];
     let img_horizontal = horizontal_filter(&image, &k_horizontal);
     vertical_filter(&img_horizontal, &k_vertical)
 }
 
 fn scharr_vertical(image: &GrayFloatImage) -> GrayFloatImage {
     // a separable Scharr kernel
-    let k_vertical = [3f32, 10f32, 3f32];
-    let k_horizontal = [-1f32, 0f32, 1f32];
+    let k_vertical = vec![3f32, 10f32, 3f32];
+    let k_horizontal = vec![-1f32, 0f32, 1f32];
     let img_horizontal = horizontal_filter(&image, &k_horizontal);
     vertical_filter(&img_horizontal, &k_vertical)
 }

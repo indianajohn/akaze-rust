@@ -101,49 +101,91 @@ pub fn sqrt_squared(image_1: &GrayFloatImage, image_2: &GrayFloatImage) -> GrayF
     result
 }
 
-pub fn fill_border(mut output: &mut GrayFloatImage) {
-    // first and last row - copy nearest pixel
+pub fn fill_border(mut output: &mut GrayFloatImage, half_width: u32) {
     for x in 0..output.width() {
-        let plus = gf(&output, x, 1);
-        let minus = gf(&output, x, output.height() - 2);
-        pf(&mut output, x, 0, plus);
-        let y = output.height() - 1;
-        pf(&mut output, x, y, minus);
+        let plus = gf(&output, x, half_width);
+        let minus = gf(&output, x, output.height() - half_width - 1);
+        for y  in 0..half_width {
+            pf(&mut output, x, y, plus);
+        }
+        for y  in (output.height() - half_width)..output.height() {
+            pf(&mut output, x, y, minus);
+        }
     }
-    // first and last column - copy nearest pixel
     for y in 0..output.height() {
-        let plus = gf(&output, 1, y);
-        let minus = gf(&output, output.width() - 2, y);
-        pf(&mut output, 0, y, plus);
-        let x = output.width() - 1;
-        pf(&mut output, x, y, minus);
+        let plus = gf(&output, half_width, y);
+        let minus = gf(&output, output.width()  - half_width- 1, y);
+        for x in 0..half_width {
+            pf(&mut output, x, y, plus);
+        }
+        for x in (output.width() - half_width )..output.width() {
+            pf(&mut output, x, y, minus);
+        }
     }
 }
 
-pub fn horizontal_filter(image: &GrayFloatImage, kernel: &[f32; 3] ) -> GrayFloatImage {
-    assert!(kernel.len() == 3);
+pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32> ) -> GrayFloatImage {
+    // Cannot have an even-sized kernel
+    assert!(kernel.len() % 2 == 1);
+    let half_width = (kernel.len() / 2) as i32;
+    let w = image.width() as i32;
+    let h = image.height() as i32;
     let mut output = GrayFloatImage::new(image.width(), image.height());
     // center of image
-    for x in 1..(image.width() - 1) {
-        for y in 1..(image.height() - 1) {
-            let val = kernel[0] * gf(image,x - 1, y) + kernel[1] * gf(image, x, y) + kernel[2] * gf(image, x + 1, y);
-            pf(&mut output, x, y, val);
+    for x in half_width..(w - half_width) {
+        for y in 0..h {
+            let mut val = 0f32;
+            for k in -half_width..=half_width {
+                let i = k + half_width;
+                let new_x = x + k;
+                val += kernel[i as usize] * gf(image, new_x as u32, y as u32);
+            }
+            pf(&mut output, x as u32, y as u32, val);
         }
     }
-    fill_border(&mut output);
+    fill_border(&mut output, half_width as u32);
     output
 }
 
-pub fn vertical_filter(image: &GrayFloatImage, kernel: &[f32; 3] ) -> GrayFloatImage {
-    assert!(kernel.len() == 3);
+pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32> ) -> GrayFloatImage {
+    // Cannot have an even-sized kernel
+    assert!(kernel.len() % 2 == 1);
+    let half_width = (kernel.len() / 2) as i32;
+    let w = image.width() as i32;
+    let h = image.height() as i32;
     let mut output = GrayFloatImage::new(image.width(), image.height());
     // center of image
-    for x in 1..(image.width() - 1) {
-        for y in 1..(image.height() - 1) {
-            let val = kernel[0] * gf(image,x, y - 1) + kernel[1] * gf(image, x, y) + kernel[2] * gf(image, x, y + 1);
-            pf(&mut output, x, y, val);
+    for x in 0..w {
+        for y in half_width..(h - half_width) {
+            let mut val = 0f32;
+            for k in -half_width..=half_width {
+                let i = k + half_width;
+                let new_y = y + k;
+                val += kernel[i as usize] * gf(image, x as u32, new_y as u32);
+            }
+            pf(&mut output, x as u32, y as u32, val);
         }
     }
-    fill_border(&mut output);
+    fill_border(&mut output, half_width as u32);
     output
+}
+
+fn gaussian(x: f32, r: f32) -> f32 {
+    ((2.0 * f32::consts::PI).sqrt() * r).recip() *
+    (-x.powi(2) / (2.0 * r.powi(2))).exp()
+}
+
+fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {
+    let mut kernel = vec![0f32; kernel_size];
+    let half_width = (kernel_size / 2) as i32;
+    for i in -half_width..half_width {
+        kernel[(i + half_width) as usize] = gaussian(i as f32, r);
+    }
+    kernel
+}
+pub fn gaussian_blur(image: &GrayFloatImage, r: f32, kernel_size: usize) -> GrayFloatImage {
+    // a separable Gaussian kernel
+    let kernel = gaussian_kernel(r, kernel_size);
+    let img_horizontal = horizontal_filter(&image, &kernel);
+    vertical_filter(&img_horizontal, &kernel)
 }

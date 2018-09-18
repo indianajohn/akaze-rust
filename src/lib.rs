@@ -14,6 +14,7 @@ pub mod types;
 use types::evolution::Config;
 use types::evolution::EvolutionStep;
 use types::image::GrayFloatImage;
+use types::image::gaussian_blur;
 
 #[cfg(test)]
 mod tests {
@@ -80,7 +81,7 @@ fn create_nonlinear_scale_space(
     options: Config,
 ) {
     info!("Creating first evolution.");
-    evolutions[0].Lt = image::imageops::blur(image, options.base_scale_offset as f32);
+    evolutions[0].Lt = gaussian_blur(image, options.base_scale_offset as f32, 5);
     evolutions[0].Lsmooth = evolutions[0].Lt.clone();
     debug!("Convolving first evolution with sigma={} Gaussian.", options.base_scale_offset);
     let mut contrast_factor = ops::contrast_factor::compute_contrast_factor(
@@ -107,7 +108,7 @@ fn create_nonlinear_scale_space(
         } else {
             evolutions[i].Lt = evolutions[i - 1].Lt.clone();
         }
-        evolutions[i].Lsmooth = image::imageops::blur(&evolutions[i].Lt, 1.0f32);
+        evolutions[i].Lsmooth = gaussian_blur(&evolutions[i].Lt, 1.0f32, 5);
         evolutions[i].Lx = ops::derivatives::scharr(&evolutions[i].Lsmooth, true, false);
         evolutions[i].Ly = ops::derivatives::scharr(&evolutions[i].Lsmooth, false, true);
         evolutions[i].Lflow = pm_g2(&evolutions[i].Lx, &evolutions[i].Ly, contrast_factor);

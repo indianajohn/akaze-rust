@@ -2,6 +2,7 @@ extern crate image;
 use image::Pixel;
 use ops;
 use types::image::GrayFloatImage;
+use types::image::gaussian_blur;
 
 /// This function computes a good empirical value for the k contrast factor
 /// given an input image, the percentile (0-1), the gradient scale and the
@@ -22,7 +23,7 @@ pub fn compute_contrast_factor(
     let mut num_points: f64 = 0.0;
     let mut hmax: f64 = 0.0;
     let mut histogram: Vec<f64> = vec![0f64; num_bins];
-    let gaussian = image::imageops::blur(image, gradient_histogram_scale as f32);
+    let gaussian = gaussian_blur(image, gradient_histogram_scale as f32, 5);
     let Lx = ops::derivatives::scharr(&gaussian, true, false);
     let Ly = ops::derivatives::scharr(&gaussian, false, true);
     for y in 1..(gaussian.height() - 1) {
