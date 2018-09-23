@@ -1,5 +1,4 @@
 use image::DynamicImage;
-use image::GenericImage;
 use image::GrayImage;
 use image::ImageBuffer;
 use image::Luma;
