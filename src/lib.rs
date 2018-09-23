@@ -3,10 +3,12 @@ extern crate image;
 extern crate log;
 extern crate env_logger;
 extern crate primal;
+extern crate time;
 
-use image::GenericImage;
+use time::PreciseTime;
 use image::Luma;
 use image::Pixel;
+use image::GenericImageView;
 use std::path::PathBuf;
 
 pub mod ops;
@@ -138,7 +140,9 @@ pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf
     );
     let mut evolutions =
         types::evolution::allocate_evolutions(input_image.width(), input_image.height(), options);
+    let start = PreciseTime::now();
     create_nonlinear_scale_space(&mut evolutions, &float_image, options);
+    debug!("Creating scale space took {:?}.",start.to(PreciseTime::now())); 
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {
         Ok(val) => {
             info!("Writing scale space; if you want to skip this step, undefine the env var AKAZE_SCALE_SPACE_DIR");

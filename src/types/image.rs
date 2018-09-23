@@ -4,6 +4,7 @@ use image::GrayImage;
 use image::ImageBuffer;
 use image::Luma;
 use image::Pixel;
+use image::GenericImageView;
 use std::path::PathBuf;
 use std::f32;
 pub type GrayFloatImage = ImageBuffer<Luma<f32>, Vec<f32>>;
