@@ -1,8 +1,7 @@
 extern crate image;
-use image::Pixel;
 use ops;
 use types::image::gaussian_blur;
-use types::image::GrayFloatImage;
+use types::image::{GrayFloatImage, ImageFunctions};
 
 /// This function computes a good empirical value for the k contrast factor
 /// given an input image, the percentile (0-1), the gradient scale and the
@@ -28,8 +27,8 @@ pub fn compute_contrast_factor(
     let Ly = ops::derivatives::scharr(&gaussian, false, true);
     for y in 1..(gaussian.height() - 1) {
         for x in 1..(gaussian.width() - 1) {
-            let Lx: f64 = Lx.get_pixel(x, y).channels()[0] as f64;
-            let Ly: f64 = Ly.get_pixel(x, y).channels()[0] as f64;
+            let Lx: f64 = Lx.get(x, y) as f64;
+            let Ly: f64 = Ly.get(x, y) as f64;
             let modg: f64 = f64::sqrt(Lx * Lx + Ly * Ly);
             if modg > hmax {
                 hmax = modg;
@@ -38,8 +37,8 @@ pub fn compute_contrast_factor(
     }
     for y in 1..(gaussian.height() - 1) {
         for x in 1..(gaussian.width() - 1) {
-            let Lx: f64 = Lx.get_pixel(x, y).channels()[0] as f64;
-            let Ly: f64 = Ly.get_pixel(x, y).channels()[0] as f64;
+            let Lx: f64 = Lx.get(x, y) as f64;
+            let Ly: f64 = Ly.get(x, y) as f64;
             let modg: f64 = f64::sqrt(Lx * Lx + Ly * Ly);
             if modg != 0.0 {
                 let mut bin_number = f64::floor((num_bins as f64) * (modg / hmax)) as usize;

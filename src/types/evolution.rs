@@ -2,7 +2,7 @@ use ops::fed_tau;
 use std::fmt::Write;
 use std::path::PathBuf;
 use types::image::save;
-use types::image::GrayFloatImage;
+use types::image::{GrayFloatImage, ImageFunctions};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Config {

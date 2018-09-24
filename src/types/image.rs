@@ -1,33 +1,117 @@
 use image::DynamicImage;
 use image::GenericImageView;
 use image::GrayImage;
-use image::ImageBuffer;
 use image::Luma;
 use image::Pixel;
 use std::f32;
 use std::path::PathBuf;
-pub type GrayFloatImage = ImageBuffer<Luma<f32>, Vec<f32>>;
+
+
+#[derive(Debug, Clone)]
+pub struct GrayFloatImage {
+    buffer: Vec<Vec<f32> >,
+}
+pub trait ImageFunctions {
+    /// The width of the image.
+    /// # Return value
+    /// The width.
+    fn width(&self) -> usize;
+
+    /// The height of the image.
+    /// # Return value
+    /// The height.
+    fn height(&self) -> usize;
+
+    /// Create a new image
+    /// `width` width of image
+    /// `height` height of image.
+    /// # Return value
+    /// The image.
+    fn new(width: usize, height: usize) -> Self;
+
+    /// Return an image with each dimension halved
+    fn half_size(&self) -> Self;
+
+    /// get a float pixel at x, y
+    /// `x` x coordinate.
+    /// `y` y coordinate.
+    /// # Return value
+    /// the value of the pixel.
+    fn get(&self, x: usize, y: usize) -> f32;
+
+    /// put a float pixel to x, y
+    /// `x` x coordinate.
+    /// `y` y coordinate.
+    /// pixel_value: value to put
+    fn put(&mut self, x: usize, y: usize, pixel_value: f32);
+}
+
+impl ImageFunctions for GrayFloatImage {
+    fn width(&self) -> usize {
+        if self.height() == 0 {
+            0
+        } else {
+            self.buffer[0].len()
+        }
+    }
+
+    fn height(&self) -> usize {
+        self.buffer.len()
+    }
+
+    fn new(width: usize, height: usize) -> Self {
+        Self { buffer: vec![vec![0f32; width]; height] }
+    }
+
+    fn get(&self, x: usize, y: usize) -> f32 {
+        self.buffer[y][x]
+    }
+
+    fn put(&mut self, x: usize, y: usize, pixel_value: f32) {
+        self.buffer[y][x] = pixel_value;
+    }
+    fn half_size(&self) -> Self {
+        let width  = self.width() / 2;
+        let height = self.height() / 2;
+        let mut out = Self::new(width, height);
+        for x in 0..width {
+            for y in 0..height {
+                let mut val = 0f32;
+                for x_src in x..(x+2) {
+                    for y_src in 0..(x+2) {
+                        val += self.get(x_src, y_src);
+                    }
+                }
+                out.put(x, y, val / 4f32)
+            }
+        }
+        out
+    }
+}
 
 pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
     let gray_image: GrayImage = input_image.to_luma();
-    let mut output_image = GrayFloatImage::new(input_image.width(), input_image.height());
+    let mut output_image = GrayFloatImage::new(
+        input_image.width() as usize, input_image.height() as usize);
     for (x, y, gray_pixel) in gray_image.enumerate_pixels() {
         let pixel_value: u8 = gray_pixel.channels()[0];
         let scaled_float = (pixel_value as f32) * 1f32 / 255f32;
-        output_image.put_pixel(x, y, Luma([scaled_float]));
+        output_image.put(x as usize, y as usize, scaled_float);
     }
     output_image
 }
 
 pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
-    let mut output_image = DynamicImage::new_luma8(input_image.width(), input_image.height());
-    for (x, y, float_pixel) in input_image.enumerate_pixels() {
-        let pixel_value: f32 = float_pixel.channels()[0];
-        let u8_pixel: u8 = (pixel_value * 255f32) as u8;
-        output_image
-            .as_mut_luma8()
-            .unwrap()
-            .put_pixel(x, y, Luma([u8_pixel]));
+    let mut output_image = DynamicImage::new_luma8(input_image.width() as u32, input_image.height() as u32);
+    for x in 0..input_image.width() {
+        for y in 0..input_image.height() {
+            let pixel_value: f32 = input_image.get(x,y);
+            let u8_pixel: u8 = (pixel_value * 255f32) as u8;
+            output_image
+                .as_mut_luma8()
+                .unwrap()
+                .put_pixel(x as u32, y as u32, Luma([u8_pixel]));
+        }
     }
     output_image
 }
@@ -35,10 +119,11 @@ pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
 pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
     let mut min_pixel = f32::MAX;
     let mut max_pixel = f32::MIN;
-    let mut output_image = GrayFloatImage::new(input_image.width(), input_image.height());
+    let mut output_image = GrayFloatImage::new(
+        input_image.width() as usize, input_image.height() as usize);
     for x in 0..input_image.width() {
         for y in 0..input_image.height() {
-            let pixel = gf(&input_image, x, y);
+            let pixel = input_image.get(x,y);
             if pixel > max_pixel {
                 max_pixel = pixel;
             }
@@ -51,10 +136,10 @@ pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
     let new_max_pixel = max_pixel - min_pixel;
     for x in 0..input_image.width() {
         for y in 0..input_image.height() {
-            let mut pixel = gf(&input_image, x, y);
+            let mut pixel = input_image.get(x, y);
             pixel = pixel - min_pixel;
             pixel = pixel / new_max_pixel;
-            pf(&mut output_image, x, y, pixel);
+            output_image.put(x, y, pixel);
         }
     }
     output_image
@@ -68,55 +153,39 @@ pub fn save(input_image: &GrayFloatImage, path: PathBuf) {
     }
 }
 
-/// get a float pixel at x, y
-/// `x` x coordinate.
-/// `y` y coordinate.
-/// # Return value
-/// the value of the pixel.
-pub fn gf(image: &GrayFloatImage, x: u32, y: u32) -> f32 {
-    image.get_pixel(x, y).channels()[0]
-}
-
-/// put a float pixel to x, y
-/// `x` x coordinate.
-/// `y` y coordinate.
-pub fn pf(image: &mut GrayFloatImage, x: u32, y: u32, pixel_value: f32) {
-    image.put_pixel(x, y, Luma([pixel_value]));
-}
-
 pub fn sqrt_squared(image_1: &GrayFloatImage, image_2: &GrayFloatImage) -> GrayFloatImage {
     let mut result = GrayFloatImage::new(image_1.width(), image_1.height());
     debug_assert!(image_1.width() == image_2.width());
     debug_assert!(image_1.height() == image_2.height());
     for x in 0..image_1.width() {
         for y in 0..image_2.height() {
-            let p1: f32 = gf(&image_1, x, y);
-            let p2: f32 = gf(&image_2, x, y);
-            pf(&mut result, x, y, f32::sqrt(p1 * p1 + p2 * p2));
+            let p1: f32 = image_1.get(x, y);
+            let p2: f32 = image_2.get(x, y);
+            result.put(x, y, f32::sqrt(p1 * p1 + p2 * p2));
         }
     }
     result
 }
 
-pub fn fill_border(mut output: &mut GrayFloatImage, half_width: u32) {
+pub fn fill_border(output: &mut GrayFloatImage, half_width: usize) {
     for x in 0..output.width() {
-        let plus = gf(&output, x, half_width);
-        let minus = gf(&output, x, output.height() - half_width - 1);
+        let plus = output.get(x, half_width);
+        let minus = output.get(x, output.height() - half_width - 1);
         for y in 0..half_width {
-            pf(&mut output, x, y, plus);
+            output.put(x, y, plus);
         }
         for y in (output.height() - half_width)..output.height() {
-            pf(&mut output, x, y, minus);
+            output.put(x, y, minus);
         }
     }
     for y in 0..output.height() {
-        let plus = gf(&output, half_width, y);
-        let minus = gf(&output, output.width() - half_width - 1, y);
+        let plus = output.get(half_width, y);
+        let minus = output.get(output.width() - half_width - 1, y);
         for x in 0..half_width {
-            pf(&mut output, x, y, plus);
+            output.put(x, y, plus);
         }
         for x in (output.width() - half_width)..output.width() {
-            pf(&mut output, x, y, minus);
+            output.put(x, y, minus);
         }
     }
 }
@@ -135,12 +204,12 @@ pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloat
             for k in -half_width..=half_width {
                 let i = k + half_width;
                 let new_x = x + k;
-                val += kernel[i as usize] * gf(image, new_x as u32, y as u32);
+                val += kernel[i as usize] * image.get(new_x as usize, y as usize);
             }
-            pf(&mut output, x as u32, y as u32, val);
+            output.put(x as usize, y as usize, val);
         }
     }
-    fill_border(&mut output, half_width as u32);
+    fill_border(&mut output, half_width as usize);
     output
 }
 
@@ -158,12 +227,12 @@ pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatIm
             for k in -half_width..=half_width {
                 let i = k + half_width;
                 let new_y = y + k;
-                val += kernel[i as usize] * gf(image, x as u32, new_y as u32);
+                val += kernel[i as usize] * image.get(x as usize, new_y as usize);
             }
-            pf(&mut output, x as u32, y as u32, val);
+            output.put(x as usize, y as usize, val);
         }
     }
-    fill_border(&mut output, half_width as u32);
+    fill_border(&mut output, half_width as usize);
     output
 }
 

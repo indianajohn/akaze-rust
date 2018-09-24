@@ -6,8 +6,6 @@ extern crate primal;
 extern crate time;
 
 use image::GenericImageView;
-use image::Luma;
-use image::Pixel;
 use std::path::PathBuf;
 use time::PreciseTime;
 
@@ -16,7 +14,7 @@ pub mod types;
 use types::evolution::Config;
 use types::evolution::EvolutionStep;
 use types::image::gaussian_blur;
-use types::image::GrayFloatImage;
+use types::image::{GrayFloatImage, ImageFunctions};
 
 #[cfg(test)]
 mod tests {
@@ -67,11 +65,11 @@ fn pm_g2(Lx: &GrayFloatImage, Ly: &GrayFloatImage, k: f64) -> GrayFloatImage {
     let inverse_k: f64 = 1.0f64 / (k * k);
     for y in 0..Lx.height() {
         for x in 0..Lx.width() {
-            let Lx_pixel: f64 = Lx.get_pixel(x, y).channels()[0] as f64;
-            let Ly_pixel: f64 = Ly.get_pixel(x, y).channels()[0] as f64;
+            let Lx_pixel: f64 = Lx.get(x, y) as f64;
+            let Ly_pixel: f64 = Ly.get(x, y) as f64;
             let dst_pixel: f64 =
                 1.0f64 / (1.0f64 + inverse_k * (Lx_pixel * Lx_pixel + Ly_pixel * Ly_pixel));
-            dst.put_pixel(x, y, Luma([dst_pixel as f32]));
+            dst.put(x, y, dst_pixel as f32);
         }
     }
     dst
@@ -109,12 +107,7 @@ fn create_nonlinear_scale_space(
     for i in 1..evolutions.len() {
         info!("Creating evolution {}.", i);
         if evolutions[i].octave > evolutions[i - 1].octave {
-            evolutions[i].Lt = image::imageops::resize(
-                &evolutions[i - 1].Lt,
-                ((evolutions[i - 1].Lt.width() as f64) * 0.5) as u32,
-                ((evolutions[i - 1].Lt.height() as f64) * 0.5) as u32,
-                image::FilterType::Gaussian,
-            );
+            evolutions[i].Lt = evolutions[i - 1].Lt.half_size();
             contrast_factor = contrast_factor * 0.75;
             debug!(
                 "New image size: {}x{}, new contrast factor: {}",

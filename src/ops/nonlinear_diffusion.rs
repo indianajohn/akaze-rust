@@ -1,6 +1,5 @@
 use types::evolution::EvolutionStep;
-use types::image::GrayFloatImage;
-use types::image::{gf, pf};
+use types::image::{GrayFloatImage, ImageFunctions};
 //use std::io;
 /// This function performs a scalar non-linear diffusion step
 /// `Ld` Output image in the evolution
@@ -11,9 +10,9 @@ use types::image::{gf, pf};
 /// dL_by_ds = d(c dL_by_dx)_by_dx + d(c dL_by_dy)_by_dy
 #[allow(non_snake_case)]
 pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
-    let mut Ld: &mut GrayFloatImage = &mut evolution_step.Lt;
+    let Ld: &mut GrayFloatImage = &mut evolution_step.Lt;
     let c: &GrayFloatImage = &evolution_step.Lflow;
-    let mut Lstep: &mut GrayFloatImage = &mut evolution_step.Lstep;
+    let Lstep: &mut GrayFloatImage = &mut evolution_step.Lstep;
 
     // Diffusion all the image except borders
     for y in 1..(Lstep.height() - 1) {
@@ -22,8 +21,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
             let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
             let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
             let y_neg = eval(c, Ld, x, y, 0, 0, 0, 0, -1, 0, 0, -1);
-            pf(
-                &mut Lstep,
+            Lstep.put(
                 x,
                 y,
                 0.5 * (step_size as f32) * (x_pos - x_neg + y_pos - y_neg),
@@ -36,8 +34,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
         let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
         let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
-        pf(
-            &mut Lstep,
+        Lstep.put(
             x,
             y,
             0.5 * (step_size as f32) * (x_pos - x_neg + y_pos),
@@ -48,15 +45,14 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let y = 0;
         let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
         let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
-        pf(&mut Lstep, x, y, 0.5 * (step_size as f32) * (x_pos + y_pos));
+        Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos + y_pos));
     }
     {
         let x = Lstep.width() - 1;
         let y = 0;
         let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
         let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
-        pf(
-            &mut Lstep,
+        Lstep.put(
             x,
             y,
             0.5 * (step_size as f32) * (-x_neg + y_pos),
@@ -68,8 +64,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
         let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, -1, -1, 0);
         let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
-        pf(
-            &mut Lstep,
+        Lstep.put(
             x,
             y,
             0.5 * (step_size as f32) * (x_pos - x_neg + y_pos),
@@ -79,14 +74,13 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let x = 0;
         let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
         let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, -1, -1, 0);
-        pf(&mut Lstep, x, y, 0.5 * (step_size as f32) * (x_pos + y_pos));
+        Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos + y_pos));
     }
     {
         let x = Lstep.width() - 1;
         let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, -1, -1, 0);
         let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
-        pf(
-            &mut Lstep,
+        Lstep.put(
             x,
             y,
             0.5 * (step_size as f32) * (-x_neg + y_pos),
@@ -99,8 +93,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
             let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
             let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
             let y_neg = eval(c, Ld, x, y, 0, 0, 0, 0, -1, 0, 0, -1);
-            pf(
-                &mut Lstep,
+            Lstep.put(
                 x,
                 y,
                 0.5 * (step_size as f32) * (x_pos + y_pos - y_neg),
@@ -111,8 +104,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
             let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
             let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
             let y_neg = eval(c, Ld, x, y, 0, 0, 0, 0, -1, 0, 0, -1);
-            pf(
-                &mut Lstep,
+            Lstep.put(
                 x,
                 y,
                 0.5 * (step_size as f32) * (-x_neg + y_pos - y_neg),
@@ -121,9 +113,9 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
     }
     for x in 0..Lstep.width() {
         for y in 0..Lstep.height() {
-            let Ld_pixel = gf(Ld, x, y);
-            let Lstep_pixel = gf(Lstep, x, y);
-            pf(&mut Ld, x, y, Ld_pixel + Lstep_pixel);
+            let Ld_pixel = Ld.get(x, y);
+            let Lstep_pixel = Lstep.get(x, y);
+            Ld.put(x, y, Ld_pixel + Lstep_pixel);
         }
     }
 }
@@ -133,8 +125,8 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
 pub fn eval(
     c: &GrayFloatImage,
     Ld: &GrayFloatImage,
-    x: u32,
-    y: u32,
+    x: usize,
+    y: usize,
     plus_x_1: i32,
     plus_x_2: i32,
     plus_x_3: i32,
@@ -161,6 +153,6 @@ pub fn eval(
     let set_y_4 = (y as i32) + plus_y_4;
     debug_assert!(set_y_4 >= 0);
     // If we access past the upper bounds of image the image class will assert
-    (gf(c, set_x_1 as u32, set_y_1 as u32) + gf(c, set_x_2 as u32, set_y_2 as u32))
-        * (gf(Ld, set_x_3 as u32, set_y_3 as u32) - gf(Ld, set_x_4 as u32, set_y_4 as u32))
+    (c.get(set_x_1 as usize, set_y_1 as usize) + c.get(set_x_2 as usize, set_y_2 as usize))
+        * (Ld.get(set_x_3 as usize, set_y_3 as usize) - Ld.get(set_x_4 as usize, set_y_4 as usize))
 }
