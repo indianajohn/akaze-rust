@@ -79,8 +79,8 @@ impl ImageFunctions for GrayFloatImage {
         for x in 0..width {
             for y in 0..height {
                 let mut val = 0f32;
-                for x_src in x..(x+2) {
-                    for y_src in 0..(x+2) {
+                for x_src in (2 * x)..(x+2) {
+                    for y_src in (2 * y)..(x+2) {
                         val += self.get(x_src, y_src);
                     }
                 }
