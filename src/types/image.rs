@@ -7,9 +7,13 @@ use std::f32;
 use std::path::PathBuf;
 
 
+// Using the image crate with u32 pixels is approximately 40% slower
+// than this.
 #[derive(Debug, Clone)]
 pub struct GrayFloatImage {
-    buffer: Vec<Vec<f32> >,
+    buffer: Vec<f32>,
+    width: usize,
+    height: usize,
 }
 pub trait ImageFunctions {
     /// The width of the image.
@@ -48,27 +52,25 @@ pub trait ImageFunctions {
 
 impl ImageFunctions for GrayFloatImage {
     fn width(&self) -> usize {
-        if self.height() == 0 {
-            0
-        } else {
-            self.buffer[0].len()
-        }
+        self.width
     }
 
     fn height(&self) -> usize {
-        self.buffer.len()
+        self.height
     }
 
     fn new(width: usize, height: usize) -> Self {
-        Self { buffer: vec![vec![0f32; width]; height] }
+        Self { 
+            buffer: vec![0f32; width * height], height: height, width: width 
+            }
     }
 
     fn get(&self, x: usize, y: usize) -> f32 {
-        self.buffer[y][x]
+        self.buffer[self.width * y + x]
     }
 
     fn put(&mut self, x: usize, y: usize, pixel_value: f32) {
-        self.buffer[y][x] = pixel_value;
+        self.buffer[self.width * y + x] = pixel_value;
     }
     fn half_size(&self) -> Self {
         let width  = self.width() / 2;
