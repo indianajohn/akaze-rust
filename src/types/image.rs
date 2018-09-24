@@ -90,11 +90,9 @@ pub fn sqrt_squared(image_1: &GrayFloatImage, image_2: &GrayFloatImage) -> GrayF
     debug_assert!(image_1.height() == image_2.height());
     for x in 0..image_1.width() {
         for y in 0..image_2.height() {
-            let p1: f32 = image_1.get_pixel(x, y).channels()[0];
-            let p2: f32 = image_2.get_pixel(x, y).channels()[0];
-            let mut pixel = image_1.get_pixel(x, y).clone();
-            pixel.channels_mut()[0] = f32::sqrt(p1 * p1 + p2 * p2);
-            result.put_pixel(x, y, pixel);
+            let p1: f32 = gf(&image_1, x, y);
+            let p2: f32 = gf(&image_2, x, y);
+            pf(&mut result, x, y, f32::sqrt(p1 * p1 + p2 * p2));
         }
     }
     result
