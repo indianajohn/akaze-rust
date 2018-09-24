@@ -145,21 +145,22 @@ pub fn eval(
     plus_y_4: i32,
 ) -> f32 {
     let set_x_1 = (x as i32) + plus_x_1;
-    assert!(set_x_1 >= 0);
+    debug_assert!(set_x_1 >= 0);
     let set_x_2 = (x as i32) + plus_x_2;
-    assert!(set_x_2 >= 0);
+    debug_assert!(set_x_2 >= 0);
     let set_x_3 = (x as i32) + plus_x_3;
-    assert!(set_x_3 >= 0);
+    debug_assert!(set_x_3 >= 0);
     let set_x_4 = (x as i32) + plus_x_4;
-    assert!(set_x_4 >= 0);
+    debug_assert!(set_x_4 >= 0);
     let set_y_1 = (y as i32) + plus_y_1;
-    assert!(set_y_1 >= 0);
+    debug_assert!(set_y_1 >= 0);
     let set_y_2 = (y as i32) + plus_y_2;
-    assert!(set_y_2 >= 0);
+    debug_assert!(set_y_2 >= 0);
     let set_y_3 = (y as i32) + plus_y_3;
-    assert!(set_y_3 >= 0);
+    debug_assert!(set_y_3 >= 0);
     let set_y_4 = (y as i32) + plus_y_4;
-    assert!(set_y_4 >= 0);
+    debug_assert!(set_y_4 >= 0);
     // If we access past the upper bounds of image the image class will assert
-    (gf(c, set_x_1 as u32, set_y_1 as u32) + gf(c, set_x_2 as u32, set_y_2 as u32)) * (gf(Ld, set_x_3 as u32, set_y_3 as u32) - gf(Ld, set_x_4 as u32, set_y_4 as u32))
+    (gf(c, set_x_1 as u32, set_y_1 as u32) + gf(c, set_x_2 as u32, set_y_2 as u32))
+        * (gf(Ld, set_x_3 as u32, set_y_3 as u32) - gf(Ld, set_x_4 as u32, set_y_4 as u32))
 }

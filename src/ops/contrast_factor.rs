@@ -1,8 +1,8 @@
 extern crate image;
 use image::Pixel;
 use ops;
-use types::image::GrayFloatImage;
 use types::image::gaussian_blur;
+use types::image::GrayFloatImage;
 
 /// This function computes a good empirical value for the k contrast factor
 /// given an input image, the percentile (0-1), the gradient scale and the
@@ -58,7 +58,10 @@ pub fn compute_contrast_factor(
         num_elements = num_elements + histogram[k] as usize;
         k += 1;
     }
-    debug!("hmax: {}, threshold: {}, num_elements: {}", hmax, threshold, num_elements);
+    debug!(
+        "hmax: {}, threshold: {}, num_elements: {}",
+        hmax, threshold, num_elements
+    );
     let mut kperc: f64 = 0.03;
     if num_elements >= threshold {
         kperc = hmax * (k as f64) / (num_bins as f64);

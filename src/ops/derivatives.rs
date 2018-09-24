@@ -1,4 +1,4 @@
-use types::image::{GrayFloatImage, sqrt_squared, horizontal_filter, vertical_filter};
+use types::image::{horizontal_filter, sqrt_squared, vertical_filter, GrayFloatImage};
 
 fn scharr_horizontal(image: &GrayFloatImage) -> GrayFloatImage {
     // a separable Scharr kernel

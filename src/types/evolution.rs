@@ -72,11 +72,7 @@ pub struct EvolutionStep {
 }
 
 impl EvolutionStep {
-    fn new(
-        octave: u32,
-        sublevel: u32,
-        options: Config,
-    ) -> EvolutionStep {
+    fn new(octave: u32, sublevel: u32, options: Config) -> EvolutionStep {
         //step.esigma = options_.soffset*pow(2.0f, (float)(j)/(float)(options_.nsublevels) + i);
         let esigma = options.base_scale_offset * f64::powf(
             2.0f64,

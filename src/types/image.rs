@@ -1,11 +1,11 @@
 use image::DynamicImage;
+use image::GenericImageView;
 use image::GrayImage;
 use image::ImageBuffer;
 use image::Luma;
 use image::Pixel;
-use image::GenericImageView;
-use std::path::PathBuf;
 use std::f32;
+use std::path::PathBuf;
 pub type GrayFloatImage = ImageBuffer<Luma<f32>, Vec<f32>>;
 
 pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
@@ -32,8 +32,7 @@ pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
     output_image
 }
 
-pub fn normalize(input_image: &GrayFloatImage
-) -> GrayFloatImage {
+pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
     let mut min_pixel = f32::MAX;
     let mut max_pixel = f32::MIN;
     let mut output_image = GrayFloatImage::new(input_image.width(), input_image.height());
@@ -87,8 +86,8 @@ pub fn pf(image: &mut GrayFloatImage, x: u32, y: u32, pixel_value: f32) {
 
 pub fn sqrt_squared(image_1: &GrayFloatImage, image_2: &GrayFloatImage) -> GrayFloatImage {
     let mut result = GrayFloatImage::new(image_1.width(), image_1.height());
-    assert!(image_1.width() == image_2.width());
-    assert!(image_1.height() == image_2.height());
+    debug_assert!(image_1.width() == image_2.width());
+    debug_assert!(image_1.height() == image_2.height());
     for x in 0..image_1.width() {
         for y in 0..image_2.height() {
             let p1: f32 = image_1.get_pixel(x, y).channels()[0];
@@ -105,28 +104,28 @@ pub fn fill_border(mut output: &mut GrayFloatImage, half_width: u32) {
     for x in 0..output.width() {
         let plus = gf(&output, x, half_width);
         let minus = gf(&output, x, output.height() - half_width - 1);
-        for y  in 0..half_width {
+        for y in 0..half_width {
             pf(&mut output, x, y, plus);
         }
-        for y  in (output.height() - half_width)..output.height() {
+        for y in (output.height() - half_width)..output.height() {
             pf(&mut output, x, y, minus);
         }
     }
     for y in 0..output.height() {
         let plus = gf(&output, half_width, y);
-        let minus = gf(&output, output.width()  - half_width- 1, y);
+        let minus = gf(&output, output.width() - half_width - 1, y);
         for x in 0..half_width {
             pf(&mut output, x, y, plus);
         }
-        for x in (output.width() - half_width )..output.width() {
+        for x in (output.width() - half_width)..output.width() {
             pf(&mut output, x, y, minus);
         }
     }
 }
 
-pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32> ) -> GrayFloatImage {
+pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatImage {
     // Cannot have an even-sized kernel
-    assert!(kernel.len() % 2 == 1);
+    debug_assert!(kernel.len() % 2 == 1);
     let half_width = (kernel.len() / 2) as i32;
     let w = image.width() as i32;
     let h = image.height() as i32;
@@ -147,9 +146,9 @@ pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32> ) -> GrayFloa
     output
 }
 
-pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32> ) -> GrayFloatImage {
+pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatImage {
     // Cannot have an even-sized kernel
-    assert!(kernel.len() % 2 == 1);
+    debug_assert!(kernel.len() % 2 == 1);
     let half_width = (kernel.len() / 2) as i32;
     let w = image.width() as i32;
     let h = image.height() as i32;
@@ -171,8 +170,7 @@ pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32> ) -> GrayFloatI
 }
 
 fn gaussian(x: f32, r: f32) -> f32 {
-    ((2.0 * f32::consts::PI).sqrt() * r).recip() *
-    (-x.powi(2) / (2.0 * r.powi(2))).exp()
+    ((2.0 * f32::consts::PI).sqrt() * r).recip() * (-x.powi(2) / (2.0 * r.powi(2))).exp()
 }
 
 fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {

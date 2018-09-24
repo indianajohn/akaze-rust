@@ -5,18 +5,18 @@ extern crate env_logger;
 extern crate primal;
 extern crate time;
 
-use time::PreciseTime;
+use image::GenericImageView;
 use image::Luma;
 use image::Pixel;
-use image::GenericImageView;
 use std::path::PathBuf;
+use time::PreciseTime;
 
 pub mod ops;
 pub mod types;
 use types::evolution::Config;
 use types::evolution::EvolutionStep;
-use types::image::GrayFloatImage;
 use types::image::gaussian_blur;
+use types::image::GrayFloatImage;
 
 #[cfg(test)]
 mod tests {
@@ -38,17 +38,17 @@ mod tests {
         let mut image_file_path = test_data_path;
         image_file_path.push("1.jpg");
         let metadata = ::std::fs::metadata(image_file_path).unwrap();
-        assert!(metadata.is_file());
+        debug_assert!(metadata.is_file());
         let test_data_path = locate_test_data();
         let mut image_file_path = test_data_path;
         image_file_path.push("2.jpg");
         let metadata = ::std::fs::metadata(image_file_path).unwrap();
-        assert!(metadata.is_file());
+        debug_assert!(metadata.is_file());
         let test_data_path = locate_test_data();
         let mut image_file_path = test_data_path;
         image_file_path.push("1-output");
         let metadata = ::std::fs::metadata(image_file_path).unwrap();
-        assert!(metadata.is_dir());
+        debug_assert!(metadata.is_dir());
     }
 }
 
@@ -62,8 +62,8 @@ mod tests {
 #[allow(non_snake_case)]
 fn pm_g2(Lx: &GrayFloatImage, Ly: &GrayFloatImage, k: f64) -> GrayFloatImage {
     let mut dst = GrayFloatImage::new(Lx.width(), Lx.height());
-    assert!(Lx.width() == Ly.width());
-    assert!(Lx.height() == Ly.height());
+    debug_assert!(Lx.width() == Ly.width());
+    debug_assert!(Lx.height() == Ly.height());
     let inverse_k: f64 = 1.0f64 / (k * k);
     for y in 0..Lx.height() {
         for x in 0..Lx.width() {
@@ -83,42 +83,68 @@ fn create_nonlinear_scale_space(
     options: Config,
 ) {
     info!("Creating first evolution.");
+    let start = PreciseTime::now();
     evolutions[0].Lt = gaussian_blur(image, options.base_scale_offset as f32, 5);
+    debug!("Gaussian blur took {}.", start.to(PreciseTime::now()));
     evolutions[0].Lsmooth = evolutions[0].Lt.clone();
-    debug!("Convolving first evolution with sigma={} Gaussian.", options.base_scale_offset);
+    debug!(
+        "Convolving first evolution with sigma={} Gaussian.",
+        options.base_scale_offset
+    );
+    let start = PreciseTime::now();
     let mut contrast_factor = ops::contrast_factor::compute_contrast_factor(
         &evolutions[0].Lsmooth,
         options.contrast_percentile,
         1.0f64,
         options.contrast_factor_num_bins,
     );
-    debug!("Contrast percentile={}, Num bins={}, Initial contrast factor={}", 
-    options.contrast_percentile, options.contrast_factor_num_bins, contrast_factor);
+    debug!(
+        "Computing contrast factor took {}.",
+        start.to(PreciseTime::now())
+    );
+    debug!(
+        "Contrast percentile={}, Num bins={}, Initial contrast factor={}",
+        options.contrast_percentile, options.contrast_factor_num_bins, contrast_factor
+    );
     for i in 1..evolutions.len() {
         info!("Creating evolution {}.", i);
         if evolutions[i].octave > evolutions[i - 1].octave {
             evolutions[i].Lt = image::imageops::resize(
                 &evolutions[i - 1].Lt,
-                ( (evolutions[i-1].Lt.width() as f64) * 0.5) as u32,
-                ( (evolutions[i-1].Lt.height() as f64) * 0.5) as u32,
+                ((evolutions[i - 1].Lt.width() as f64) * 0.5) as u32,
+                ((evolutions[i - 1].Lt.height() as f64) * 0.5) as u32,
                 image::FilterType::Gaussian,
             );
-            contrast_factor = contrast_factor*0.75;
+            contrast_factor = contrast_factor * 0.75;
             debug!(
                 "New image size: {}x{}, new contrast factor: {}",
-                evolutions[i].Lt.width(), evolutions[i].Lt.height(), contrast_factor);
+                evolutions[i].Lt.width(),
+                evolutions[i].Lt.height(),
+                contrast_factor
+            );
         } else {
             evolutions[i].Lt = evolutions[i - 1].Lt.clone();
         }
         evolutions[i].Lsmooth = gaussian_blur(&evolutions[i].Lt, 1.0f32, 5);
+        let start = PreciseTime::now();
         evolutions[i].Lx = ops::derivatives::scharr(&evolutions[i].Lsmooth, true, false);
+        debug!(
+            "Computing derivative Lx took {}.",
+            start.to(PreciseTime::now())
+        );
         evolutions[i].Ly = ops::derivatives::scharr(&evolutions[i].Lsmooth, false, true);
         evolutions[i].Lflow = pm_g2(&evolutions[i].Lx, &evolutions[i].Ly, contrast_factor);
-        evolutions[i].Lstep = GrayFloatImage::new(evolutions[i].Lt.width(), evolutions[i].Lt.height());
+        evolutions[i].Lstep =
+            GrayFloatImage::new(evolutions[i].Lt.width(), evolutions[i].Lt.height());
         for j in 0..evolutions[i].fed_tau_steps.len() {
             let step_size: f64 = evolutions[i].fed_tau_steps[j];
-            debug!("Using step size {}", step_size);
+            let start = PreciseTime::now();
             ops::nonlinear_diffusion::calculate_step(&mut evolutions[i], step_size);
+            debug!(
+                "Used step size {}, took {}",
+                step_size,
+                start.to(PreciseTime::now())
+            );
         }
     }
 }
@@ -142,7 +168,10 @@ pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf
         types::evolution::allocate_evolutions(input_image.width(), input_image.height(), options);
     let start = PreciseTime::now();
     create_nonlinear_scale_space(&mut evolutions, &float_image, options);
-    debug!("Creating scale space took {:?}.",start.to(PreciseTime::now())); 
+    debug!(
+        "Creating scale space took {}.",
+        start.to(PreciseTime::now())
+    );
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {
         Ok(val) => {
             info!("Writing scale space; if you want to skip this step, undefine the env var AKAZE_SCALE_SPACE_DIR");
