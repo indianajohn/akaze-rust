@@ -193,6 +193,7 @@ pub fn fill_border(output: &mut GrayFloatImage, half_width: usize) {
     }
 }
 
+#[inline(always)]
 pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatImage {
     // Cannot have an even-sized kernel
     debug_assert!(kernel.len() % 2 == 1);
@@ -221,6 +222,7 @@ pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloat
     output
 }
 
+#[inline(always)]
 pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatImage {
     // Cannot have an even-sized kernel
     debug_assert!(kernel.len() % 2 == 1);

@@ -122,6 +122,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
 
 /// Convenience method for calculating x_pos and x_neg that is more compact
 #[allow(non_snake_case)]
+#[inline(always)]
 pub fn eval(
     c: &GrayFloatImage,
     Ld: &GrayFloatImage,
