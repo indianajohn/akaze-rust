@@ -155,18 +155,19 @@ pub fn save(input_image: &GrayFloatImage, path: PathBuf) {
     }
 }
 
-pub fn sqrt_squared(image_1: &GrayFloatImage, image_2: &GrayFloatImage) -> GrayFloatImage {
-    let mut result = GrayFloatImage::new(image_1.width(), image_1.height());
+pub fn sqrt_squared(image_1: &mut GrayFloatImage, image_2: &GrayFloatImage) {
     debug_assert!(image_1.width() == image_2.width());
     debug_assert!(image_1.height() == image_2.height());
-    for x in 0..image_1.width() {
-        for y in 0..image_2.height() {
-            let p1: f32 = image_1.get(x, y);
-            let p2: f32 = image_2.get(x, y);
-            result.put(x, y, f32::sqrt(p1 * p1 + p2 * p2));
-        }
+    let length = image_1.width() * image_1.height();
+    let slice_1 = &mut image_1.buffer[..];
+    let slice_2 = &image_2.buffer[..];
+    let mut itr1 = slice_1.iter_mut();
+    let mut itr2 = slice_2.iter();
+    for _ in 0..(length) {
+        let p1 = itr1.next().unwrap();
+        let p2 = itr2.next().unwrap();
+        *p1 += *p2;
     }
-    result
 }
 
 pub fn fill_border(output: &mut GrayFloatImage, half_width: usize) {

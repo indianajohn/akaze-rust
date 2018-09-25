@@ -19,8 +19,9 @@ fn scharr_vertical(image: &GrayFloatImage) -> GrayFloatImage {
 pub fn scharr(image: &GrayFloatImage, x_order: bool, y_order: bool) -> GrayFloatImage {
     if x_order && y_order {
         let horizontal = scharr_horizontal(&image);
-        let vertical = scharr_horizontal(&image);
-        sqrt_squared(&vertical, &horizontal)
+        let mut vertical = scharr_horizontal(&image);
+        sqrt_squared(&mut vertical, &horizontal);
+        vertical
     } else if x_order {
         scharr_horizontal(&image)
     } else if y_order {
