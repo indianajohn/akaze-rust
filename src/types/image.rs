@@ -200,15 +200,19 @@ pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloat
     let h = image.height() as i32;
     let mut output = GrayFloatImage::new(image.width(), image.height());
     // center of image
-    for x in half_width..(w - half_width) {
-        for y in 0..h {
+    for y in 0..h {
+        let start_i = (w * y) as usize;
+        let stop_i = (w * (y + 1)) as usize;
+        let image_slice = &image.buffer[start_i..stop_i];
+        let out_slice = &mut output.buffer[start_i..stop_i];
+        for x in half_width..(w - half_width) {
             let mut val = 0f32;
             for k in -half_width..=half_width {
                 let i = k + half_width;
-                let new_x = x + k;
-                val += kernel[i as usize] * image.get(new_x as usize, y as usize);
+                let new_x = (x + k) as usize;
+                val += kernel[i as usize] * image_slice[new_x];
             }
-            output.put(x as usize, y as usize, val);
+            out_slice[x as usize] = val;
         }
     }
     fill_border(&mut output, half_width as usize);
@@ -223,15 +227,18 @@ pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatIm
     let h = image.height() as i32;
     let mut output = GrayFloatImage::new(image.width(), image.height());
     // center of image
-    for x in 0..w {
-        for y in half_width..(h - half_width) {
+    for y in half_width..(h - half_width) {
+        let start_i = (w * y) as usize;
+        let stop_i = (w * (y + 1)) as usize;
+        let out_slice = &mut output.buffer[start_i..stop_i];
+        for x in 0..w {
             let mut val = 0f32;
             for k in -half_width..=half_width {
                 let i = k + half_width;
                 let new_y = y + k;
                 val += kernel[i as usize] * image.get(x as usize, new_y as usize);
             }
-            output.put(x as usize, y as usize, val);
+            out_slice[x as usize] = val;
         }
     }
     fill_border(&mut output, half_width as usize);
