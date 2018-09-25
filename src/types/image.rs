@@ -11,7 +11,7 @@ use std::path::PathBuf;
 // than this.
 #[derive(Debug, Clone)]
 pub struct GrayFloatImage {
-    buffer: Vec<f32>,
+    pub buffer: Vec<f32>,
     width: usize,
     height: usize,
 }
@@ -199,20 +199,21 @@ pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloat
     let w = image.width() as i32;
     let h = image.height() as i32;
     let mut output = GrayFloatImage::new(image.width(), image.height());
-    // center of image
-    for y in 0..h {
-        let start_i = (w * y) as usize;
-        let stop_i = (w * (y + 1)) as usize;
-        let image_slice = &image.buffer[start_i..stop_i];
-        let out_slice = &mut output.buffer[start_i..stop_i];
-        for x in half_width..(w - half_width) {
-            let mut val = 0f32;
-            for k in -half_width..=half_width {
-                let i = k + half_width;
-                let new_x = (x + k) as usize;
-                val += kernel[i as usize] * image_slice[new_x];
+    {
+        let out_slice = &mut output.buffer[..];
+        let image_slice = &image.buffer[..];
+        for y in 0..h {
+            for x in half_width..(w - half_width) {
+                let mut val = 0f32;
+                for k in -half_width..=half_width {
+                    let i = k + half_width;
+                    let new_x = x + k;
+                    let j = (y * w + new_x) as usize;
+                    val += kernel[i as usize] * image_slice[j];
+                }
+                let j = (y * w + x) as usize;
+                out_slice[j] = val;
             }
-            out_slice[x as usize] = val;
         }
     }
     fill_border(&mut output, half_width as usize);
@@ -226,19 +227,21 @@ pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatIm
     let w = image.width() as i32;
     let h = image.height() as i32;
     let mut output = GrayFloatImage::new(image.width(), image.height());
-    // center of image
-    for y in half_width..(h - half_width) {
-        let start_i = (w * y) as usize;
-        let stop_i = (w * (y + 1)) as usize;
-        let out_slice = &mut output.buffer[start_i..stop_i];
-        for x in 0..w {
-            let mut val = 0f32;
-            for k in -half_width..=half_width {
-                let i = k + half_width;
-                let new_y = y + k;
-                val += kernel[i as usize] * image.get(x as usize, new_y as usize);
+    {
+        let out_slice = &mut output.buffer[..];
+        let image_slice = &image.buffer[..];
+        for y in half_width..(h - half_width) {
+            for x in 0..w {
+                let mut val = 0f32;
+                for k in -half_width..=half_width {
+                    let i = k + half_width;
+                    let new_y = y + k;
+                    let j = (new_y * w + x) as usize;
+                    val += kernel[i as usize] * image_slice[j];
+                }
+                let j = (y * w + x) as usize;
+                out_slice[j] = val;
             }
-            out_slice[x as usize] = val;
         }
     }
     fill_border(&mut output, half_width as usize);
