@@ -8,17 +8,24 @@ use types::image::{GrayFloatImage, ImageFunctions};
 pub struct Config {
     /// Default number of sublevels per scale level
     pub num_sublevels: u32,
+
     /// Maximum octave evolution of the image 2^sigma (coarsest scale sigma units)
     pub max_octave_evolution: u32,
+
     /// Base scale offset (sigma units)
     pub base_scale_offset: f64,
+
     /// The initial contrast factor parameter
     pub initial_contrast: f64,
+
     /// Percentile level for the contrast factor
     pub contrast_percentile: f64,
 
     /// Number of bins for the contrast factor histogram
     pub contrast_factor_num_bins: usize,
+
+    /// Factor for the multiscale derivatives
+    pub derivative_factor: f64,
 }
 
 impl Default for Config {
@@ -30,6 +37,7 @@ impl Default for Config {
             initial_contrast: 0.001f64,
             contrast_percentile: 0.7f64,
             contrast_factor_num_bins: 300,
+            derivative_factor: 1.5f64,
         }
     }
 }
@@ -73,7 +81,6 @@ pub struct EvolutionStep {
 
 impl EvolutionStep {
     fn new(octave: u32, sublevel: u32, options: Config) -> EvolutionStep {
-        //step.esigma = options_.soffset*pow(2.0f, (float)(j)/(float)(options_.nsublevels) + i);
         let esigma = options.base_scale_offset * f64::powf(
             2.0f64,
             (sublevel as f64) / (options.num_sublevels as f64) + (octave as f64),

@@ -30,3 +30,9 @@ pub fn scharr(image: &GrayFloatImage, x_order: bool, y_order: bool) -> GrayFloat
         GrayFloatImage::new(image.width(), image.height())
     }
 }
+
+pub fn scharr_variable_kernel(
+    image: &GrayFloatImage, x_order: bool, y_order: bool, sigma_size: u32) -> GrayFloatImage {
+    // TODO
+    GrayFloatImage::new(image.width(), image.height())
+}
