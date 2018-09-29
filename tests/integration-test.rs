@@ -16,6 +16,29 @@ fn locate_test_data() -> PathBuf {
 }
 
 #[test]
+fn test_locate_data() {
+    warn!(
+        "Note: test data can be obtained from the akaze-test-data
+        repository See README.md"
+    );
+    let test_data_path = locate_test_data();
+    let mut image_file_path = test_data_path;
+    image_file_path.push("1.jpg");
+    let metadata = ::std::fs::metadata(image_file_path).unwrap();
+    debug_assert!(metadata.is_file());
+    let test_data_path = locate_test_data();
+    let mut image_file_path = test_data_path;
+    image_file_path.push("2.jpg");
+    let metadata = ::std::fs::metadata(image_file_path).unwrap();
+    debug_assert!(metadata.is_file());
+    let test_data_path = locate_test_data();
+    let mut image_file_path = test_data_path;
+    image_file_path.push("1-output");
+    let metadata = ::std::fs::metadata(image_file_path).unwrap();
+    debug_assert!(metadata.is_dir());
+}
+
+#[test]
 fn extract_features() {
     let start = SystemTime::now();
     let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug");

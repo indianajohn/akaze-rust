@@ -7,8 +7,18 @@ use std::f32;
 use std::path::PathBuf;
 
 
-// Using the image crate with u32 pixels is approximately 40% slower
-// than this.
+/// The image type we use in this library.
+/// This is simply a wrapper around a contiguous vector. I would
+/// typically err on the side of of avoiding premature optimization,
+/// and using a higher-level interface for images. However, at first,
+/// I tried just using the image crate's types with f32 as a
+/// template type. All operations were approximately 40% slower.
+/// 
+/// The below traits have been violated in various parts of this crate,
+/// with some image operations applying directly to the buffer. This,
+/// again, ended up being a necessary optimization. Using iterators
+/// to perform image filters sped them up in some cases by a factor of
+/// 2.
 #[derive(Debug, Clone)]
 pub struct GrayFloatImage {
     pub buffer: Vec<f32>,
@@ -91,6 +101,10 @@ impl ImageFunctions for GrayFloatImage {
     }
 }
 
+/// Create a unit float image from the image crate'd DynamicImage type.
+/// `input_image` - the input image.
+/// # Return value
+/// An image with pixel values between 0 and 1.
 pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
     let gray_image: GrayImage = input_image.to_luma();
     let mut output_image = GrayFloatImage::new(
@@ -103,6 +117,10 @@ pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
     output_image
 }
 
+/// Generate a dynamic image from a GrayFloatImage
+/// `input_image` - the input image.
+/// # Return value
+/// A dynamic image (can be written to file, etc..)
 pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
     let mut output_image = DynamicImage::new_luma8(input_image.width() as u32, input_image.height() as u32);
     for x in 0..input_image.width() {
@@ -118,6 +136,10 @@ pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
     output_image
 }
 
+/// Normalize an image between 0 and 1
+/// `input_image` - the input image.
+/// # Return value
+/// the normalized image.
 pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
     let mut min_pixel = f32::MAX;
     let mut max_pixel = f32::MIN;
@@ -147,6 +169,9 @@ pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
     output_image
 }
 
+/// Helper function to write an image to a file.
+/// `input_image` - the image to write.
+/// `path` - the path to which to write the image.
 pub fn save(input_image: &GrayFloatImage, path: PathBuf) {
     if input_image.width() > 0 && input_image.height() > 0 {
         let normalized_image = normalize(&input_image);
@@ -155,6 +180,10 @@ pub fn save(input_image: &GrayFloatImage, path: PathBuf) {
     }
 }
 
+/// Return sqrt(image_1[i] + image_2[i]) for all pixels in the input images.
+/// Save the result in image_1.
+/// `image_1` - the first image.
+/// `image_2` - the second image.
 pub fn sqrt_squared(image_1: &mut GrayFloatImage, image_2: &GrayFloatImage) {
     debug_assert!(image_1.width() == image_2.width());
     debug_assert!(image_1.height() == image_2.height());
@@ -170,6 +199,10 @@ pub fn sqrt_squared(image_1: &mut GrayFloatImage, image_2: &GrayFloatImage) {
     }
 }
 
+/// Fill border with neighboring pixels. A way of preventing instability
+/// around the image borders for things like derivatives.
+/// `output` - the image to operate upon.
+/// `half_width` the number of pixels around the borders to operate on.
 pub fn fill_border(output: &mut GrayFloatImage, half_width: usize) {
     for x in 0..output.width() {
         let plus = output.get(x, half_width);
@@ -193,6 +226,11 @@ pub fn fill_border(output: &mut GrayFloatImage, half_width: usize) {
     }
 }
 
+/// Horizontal image filter for variable kernel sizes.
+/// `image` - the input image.
+/// `kernel` the kernel to apply.
+/// # Return value
+/// The filter result.
 #[inline(always)]
 pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatImage {
     // Cannot have an even-sized kernel
@@ -222,6 +260,11 @@ pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloat
     output
 }
 
+/// Vertical image filter for variable kernel sizes.
+/// `image` - the input image.
+/// `kernel` the kernel to apply.
+/// # Return value
+/// The filter result.
 #[inline(always)]
 pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatImage {
     // Cannot have an even-sized kernel
@@ -251,10 +294,20 @@ pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatIm
     output
 }
 
+/// The Gaussian function.
+/// `x` the offset.
+/// `r` sigma.
+/// # Return value
+/// The kernel value at x.
 fn gaussian(x: f32, r: f32) -> f32 {
     ((2.0 * f32::consts::PI).sqrt() * r).recip() * (-x.powi(2) / (2.0 * r.powi(2))).exp()
 }
 
+/// Generate a Gaussina kernel.
+/// `r` sigma.
+/// `kernel_size` the size of the kernel.
+/// # Return value
+/// The kernel (a vector).
 fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {
     let mut kernel = vec![0f32; kernel_size];
     let half_width = (kernel_size / 2) as i32;
@@ -263,6 +316,13 @@ fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {
     }
     kernel
 }
+
+
+/// Perform Gaussian blur on an image.
+/// `r` sigma.
+/// `kernel_size` the size of the kernel.
+/// # Return value
+/// The resulting image after the filter was applied.
 pub fn gaussian_blur(image: &GrayFloatImage, r: f32, kernel_size: usize) -> GrayFloatImage {
     // a separable Gaussian kernel
     let kernel = gaussian_kernel(r, kernel_size);

@@ -18,40 +18,6 @@ use types::evolution::EvolutionStep;
 use types::image::gaussian_blur;
 use types::image::{GrayFloatImage, ImageFunctions};
 
-#[cfg(test)]
-mod tests {
-    use std::path::PathBuf;
-    fn locate_test_data() -> PathBuf {
-        let exe_path = ::std::env::current_exe().unwrap();
-        let mut parent_path = exe_path.parent().unwrap().to_owned();
-        parent_path.push("../../../test-data/akaze-test-data");
-        parent_path
-    }
-
-    #[test]
-    fn test_locate_data() {
-        warn!(
-            "Note: test data can be obtained from the akaze-test-data
-            repository See README.md"
-        );
-        let test_data_path = locate_test_data();
-        let mut image_file_path = test_data_path;
-        image_file_path.push("1.jpg");
-        let metadata = ::std::fs::metadata(image_file_path).unwrap();
-        debug_assert!(metadata.is_file());
-        let test_data_path = locate_test_data();
-        let mut image_file_path = test_data_path;
-        image_file_path.push("2.jpg");
-        let metadata = ::std::fs::metadata(image_file_path).unwrap();
-        debug_assert!(metadata.is_file());
-        let test_data_path = locate_test_data();
-        let mut image_file_path = test_data_path;
-        image_file_path.push("1-output");
-        let metadata = ::std::fs::metadata(image_file_path).unwrap();
-        debug_assert!(metadata.is_dir());
-    }
-}
-
 /// This function computes the Perona and Malik conductivity coefficient g2
 /// g2 = 1 / (1 + dL^2 / k^2)
 /// `Lx` First order image derivative in X-direction (horizontal)
@@ -122,12 +88,12 @@ fn create_nonlinear_scale_space(
         }
         evolutions[i].Lsmooth = gaussian_blur(&evolutions[i].Lt, 1.0f32, 5);
         let start = PreciseTime::now();
-        evolutions[i].Lx = ops::derivatives::scharr(&evolutions[i].Lsmooth, true, false);
+        evolutions[i].Lx = ops::derivatives::scharr(&evolutions[i].Lsmooth, true, false, 1);
         debug!(
             "Computing derivative Lx took {}.",
             start.to(PreciseTime::now())
         );
-        evolutions[i].Ly = ops::derivatives::scharr(&evolutions[i].Lsmooth, false, true);
+        evolutions[i].Ly = ops::derivatives::scharr(&evolutions[i].Lsmooth, false, true, 1);
         evolutions[i].Lflow = pm_g2(&evolutions[i].Lx, &evolutions[i].Ly, contrast_factor);
         evolutions[i].Lstep =
             GrayFloatImage::new(evolutions[i].Lt.width(), evolutions[i].Lt.height());
