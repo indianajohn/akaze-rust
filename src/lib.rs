@@ -5,7 +5,7 @@ extern crate env_logger;
 extern crate primal;
 extern crate time;
 extern crate num_cpus;
-extern crate threadpool;
+extern crate scoped_threadpool;
 
 use image::GenericImageView;
 use std::path::PathBuf;
@@ -131,6 +131,12 @@ pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf
     create_nonlinear_scale_space(&mut evolutions, &float_image, options);
     debug!(
         "Creating scale space took {}.",
+        start.to(PreciseTime::now())
+    );
+    let start = PreciseTime::now();
+    ops::detector_response::detector_response(&mut evolutions, options);
+    debug!(
+        "Computing detector response took {}.",
         start.to(PreciseTime::now())
     );
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {
