@@ -4,7 +4,7 @@ use random::Source;
 use std::u32;
 use std::path::PathBuf;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read, Write};
 
 /// A point of interest in an image.
 /// This pretty much follows from OpenCV conventions.
@@ -126,6 +126,7 @@ pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> 
 /// `descriptors` - The descriptors extracted from the keypoints. Will
 ///                 panic if the size of this vector is not equal to the
 ///                 size of the keypoints, or 0.
+/// `path` - Path to which to write.
 pub fn serialize_to_file(
     keypoints: &Vec<Keypoint>, descriptors: &Vec<Descriptor>,
     path: PathBuf,
@@ -144,5 +145,31 @@ pub fn serialize_to_file(
         // Default to JSON
         let serialized = serde_json::to_string(&output).unwrap();
         file.write(serialized.as_bytes()).unwrap();
+    }
+}
+
+/// Serialize results to a file.
+/// 'path' - Path from which to read.
+/// # Return value
+/// The deserialized results.
+pub fn deserialize_from_file(
+    path: PathBuf,
+) -> Results {
+    debug!("Reading results from {:?}", path);
+    let mut file = File::open(path.clone()).unwrap();
+    let extension = path.extension().unwrap();
+    if extension == "json" { 
+        let mut buffer = String::new();
+        file.read_to_string(&mut buffer).unwrap();
+        serde_json::from_str(&buffer).unwrap()
+    } else if extension == "cbor" {
+        let mut buffer = Vec::new();
+        file.read_to_end(&mut buffer).unwrap();
+        serde_cbor::from_slice(&buffer[..]).unwrap()
+    } else {
+        // default to JSON
+        let mut buffer = String::new();
+        file.read_to_string(&mut buffer).unwrap();
+        serde_json::from_str(&buffer).unwrap()
     }
 }
