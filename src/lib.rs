@@ -18,7 +18,7 @@ use types::evolution::Config;
 use types::evolution::EvolutionStep;
 use types::image::gaussian_blur;
 use types::image::{GrayFloatImage, ImageFunctions};
-use types::keypoint::Keypoint;
+use types::keypoint::{Keypoint, Descriptor};
 
 /// This function computes the Perona and Malik conductivity coefficient g2
 /// g2 = 1 / (1 + dL^2 / k^2)
@@ -113,7 +113,7 @@ fn create_nonlinear_scale_space(
 }
 
 
-/// Extract features using the Akaze feature extractor.
+/// Find image keypoints using the Akaze feature extractor.
 ///
 /// # Arguments
 /// `input_image` - An image from which to extract features.
@@ -143,10 +143,12 @@ pub fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config
 /// `output_features_path` - the output path to which to write an output JSON file.
 /// `options` the options for the algorithm.
 /// # Return value
-/// The evolutions of the process. Can be used for further analysis or visualization, or ignored.
+/// * The evolutions of the process. Can be used for further analysis or visualization, or ignored.
+/// * The keypoints at which features occur.
+/// * The descriptors that were computed.
 ///
 pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf, options: Config
-) -> Vec<EvolutionStep> {
+) -> (Vec<EvolutionStep>, Vec<Keypoint>, Vec<Descriptor>) {
     let input_image = image::open(input_image_path).unwrap();
     let float_image = types::image::create_unit_float_image(&input_image);
     info!(
@@ -166,5 +168,5 @@ pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf
     let descriptors = ops::descriptors::extract_descriptors(
         &evolutions, &keypoints, options);
     types::keypoint::serialize_to_file(&keypoints, &descriptors, output_features_path);
-    evolutions
+    (evolutions, keypoints, descriptors)
 }
