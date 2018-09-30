@@ -8,7 +8,7 @@ extern crate random;
 extern crate scoped_threadpool;
 extern crate time;
 
-use image::GenericImageView;
+use image::{GenericImageView};
 use std::path::PathBuf;
 use time::PreciseTime;
 
@@ -18,6 +18,7 @@ use types::evolution::Config;
 use types::evolution::EvolutionStep;
 use types::image::gaussian_blur;
 use types::image::{GrayFloatImage, ImageFunctions};
+use types::keypoint::Keypoint;
 
 /// This function computes the Perona and Malik conductivity coefficient g2
 /// g2 = 1 / (1 + dL^2 / k^2)
@@ -111,14 +112,41 @@ fn create_nonlinear_scale_space(
     }
 }
 
+
 /// Extract features using the Akaze feature extractor.
+///
+/// # Arguments
+/// `input_image` - An image from which to extract features.
+/// `options` the options for the algorithm.
+/// # Return Value
+/// The resulting keypoints.
+///
+pub fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config
+) -> Vec<Keypoint> {
+    let start = PreciseTime::now();
+    ops::detector_response::detector_response(evolutions, options);
+    debug!(
+        "Computing detector response took {}.",
+        start.to(PreciseTime::now())
+    );
+    ops::scale_space_extrema::detect_keypoints(evolutions)
+}
+
+/// Extract features using the Akaze feature extractor.
+/// 
+/// This performs all operations end-to-end. The client might be only interested
+/// in certain portions of the process, all of which are exposed in public functions,
+/// but this function can document how the various parts fit together.
 ///
 /// # Arguments
 /// `input_image_path` - the input image for which to extract features.
 /// `output_features_path` - the output path to which to write an output JSON file.
-/// `options: the options for the algorithm.`
+/// `options` the options for the algorithm.
+/// # Return value
+/// The evolutions of the process. Can be used for further analysis or visualization, or ignored.
 ///
-pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf, options: Config) {
+pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf, options: Config
+) -> Vec<EvolutionStep> {
     let input_image = image::open(input_image_path).unwrap();
     let float_image = types::image::create_unit_float_image(&input_image);
     info!(
@@ -134,26 +162,9 @@ pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf
         "Creating scale space took {}.",
         start.to(PreciseTime::now())
     );
-    let start = PreciseTime::now();
-    ops::detector_response::detector_response(&mut evolutions, options);
-    debug!(
-        "Computing detector response took {}.",
-        start.to(PreciseTime::now())
-    );
-    match std::env::var("AKAZE_SCALE_SPACE_DIR") {
-        Ok(val) => {
-            info!("Writing scale space; if you want to skip this step, undefine the env var AKAZE_SCALE_SPACE_DIR");
-            let string_to_pass = val.to_string();
-            std::fs::create_dir_all(&string_to_pass.clone()).unwrap();
-            types::evolution::write_evolutions(
-                &evolutions,
-                std::path::Path::new(&string_to_pass.clone()).to_owned(),
-            );
-        }
-        Err(_e) => {
-            info!("Not writing scale space; do write scale space, define the env var AKAZE_SCALE_SPACE_DIR");
-        }
-    }
-    warn!("TODO: finish");
-    std::fs::write(output_features_path, "foo").unwrap(); // placeholder
+    let keypoints = find_image_keypoints(&mut evolutions, options);
+    let descriptors = ops::descriptors::extract_descriptors(
+        &evolutions, &keypoints, options);
+    types::keypoint::serialize_to_file(&keypoints, &descriptors, output_features_path);
+    evolutions
 }

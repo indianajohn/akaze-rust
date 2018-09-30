@@ -2,6 +2,7 @@ use image::{DynamicImage, Pixel, RgbImage};
 use random;
 use random::Source;
 use std::u32;
+use std::path::PathBuf;
 
 /// A point of interest in an image.
 /// This pretty much follows from OpenCV conventions.
@@ -26,6 +27,13 @@ pub struct Keypoint {
     /// A classification ID
     pub class_id: usize,
 }
+
+/// A feature descriptor.
+#[derive(Debug, Clone)]
+pub struct Descriptor {
+    vector: Vec<bool>,
+}
+
 
 fn random_color() -> (u8, u8, u8) {
     let mut source = random::default().seed([42, 69]);
@@ -103,4 +111,16 @@ pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> 
     let mut rgb_image = input_image.to_rgb();
     draw_keypoints_to_image(&mut rgb_image, keypoints);
     rgb_image
+}
+
+/// Serialize results to a file.
+/// 'keypoints' - the keypoints detected from an image.
+/// `descriptors` - The descriptors extracted from the keypoints. Will
+///                 panic if the size of this vector is not equal to the
+///                 size of the keypoints, or 0.
+pub fn serialize_to_file(
+    _keypoints: &Vec<Keypoint>, _descriptors: &Vec<Descriptor>,
+    _path: PathBuf,
+) {
+    warn!("TODO: serialize to file.");
 }

@@ -6,7 +6,7 @@ extern crate log;
 extern crate env_logger;
 use std::time::SystemTime;
 
-use akaze::types::evolution::Config;
+use akaze::types::evolution::{Config, write_evolutions};
 
 fn locate_test_data() -> PathBuf {
     let exe_path = ::std::env::current_exe().unwrap();
@@ -48,7 +48,21 @@ fn extract_features() {
     // TODO: temp dir
     let output_path = Path::new("output.json");
     let options = Config::default();
-    akaze::extract_features(test_image_path, output_path.to_owned(), options);
+    let evolutions = akaze::extract_features(test_image_path, output_path.to_owned(), options);
+    match std::env::var("AKAZE_SCALE_SPACE_DIR") {
+        Ok(val) => {
+            info!("Writing scale space; if you want to skip this step, undefine the env var AKAZE_SCALE_SPACE_DIR");
+            let string_to_pass = val.to_string();
+            std::fs::create_dir_all(&string_to_pass.clone()).unwrap();
+            write_evolutions(
+                &evolutions,
+                std::path::Path::new(&string_to_pass.clone()).to_owned(),
+            );
+        }
+        Err(_e) => {
+            info!("Not writing scale space; do write scale space, define the env var AKAZE_SCALE_SPACE_DIR");
+        }
+    }
     match std::fs::remove_file(output_path) {
         Err(result) => warn!("Could not clean up temp files; returned error {:?}", result),
         Ok(result) => trace!("Cleaned up temp files with result: {:?}", result),
