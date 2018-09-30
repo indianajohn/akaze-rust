@@ -6,6 +6,7 @@ extern crate primal;
 extern crate time;
 extern crate num_cpus;
 extern crate scoped_threadpool;
+extern crate random;
 
 use image::GenericImageView;
 use std::path::PathBuf;
