@@ -1,10 +1,11 @@
 extern crate akaze;
-use std::path::Path;
 use std::path::PathBuf;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
+extern crate tempdir;
 use std::time::SystemTime;
+use tempdir::TempDir;
 
 use akaze::types::evolution::{Config, write_evolutions};
 use akaze::types::keypoint::draw_keypoints_to_image;
@@ -47,7 +48,8 @@ fn extract_features() {
     let mut test_image_path = locate_test_data();
     test_image_path.push("1.jpg");
     // TODO: temp dir
-    let output_path = Path::new("output.json");
+    let tmp_dir = TempDir::new("output_dir").unwrap();
+    let output_path = tmp_dir.path().join("output.json");
     let options = Config::default();
     let (evolutions, keypoints, _descriptors) = akaze::extract_features(test_image_path.clone(), output_path.to_owned(), options);
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {

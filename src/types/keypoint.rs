@@ -3,10 +3,12 @@ use random;
 use random::Source;
 use std::u32;
 use std::path::PathBuf;
+use std::fs::File;
+use std::io::Write;
 
 /// A point of interest in an image.
 /// This pretty much follows from OpenCV conventions.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Keypoint {
     /// The horizontal coordinate in a coordinate system is
     /// defined s.t. +x faces right and starts from the top
@@ -29,9 +31,15 @@ pub struct Keypoint {
 }
 
 /// A feature descriptor.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Descriptor {
     vector: Vec<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Results {
+    pub keypoints: Vec<Keypoint>,
+    pub descriptors: Vec<Descriptor>,
 }
 
 
@@ -119,8 +127,22 @@ pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> 
 ///                 panic if the size of this vector is not equal to the
 ///                 size of the keypoints, or 0.
 pub fn serialize_to_file(
-    _keypoints: &Vec<Keypoint>, _descriptors: &Vec<Descriptor>,
-    _path: PathBuf,
+    keypoints: &Vec<Keypoint>, descriptors: &Vec<Descriptor>,
+    path: PathBuf,
 ) {
-    warn!("TODO: serialize to file.");
+    debug!("Writing results to {:?}", path);
+    let mut file = File::create(path.clone()).unwrap();
+    let extension = path.extension().unwrap();
+    let output = Results{keypoints: keypoints.clone(), descriptors: descriptors.clone()};
+    if extension == "json" {
+        let serialized = serde_json::to_string(&output).unwrap();
+        file.write(serialized.as_bytes()).unwrap();
+    } else if extension == "cbor" {
+        let serialized = serde_cbor::to_vec(&output).unwrap();
+        file.write(&serialized[..]).unwrap();
+    } else {
+        // Default to JSON
+        let serialized = serde_json::to_string(&output).unwrap();
+        file.write(serialized.as_bytes()).unwrap();
+    }
 }
