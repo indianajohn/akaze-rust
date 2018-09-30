@@ -6,14 +6,13 @@ use image::Pixel;
 use std::f32;
 use std::path::PathBuf;
 
-
 /// The image type we use in this library.
 /// This is simply a wrapper around a contiguous vector. I would
 /// typically err on the side of of avoiding premature optimization,
 /// and using a higher-level interface for images. However, at first,
 /// I tried just using the image crate's types with f32 as a
 /// template type. All operations were approximately 40% slower.
-/// 
+///
 /// The below traits have been violated in various parts of this crate,
 /// with some image operations applying directly to the buffer. This,
 /// again, ended up being a necessary optimization. Using iterators
@@ -70,9 +69,11 @@ impl ImageFunctions for GrayFloatImage {
     }
 
     fn new(width: usize, height: usize) -> Self {
-        Self { 
-            buffer: vec![0f32; width * height], height: height, width: width 
-            }
+        Self {
+            buffer: vec![0f32; width * height],
+            height: height,
+            width: width,
+        }
     }
 
     fn get(&self, x: usize, y: usize) -> f32 {
@@ -83,7 +84,7 @@ impl ImageFunctions for GrayFloatImage {
         self.buffer[self.width * y + x] = pixel_value;
     }
     fn half_size(&self) -> Self {
-        let width  = self.width() / 2;
+        let width = self.width() / 2;
         let height = self.height() / 2;
         let mut out = Self::new(width, height);
         for x in 0..width {
@@ -107,8 +108,8 @@ impl ImageFunctions for GrayFloatImage {
 /// An image with pixel values between 0 and 1.
 pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
     let gray_image: GrayImage = input_image.to_luma();
-    let mut output_image = GrayFloatImage::new(
-        input_image.width() as usize, input_image.height() as usize);
+    let mut output_image =
+        GrayFloatImage::new(input_image.width() as usize, input_image.height() as usize);
     for (x, y, gray_pixel) in gray_image.enumerate_pixels() {
         let pixel_value: u8 = gray_pixel.channels()[0];
         let scaled_float = (pixel_value as f32) * 1f32 / 255f32;
@@ -122,10 +123,11 @@ pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
 /// # Return value
 /// A dynamic image (can be written to file, etc..)
 pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
-    let mut output_image = DynamicImage::new_luma8(input_image.width() as u32, input_image.height() as u32);
+    let mut output_image =
+        DynamicImage::new_luma8(input_image.width() as u32, input_image.height() as u32);
     for x in 0..input_image.width() {
         for y in 0..input_image.height() {
-            let pixel_value: f32 = input_image.get(x,y);
+            let pixel_value: f32 = input_image.get(x, y);
             let u8_pixel: u8 = (pixel_value * 255f32) as u8;
             output_image
                 .as_mut_luma8()
@@ -143,11 +145,11 @@ pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
 pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
     let mut min_pixel = f32::MAX;
     let mut max_pixel = f32::MIN;
-    let mut output_image = GrayFloatImage::new(
-        input_image.width() as usize, input_image.height() as usize);
+    let mut output_image =
+        GrayFloatImage::new(input_image.width() as usize, input_image.height() as usize);
     for x in 0..input_image.width() {
         for y in 0..input_image.height() {
-            let pixel = input_image.get(x,y);
+            let pixel = input_image.get(x, y);
             if pixel > max_pixel {
                 max_pixel = pixel;
             }
@@ -316,7 +318,6 @@ fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {
     }
     kernel
 }
-
 
 /// Perform Gaussian blur on an image.
 /// `r` sigma.

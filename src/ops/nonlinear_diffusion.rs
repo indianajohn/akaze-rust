@@ -18,16 +18,16 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
 
     // Diffusion all the image except borders
     for y in 1..(h - 1) {
-        let mut Ld_yn = Ld.buffer.iter(); 
+        let mut Ld_yn = Ld.buffer.iter();
         let mut Ld_yn_i = Ld_yn.nth(w * (y - 1) + 1).unwrap();
 
-        let mut Ld_yp = Ld.buffer.iter(); 
+        let mut Ld_yp = Ld.buffer.iter();
         let mut Ld_yp_i = Ld_yp.nth(w * (y + 1) + 1).unwrap();
 
         let mut Ld_xn = Ld.buffer.iter();
         let mut Ld_xn_i = Ld_xn.nth(w * y + 0).unwrap();
 
-        let mut Ld_x  = Ld.buffer.iter();
+        let mut Ld_x = Ld.buffer.iter();
         let mut Ld_x_i = Ld_x.nth(w * y + 1).unwrap();
 
         let mut Ld_xp = Ld.buffer.iter();
@@ -42,13 +42,13 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let mut c_xn = c.buffer.iter();
         let mut c_xn_i = c_xn.nth(w * y + 0).unwrap();
 
-        let mut c_x  = c.buffer.iter();
+        let mut c_x = c.buffer.iter();
         let mut c_x_i = c_x.nth(w * y + 1).unwrap();
 
         let mut c_xp = c.buffer.iter();
         let mut c_xp_i = c_xp.nth(w * y + 2).unwrap();
 
-        let slice = &mut Lstep.buffer[(w * y+1)..(w * y + w - 1)];
+        let slice = &mut Lstep.buffer[(w * y + 1)..(w * y + w - 1)];
         for Lstep_x_i in slice.iter_mut() {
             let x_pos = (c_x_i + c_xp_i) * (Ld_xp_i - Ld_x_i);
             let x_neg = (c_xn_i + c_x_i) * (Ld_x_i - Ld_xn_i);
@@ -75,11 +75,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
         let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
         let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
-        Lstep.put(
-            x,
-            y,
-            0.5 * (step_size as f32) * (x_pos - x_neg + y_pos),
-        );
+        Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos - x_neg + y_pos));
     }
     {
         let x = 0;
@@ -93,11 +89,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let y = 0;
         let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
         let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
-        Lstep.put(
-            x,
-            y,
-            0.5 * (step_size as f32) * (-x_neg + y_pos),
-        );
+        Lstep.put(x, y, 0.5 * (step_size as f32) * (-x_neg + y_pos));
     }
     // Last row
     let y = Lstep.height() - 1;
@@ -105,11 +97,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
         let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, -1, -1, 0);
         let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
-        Lstep.put(
-            x,
-            y,
-            0.5 * (step_size as f32) * (x_pos - x_neg + y_pos),
-        );
+        Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos - x_neg + y_pos));
     }
     {
         let x = 0;
@@ -121,11 +109,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let x = Lstep.width() - 1;
         let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, -1, -1, 0);
         let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
-        Lstep.put(
-            x,
-            y,
-            0.5 * (step_size as f32) * (-x_neg + y_pos),
-        );
+        Lstep.put(x, y, 0.5 * (step_size as f32) * (-x_neg + y_pos));
     }
     // First and last columns
     for y in 1..(Lstep.height() - 1) {
@@ -134,22 +118,14 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
             let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
             let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
             let y_neg = eval(c, Ld, x, y, 0, 0, 0, 0, -1, 0, 0, -1);
-            Lstep.put(
-                x,
-                y,
-                0.5 * (step_size as f32) * (x_pos + y_pos - y_neg),
-            );
+            Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos + y_pos - y_neg));
         }
         {
             let x = Lstep.width() - 1;
             let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
             let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
             let y_neg = eval(c, Ld, x, y, 0, 0, 0, 0, -1, 0, 0, -1);
-            Lstep.put(
-                x,
-                y,
-                0.5 * (step_size as f32) * (-x_neg + y_pos - y_neg),
-            );
+            Lstep.put(x, y, 0.5 * (step_size as f32) * (-x_neg + y_pos - y_neg));
         }
     }
 

@@ -2,11 +2,11 @@ extern crate image;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
-extern crate primal;
-extern crate time;
 extern crate num_cpus;
-extern crate scoped_threadpool;
+extern crate primal;
 extern crate random;
+extern crate scoped_threadpool;
+extern crate time;
 
 use image::GenericImageView;
 use std::path::PathBuf;
