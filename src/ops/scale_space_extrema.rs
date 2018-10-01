@@ -19,27 +19,23 @@ pub fn find_scale_space_extrema(
         let mut x_iter = evolution.Ldet.buffer.iter();
         let mut x_i = x_iter.nth(w + 1).unwrap(); // 1, 1
         let mut x_p_iter = evolution.Ldet.buffer.iter();
-        let mut x_p_i = x_p_iter.nth(w).unwrap(); // 2, 1
+        let mut x_p_i = x_p_iter.nth(w + 2).unwrap(); // 2, 1
         let mut y_m_iter = evolution.Ldet.buffer.iter();
         let mut y_m_i = y_m_iter.nth(1).unwrap(); // 1, 0
         let mut y_p_iter = evolution.Ldet.buffer.iter();
-        let mut y_p_i = y_p_iter.nth(1).unwrap(); // 1, 2
+        let mut y_p_i = y_p_iter.nth(2 * w + 1).unwrap(); // 1, 2
         // Iterate from 1,1 to the second-to-last pixel of the second-to-last row
-        for i in (h + 1)..(evolution.Ldet.buffer.len() - h - 1) {
+        for i in (w + 1)..(evolution.Ldet.buffer.len() - w - 1) {
             let x = i % w;
             let y = i / w;
-            // do nothing for border pixels we will encounter in the iteration range
-            if x == 0 || x == w {
-                continue;
-            }
-
             // Apply detector threshold
             if 
-                f32::abs(*x_i) > (options.detector_threshold as f32) &&
-                f32::abs(*x_i) > f32::abs(*x_p_i) &&
-                f32::abs(*x_i) > f32::abs(*x_m_i) &&
-                f32::abs(*x_i) > f32::abs(*y_m_i) &&
-                f32::abs(*x_i) > f32::abs(*y_p_i)
+                x != 0 && x != w && // do nothing for border pixels we will encounter in the iteration range
+                *x_i > (options.detector_threshold as f32) &&
+                *x_i > *x_p_i &&
+                *x_i > *x_m_i &&
+                *x_i > *y_m_i &&
+                *x_i > *y_p_i
             {
                 let mut keypoint = Keypoint{
                     response: f32::abs(*x_i),
