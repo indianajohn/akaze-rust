@@ -44,7 +44,7 @@ pub struct Results {
 
 
 fn random_color() -> (u8, u8, u8) {
-    let mut source = random::default().seed([42, 69]);
+    let mut source = random::default();
     (
         source.read::<u8>(),
         source.read::<u8>(),
