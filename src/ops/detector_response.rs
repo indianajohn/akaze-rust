@@ -47,7 +47,7 @@ pub fn detector_response(evolutions: &mut Vec<EvolutionStep>, options: Config) {
             let Lxx_i = Lxx_iter.next().unwrap();
             let Lyy_i = Lyy_iter.next().unwrap();
             let Lxy_i = Lxy_iter.next().unwrap();
-            *Ldet_iter = (Lxx_i * Lyy_i) - (Lxy_i * Lxy_i) * (sigma_size_quat as f32);
+            *Ldet_iter = ((Lxx_i * Lyy_i) - (Lxy_i * Lxy_i)) * (sigma_size_quat as f32);
         }
     }
 }
