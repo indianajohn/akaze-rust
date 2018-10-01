@@ -26,6 +26,9 @@ pub struct Config {
 
     /// Factor for the multiscale derivatives
     pub derivative_factor: f64,
+
+    /// Detector response threshold to accept point
+    pub detector_threshold: f64,
 }
 
 impl Default for Config {
@@ -38,6 +41,7 @@ impl Default for Config {
             contrast_percentile: 0.7f64,
             contrast_factor_num_bins: 300,
             derivative_factor: 1.5f64,
+            detector_threshold: 0.001f64,
         }
     }
 }

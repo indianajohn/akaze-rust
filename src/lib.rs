@@ -135,7 +135,7 @@ pub fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config
         "Computing detector response took {}.",
         start.to(PreciseTime::now())
     );
-    ops::scale_space_extrema::detect_keypoints(evolutions)
+    ops::scale_space_extrema::detect_keypoints(evolutions, options)
 }
 
 /// Extract features using the Akaze feature extractor.
