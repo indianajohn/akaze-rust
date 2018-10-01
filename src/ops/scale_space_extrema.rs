@@ -54,14 +54,14 @@ pub fn find_scale_space_extrema(
                 let mut id_repeated = 0;
                 let mut is_repeated = false;
                 let mut is_extremum = true;
-                for (i, prev_keypoint) in keypoint_cache.iter().enumerate() {
+                for (k, prev_keypoint) in keypoint_cache.iter().enumerate() {
                     if ((keypoint.class_id - 1) == prev_keypoint.class_id) || (keypoint.class_id == prev_keypoint.class_id) {
                         let dist = 
                             (keypoint.point.0 * ratio - prev_keypoint.point.0) * (keypoint.point.0 * ratio - prev_keypoint.point.0) +
                             (keypoint.point.1 * ratio - prev_keypoint.point.1) * (keypoint.point.1 * ratio - prev_keypoint.point.1);
                         if dist <= keypoint.size * keypoint.size {
                             if keypoint.response > prev_keypoint.response {
-                                id_repeated = i;
+                                id_repeated = k;
                                 is_repeated = true;
                             } else {
                                 is_extremum = false;
