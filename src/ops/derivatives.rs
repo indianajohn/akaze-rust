@@ -10,7 +10,6 @@ mod tests {
     fn scharr_3x3_main_axis_kernel() {
         let expected_kernel = vec![0.09375f32, 0.3125f32, 0.09375f32];
         let produced_kernel = scharr_main_axis_kernel(1u32);
-        println!("{:?}", produced_kernel);
         assert_eq!(expected_kernel.len(), produced_kernel.len());
         for i in 0..produced_kernel.len() {
             assert_eq!(expected_kernel[i], produced_kernel[i]);
