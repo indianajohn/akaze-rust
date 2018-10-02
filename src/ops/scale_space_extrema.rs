@@ -1,6 +1,7 @@
 use types::evolution::{EvolutionStep, Config};
 use types::keypoint::Keypoint;
 use types::image::ImageFunctions;
+use nalgebra::{Matrix2, Vector2, LU};
 
 pub fn find_scale_space_extrema(
     evolutions: &mut Vec<EvolutionStep>,
@@ -8,7 +9,7 @@ pub fn find_scale_space_extrema(
 ) -> Vec<Keypoint> {
     let mut keypoint_cache: Vec<Keypoint> = vec![];
     let smax = 10.0f32*f32::sqrt(2.0f32);
-    for evolution in evolutions {
+    for (e_id, evolution) in evolutions.iter_mut().enumerate() {
         let w = evolution.Ldet.width();
         let h = evolution.Ldet.height();
         // maintain 5 iterators, one for the current pixel and one
@@ -41,7 +42,7 @@ pub fn find_scale_space_extrema(
                     response: f32::abs(*x_i),
                     size: (evolution.esigma * options.derivative_factor) as f32,
                     octave: evolution.octave as usize,
-                    class_id: (y * w + x),
+                    class_id: e_id,
                     point: (x as f32, y as f32),
                 };
                 let ratio =  f32::powf(2.0f32, evolution.octave as f32);
@@ -123,10 +124,39 @@ pub fn find_scale_space_extrema(
 }
 
 pub fn do_subpixel_refinement(
-    in_keypoints: &mut Vec<Keypoint>
+    in_keypoints: &Vec<Keypoint>,
+    evolutions: &Vec<EvolutionStep>,
 ) -> Vec<Keypoint> {
     warn!("TODO: sub-pixel refinement.");
-    in_keypoints.clone()
+    let mut result: Vec<Keypoint> = vec![];
+    for keypoint in in_keypoints.iter() {
+        let ratio =  f32::powf(2.0f32, keypoint.octave as f32);
+        let x = f32::round(keypoint.point.0/ratio) as usize;
+        let y = f32::round(keypoint.point.1/ratio) as usize;
+        let x_i = evolutions[keypoint.class_id].Ldet.get(x, y);
+        let x_p = evolutions[keypoint.class_id].Ldet.get(x+1, y);
+        let x_m = evolutions[keypoint.class_id].Ldet.get(x-1, y);
+        let y_p = evolutions[keypoint.class_id].Ldet.get(x, y+1);
+        let y_m = evolutions[keypoint.class_id].Ldet.get(x, y-1);
+        // Derivative
+        let d_x = 0.5f32 * (x_p - x_m);
+        let d_y = 0.5f32 * (y_p - y_m);
+        // Hessian
+        let d_xx = x_p + x_m - 2f32 * x_i;
+        let d_yy = y_p + y_m - 2f32 * x_i;
+        let d_xy = 0.25f32*(x_p+x_m) - 0.25f32*(x_p+x_m);
+        let a = Matrix2::new(d_xx, d_xy, d_xy, d_yy);
+        let mut b = Vector2::new(-d_x, -d_y);
+        let lu = LU::new(a.clone());
+        lu.solve(&mut b);
+        if f32::abs(b[0]) <= 1.0 && f32::abs(b[1]) <= 1.0 {
+            let mut keypoint_clone = keypoint.clone();
+            keypoint_clone.point = (keypoint.point.0 + b[0], keypoint.point.1 + b[1]);
+            result.push(keypoint_clone);
+        }
+    }
+    info!("{}/{} remain after subpixel refinement.", result.len(), in_keypoints.len());
+    result
 }
 
 pub fn detect_keypoints(
@@ -134,6 +164,6 @@ pub fn detect_keypoints(
     options: Config,
 ) -> Vec<Keypoint> {
     let mut keypoints = find_scale_space_extrema(evolutions, options);
-    do_subpixel_refinement(&mut keypoints);
+    keypoints = do_subpixel_refinement(&keypoints, &evolutions);
     keypoints
 }

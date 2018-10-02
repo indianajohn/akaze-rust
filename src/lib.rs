@@ -7,6 +7,12 @@ extern crate primal;
 extern crate random;
 extern crate scoped_threadpool;
 extern crate time;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
+extern crate serde_json;
+extern crate serde_cbor;
+extern crate nalgebra;
 
 use image::{GenericImageView};
 use std::path::PathBuf;
@@ -19,11 +25,6 @@ use types::evolution::EvolutionStep;
 use types::image::gaussian_blur;
 use types::image::{GrayFloatImage, ImageFunctions};
 use types::keypoint::{Keypoint, Descriptor};
-#[macro_use]
-extern crate serde_derive;
-extern crate serde;
-extern crate serde_json;
-extern crate serde_cbor;
 
 
 /// This function computes the Perona and Malik conductivity coefficient g2
