@@ -151,7 +151,11 @@ pub fn do_subpixel_refinement(
         lu.solve(&mut b);
         if f32::abs(b[0]) <= 1.0 && f32::abs(b[1]) <= 1.0 {
             let mut keypoint_clone = keypoint.clone();
-            keypoint_clone.point = (keypoint.point.0 + b[0], keypoint.point.1 + b[1]);
+            keypoint_clone.point = ((x as f32) + b[0], (y as f32) + b[1]);
+            keypoint_clone.point = (
+                keypoint_clone.point.0 * ratio + 0.5f32 * (ratio - 1f32),
+                keypoint_clone.point.1 * ratio + 0.5f32 * (ratio - 1f32)
+            );
             result.push(keypoint_clone);
         }
     }
