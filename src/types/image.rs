@@ -1,7 +1,6 @@
 use image::DynamicImage;
 use image::GenericImageView;
 use image::GrayImage;
-use image::Luma;
 use image::Pixel;
 use std::f32;
 use std::path::PathBuf;
@@ -110,10 +109,13 @@ pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
     let gray_image: GrayImage = input_image.to_luma();
     let mut output_image =
         GrayFloatImage::new(input_image.width() as usize, input_image.height() as usize);
-    for (x, y, gray_pixel) in gray_image.enumerate_pixels() {
-        let pixel_value: u8 = gray_pixel.channels()[0];
-        let scaled_float = (pixel_value as f32) * 1f32 / 255f32;
-        output_image.put(x as usize, y as usize, scaled_float);
+    {
+        let mut itr_output = output_image.buffer.iter_mut();
+        for  gray_pixel in gray_image.pixels() {
+            let output_ptr = itr_output.next().unwrap();
+            let pixel_value: u8 = gray_pixel.channels()[0];
+            *output_ptr = (pixel_value as f32) * 1f32 / 255f32;
+        }
     }
     output_image
 }
