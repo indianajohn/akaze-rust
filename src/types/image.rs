@@ -125,14 +125,12 @@ pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
 pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
     let mut output_image =
         DynamicImage::new_luma8(input_image.width() as u32, input_image.height() as u32);
-    for x in 0..input_image.width() {
-        for y in 0..input_image.height() {
-            let pixel_value: f32 = input_image.get(x, y);
-            let u8_pixel: u8 = (pixel_value * 255f32) as u8;
-            output_image
-                .as_mut_luma8()
-                .unwrap()
-                .put_pixel(x as u32, y as u32, Luma([u8_pixel]));
+    {
+        let luma8 = output_image.as_mut_luma8().unwrap();
+        let mut itr_input = input_image.buffer.iter();
+        for pixel in luma8.pixels_mut() {
+            let val = itr_input.next().unwrap();
+            pixel.channels_mut()[0] = (*val * 255f32) as u8;
         }
     }
     output_image
@@ -147,25 +145,27 @@ pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
     let mut max_pixel = f32::MIN;
     let mut output_image =
         GrayFloatImage::new(input_image.width() as usize, input_image.height() as usize);
-    for x in 0..input_image.width() {
-        for y in 0..input_image.height() {
-            let pixel = input_image.get(x, y);
-            if pixel > max_pixel {
-                max_pixel = pixel;
-            }
-            if pixel < min_pixel {
-                min_pixel = pixel;
-            }
+    
+    for pixel in input_image.buffer.iter() {
+        if *pixel > max_pixel {
+            max_pixel = *pixel;
+        }
+        if *pixel < min_pixel {
+            min_pixel = *pixel;
         }
     }
-
-    let new_max_pixel = max_pixel - min_pixel;
-    for x in 0..input_image.width() {
-        for y in 0..input_image.height() {
-            let mut pixel = input_image.get(x, y);
+    let length = input_image.width()*input_image.height();
+    {
+        let mut itr1 = output_image.buffer.iter_mut();
+        let mut itr2 = input_image.buffer.iter();
+        let new_max_pixel = max_pixel - min_pixel;
+        for _ in 0..(length) {
+            let p1 = itr1.next().unwrap();
+            let p2 = itr2.next().unwrap();
+            let mut pixel = *p2;
             pixel = pixel - min_pixel;
             pixel = pixel / new_max_pixel;
-            output_image.put(x, y, pixel);
+            *p1 = pixel;
         }
     }
     output_image
