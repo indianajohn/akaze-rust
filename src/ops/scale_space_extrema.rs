@@ -43,6 +43,7 @@ pub fn find_scale_space_extrema(
                     octave: evolution.octave as usize,
                     class_id: e_id,
                     point: (x as f32, y as f32),
+                    angle: 0f32, // This is computed later - it is not needed for candidates
                 };
                 let ratio = f32::powf(2.0f32, evolution.octave as f32);
                 let sigma_size = f32::round(keypoint.size / ratio);
@@ -162,11 +163,15 @@ pub fn do_subpixel_refinement(
             result.push(keypoint_clone);
         }
     }
+    warn!("TODO: compute_main_orientaion");
     info!(
         "{}/{} remain after subpixel refinement.",
         result.len(),
         in_keypoints.len()
     );
+    for keypoint in result.iter_mut() {
+        compute_main_orientation(&keypoint, &evolutions);
+    }
     result
 }
 
@@ -174,4 +179,9 @@ pub fn detect_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config) ->
     let mut keypoints = find_scale_space_extrema(evolutions, options);
     keypoints = do_subpixel_refinement(&keypoints, &evolutions);
     keypoints
+}
+
+fn compute_main_orientation(_keypoint: &Keypoint, _evolutions: &Vec<EvolutionStep>
+) -> f32 {
+    0.0f32
 }

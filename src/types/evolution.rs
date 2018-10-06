@@ -29,6 +29,12 @@ pub struct Config {
 
     /// Detector response threshold to accept point
     pub detector_threshold: f64,
+
+    /// Number of channels in the descriptor (1, 2, 3) 
+    pub descriptor_channels: usize,
+
+    /// Actual patch size is 2*pattern_size*point.scale
+    pub descriptor_pattern_size: usize,
 }
 
 impl Default for Config {
@@ -42,6 +48,8 @@ impl Default for Config {
             contrast_factor_num_bins: 300,
             derivative_factor: 1.5f64,
             detector_threshold: 0.001f64,
+            descriptor_channels: 3usize,
+            descriptor_pattern_size: 10usize,
         }
     }
 }

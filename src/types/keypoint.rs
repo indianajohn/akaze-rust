@@ -30,12 +30,15 @@ pub struct Keypoint {
 
     /// A classification ID
     pub class_id: usize,
+
+    /// The orientation angle
+    pub angle: f32,
 }
 
 /// A feature descriptor.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Descriptor {
-    vector: Vec<bool>,
+    pub vector: Vec<u8>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
