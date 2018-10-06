@@ -4,6 +4,7 @@ use std::path::PathBuf;
 extern crate log;
 extern crate env_logger;
 extern crate tempdir;
+extern crate image;
 use std::time::SystemTime;
 use tempdir::TempDir;
 
