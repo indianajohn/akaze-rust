@@ -1,10 +1,10 @@
 use image::{DynamicImage, Pixel, RgbImage};
 use random;
 use random::Source;
-use std::u32;
-use std::path::PathBuf;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::path::PathBuf;
+use std::u32;
 
 /// A point of interest in an image.
 /// This pretty much follows from OpenCV conventions.
@@ -41,7 +41,6 @@ pub struct Results {
     pub keypoints: Vec<Keypoint>,
     pub descriptors: Vec<Descriptor>,
 }
-
 
 fn random_color() -> (u8, u8, u8) {
     let mut source = random::default();
@@ -127,14 +126,14 @@ pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> 
 ///                 panic if the size of this vector is not equal to the
 ///                 size of the keypoints, or 0.
 /// `path` - Path to which to write.
-pub fn serialize_to_file(
-    keypoints: &Vec<Keypoint>, descriptors: &Vec<Descriptor>,
-    path: PathBuf,
-) {
+pub fn serialize_to_file(keypoints: &Vec<Keypoint>, descriptors: &Vec<Descriptor>, path: PathBuf) {
     debug!("Writing results to {:?}", path);
     let mut file = File::create(path.clone()).unwrap();
     let extension = path.extension().unwrap();
-    let output = Results{keypoints: keypoints.clone(), descriptors: descriptors.clone()};
+    let output = Results {
+        keypoints: keypoints.clone(),
+        descriptors: descriptors.clone(),
+    };
     if extension == "json" {
         let serialized = serde_json::to_string(&output).unwrap();
         file.write(serialized.as_bytes()).unwrap();
@@ -152,13 +151,11 @@ pub fn serialize_to_file(
 /// 'path' - Path from which to read.
 /// # Return value
 /// The deserialized results.
-pub fn deserialize_from_file(
-    path: PathBuf,
-) -> Results {
+pub fn deserialize_from_file(path: PathBuf) -> Results {
     debug!("Reading results from {:?}", path);
     let mut file = File::open(path.clone()).unwrap();
     let extension = path.extension().unwrap();
-    if extension == "json" { 
+    if extension == "json" {
         let mut buffer = String::new();
         file.read_to_string(&mut buffer).unwrap();
         serde_json::from_str(&buffer).unwrap()

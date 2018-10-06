@@ -111,7 +111,7 @@ pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
         GrayFloatImage::new(input_image.width() as usize, input_image.height() as usize);
     {
         let mut itr_output = output_image.buffer.iter_mut();
-        for  gray_pixel in gray_image.pixels() {
+        for gray_pixel in gray_image.pixels() {
             let output_ptr = itr_output.next().unwrap();
             let pixel_value: u8 = gray_pixel.channels()[0];
             *output_ptr = (pixel_value as f32) * 1f32 / 255f32;
@@ -147,7 +147,7 @@ pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
     let mut max_pixel = f32::MIN;
     let mut output_image =
         GrayFloatImage::new(input_image.width() as usize, input_image.height() as usize);
-    
+
     for pixel in input_image.buffer.iter() {
         if *pixel > max_pixel {
             max_pixel = *pixel;
@@ -156,7 +156,7 @@ pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
             min_pixel = *pixel;
         }
     }
-    let length = input_image.width()*input_image.height();
+    let length = input_image.width() * input_image.height();
     {
         let mut itr1 = output_image.buffer.iter_mut();
         let mut itr2 = input_image.buffer.iter();
@@ -252,7 +252,7 @@ pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloat
             let mut out_ptr = out_itr.nth(half_width as usize).unwrap();
             let mut image_val = image_itr.nth((half_width + k) as usize).unwrap();
             let kernel_value = kernel[(k + half_width) as usize];
-            for _ in half_width..(w*h - half_width - 1) {
+            for _ in half_width..(w * h - half_width - 1) {
                 *out_ptr += kernel_value * image_val;
                 out_ptr = out_itr.next().unwrap();
                 image_val = image_itr.next().unwrap();
@@ -282,10 +282,12 @@ pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatIm
         for k in -half_width..=half_width {
             let mut out_itr = out_slice.iter_mut();
             let mut image_itr = image_slice.iter();
-            let mut out_ptr = out_itr.nth((half_width *w ) as usize).unwrap();
-            let mut image_val = image_itr.nth(((half_width*w) + (k*w) ) as usize).unwrap();
+            let mut out_ptr = out_itr.nth((half_width * w) as usize).unwrap();
+            let mut image_val = image_itr
+                .nth(((half_width * w) + (k * w)) as usize)
+                .unwrap();
             let kernel_value = kernel[(k + half_width) as usize];
-            for _ in (half_width * w)..(w*h - (half_width*w) - 1) {
+            for _ in (half_width * w)..(w * h - (half_width * w) - 1) {
                 *out_ptr += kernel_value * image_val;
                 out_ptr = out_itr.next().unwrap();
                 image_val = image_itr.next().unwrap();

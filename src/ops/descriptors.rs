@@ -1,5 +1,5 @@
-use types::evolution::{EvolutionStep, Config};
-use types::keypoint::{Keypoint, Descriptor};
+use types::evolution::{Config, EvolutionStep};
+use types::keypoint::{Descriptor, Keypoint};
 
 /// Extract descriptors from keypoints/an evolution
 /// `evolutions` - the nonlinear scale space

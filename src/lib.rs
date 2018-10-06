@@ -9,12 +9,12 @@ extern crate scoped_threadpool;
 extern crate time;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde;
-extern crate serde_json;
-extern crate serde_cbor;
 extern crate nalgebra;
+extern crate serde;
+extern crate serde_cbor;
+extern crate serde_json;
 
-use image::{GenericImageView};
+use image::GenericImageView;
 use std::path::PathBuf;
 use time::PreciseTime;
 
@@ -24,8 +24,7 @@ use types::evolution::Config;
 use types::evolution::EvolutionStep;
 use types::image::gaussian_blur;
 use types::image::{GrayFloatImage, ImageFunctions};
-use types::keypoint::{Keypoint, Descriptor};
-
+use types::keypoint::{Descriptor, Keypoint};
 
 /// This function computes the Perona and Malik conductivity coefficient g2
 /// g2 = 1 / (1 + dL^2 / k^2)
@@ -86,10 +85,7 @@ fn create_nonlinear_scale_space(
         if evolutions[i].octave > evolutions[i - 1].octave {
             let start = PreciseTime::now();
             evolutions[i].Lt = evolutions[i - 1].Lt.half_size();
-            debug!(
-                "Half-sizing took {}", 
-                start.to(PreciseTime::now())
-            );
+            debug!("Half-sizing took {}", start.to(PreciseTime::now()));
             contrast_factor = contrast_factor * 0.75;
             debug!(
                 "New image size: {}x{}, new contrast factor: {}",
@@ -102,10 +98,7 @@ fn create_nonlinear_scale_space(
         }
         let start = PreciseTime::now();
         evolutions[i].Lsmooth = gaussian_blur(&evolutions[i].Lt, 1.0f32, 5);
-        debug!(
-            "Gaussian blur took {}.",
-            start.to(PreciseTime::now())
-        );
+        debug!("Gaussian blur took {}.", start.to(PreciseTime::now()));
         let start = PreciseTime::now();
         evolutions[i].Lx = ops::derivatives::scharr(&evolutions[i].Lsmooth, true, false, 1);
         debug!(
@@ -115,10 +108,7 @@ fn create_nonlinear_scale_space(
         evolutions[i].Ly = ops::derivatives::scharr(&evolutions[i].Lsmooth, false, true, 1);
         let start = PreciseTime::now();
         evolutions[i].Lflow = pm_g2(&evolutions[i].Lx, &evolutions[i].Ly, contrast_factor);
-        debug!(
-            "Lflow took {}", 
-            start.to(PreciseTime::now())
-        );
+        debug!("Lflow took {}", start.to(PreciseTime::now()));
         evolutions[i].Lstep =
             GrayFloatImage::new(evolutions[i].Lt.width(), evolutions[i].Lt.height());
         for j in 0..evolutions[i].fed_tau_steps.len() {
@@ -134,7 +124,6 @@ fn create_nonlinear_scale_space(
     }
 }
 
-
 /// Find image keypoints using the Akaze feature extractor.
 ///
 /// # Arguments
@@ -143,8 +132,7 @@ fn create_nonlinear_scale_space(
 /// # Return Value
 /// The resulting keypoints.
 ///
-pub fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config
-) -> Vec<Keypoint> {
+pub fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config) -> Vec<Keypoint> {
     let start = PreciseTime::now();
     ops::detector_response::detector_response(evolutions, options);
     debug!(
@@ -155,7 +143,7 @@ pub fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config
 }
 
 /// Extract features using the Akaze feature extractor.
-/// 
+///
 /// This performs all operations end-to-end. The client might be only interested
 /// in certain portions of the process, all of which are exposed in public functions,
 /// but this function can document how the various parts fit together.
@@ -169,7 +157,10 @@ pub fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config
 /// * The keypoints at which features occur.
 /// * The descriptors that were computed.
 ///
-pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf, options: Config
+pub fn extract_features(
+    input_image_path: PathBuf,
+    output_features_path: PathBuf,
+    options: Config,
 ) -> (Vec<EvolutionStep>, Vec<Keypoint>, Vec<Descriptor>) {
     let input_image = image::open(input_image_path).unwrap();
     let float_image = types::image::create_unit_float_image(&input_image);
@@ -187,8 +178,7 @@ pub fn extract_features(input_image_path: PathBuf, output_features_path: PathBuf
         start.to(PreciseTime::now())
     );
     let keypoints = find_image_keypoints(&mut evolutions, options);
-    let descriptors = ops::descriptors::extract_descriptors(
-        &evolutions, &keypoints, options);
+    let descriptors = ops::descriptors::extract_descriptors(&evolutions, &keypoints, options);
     types::keypoint::serialize_to_file(&keypoints, &descriptors, output_features_path);
     (evolutions, keypoints, descriptors)
 }

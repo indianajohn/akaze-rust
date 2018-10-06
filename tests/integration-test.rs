@@ -7,7 +7,7 @@ extern crate tempdir;
 use std::time::SystemTime;
 use tempdir::TempDir;
 
-use akaze::types::evolution::{Config, write_evolutions};
+use akaze::types::evolution::{write_evolutions, Config};
 use akaze::types::keypoint::draw_keypoints_to_image;
 
 fn locate_test_data() -> PathBuf {
@@ -51,17 +51,15 @@ fn extract_features() {
     let tmp_dir = TempDir::new("output_dir").unwrap();
     let output_path = tmp_dir.path().join("output.json");
     let options = Config::default();
-    let (evolutions, keypoints, _descriptors) = akaze::extract_features(test_image_path.clone(), output_path.to_owned(), options);
+    let (evolutions, keypoints, _descriptors) =
+        akaze::extract_features(test_image_path.clone(), output_path.to_owned(), options);
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {
         Ok(val) => {
             info!("Writing scale space; if you want to skip this step, undefine the env var AKAZE_SCALE_SPACE_DIR");
             let string_to_pass = val.to_string();
             let path_to_scale_space_dir = std::path::Path::new(&string_to_pass.clone()).to_owned();
             std::fs::create_dir_all(&string_to_pass.clone()).unwrap();
-            write_evolutions(
-                &evolutions,
-                path_to_scale_space_dir.clone(),
-            );
+            write_evolutions(&evolutions, path_to_scale_space_dir.clone());
             let mut input_image = image::open(test_image_path.clone()).unwrap().to_rgb();
             draw_keypoints_to_image(&mut input_image, &keypoints);
             let mut path_to_keypoint_image = path_to_scale_space_dir.clone();
