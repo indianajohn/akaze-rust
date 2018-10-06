@@ -84,7 +84,12 @@ fn create_nonlinear_scale_space(
     for i in 1..evolutions.len() {
         info!("Creating evolution {}.", i);
         if evolutions[i].octave > evolutions[i - 1].octave {
+            let start = PreciseTime::now();
             evolutions[i].Lt = evolutions[i - 1].Lt.half_size();
+            debug!(
+                "Half-sizing took {}", 
+                start.to(PreciseTime::now())
+            );
             contrast_factor = contrast_factor * 0.75;
             debug!(
                 "New image size: {}x{}, new contrast factor: {}",
@@ -95,7 +100,12 @@ fn create_nonlinear_scale_space(
         } else {
             evolutions[i].Lt = evolutions[i - 1].Lt.clone();
         }
+        let start = PreciseTime::now();
         evolutions[i].Lsmooth = gaussian_blur(&evolutions[i].Lt, 1.0f32, 5);
+        debug!(
+            "Gaussian blur took {}.",
+            start.to(PreciseTime::now())
+        );
         let start = PreciseTime::now();
         evolutions[i].Lx = ops::derivatives::scharr(&evolutions[i].Lsmooth, true, false, 1);
         debug!(
@@ -103,7 +113,12 @@ fn create_nonlinear_scale_space(
             start.to(PreciseTime::now())
         );
         evolutions[i].Ly = ops::derivatives::scharr(&evolutions[i].Lsmooth, false, true, 1);
+        let start = PreciseTime::now();
         evolutions[i].Lflow = pm_g2(&evolutions[i].Lx, &evolutions[i].Ly, contrast_factor);
+        debug!(
+            "Lflow took {}", 
+            start.to(PreciseTime::now())
+        );
         evolutions[i].Lstep =
             GrayFloatImage::new(evolutions[i].Lt.width(), evolutions[i].Lt.height());
         for j in 0..evolutions[i].fed_tau_steps.len() {
