@@ -131,7 +131,6 @@ pub fn do_subpixel_refinement(
     in_keypoints: &Vec<Keypoint>,
     evolutions: &Vec<EvolutionStep>,
 ) -> Vec<Keypoint> {
-    warn!("TODO: sub-pixel refinement.");
     let mut result: Vec<Keypoint> = vec![];
     for keypoint in in_keypoints.iter() {
         let ratio = f32::powf(2.0f32, keypoint.octave as f32);

@@ -48,7 +48,6 @@ fn extract_features() {
     env_logger::Builder::from_env(env).init();
     let mut test_image_path = locate_test_data();
     test_image_path.push("1.jpg");
-    // TODO: temp dir
     let tmp_dir = TempDir::new("output_dir").unwrap();
     let output_path = tmp_dir.path().join("output.json");
     let options = Config::default();
