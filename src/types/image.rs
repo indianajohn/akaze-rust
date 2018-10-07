@@ -412,6 +412,42 @@ pub fn draw_circle(input_image: &mut RgbImage, point: (f32, f32), rgb: (u8, u8, 
     }
 }
 
+/// Draw a line to an image.
+///
+/// `input_image` the image to draw on, directly mutated.
+/// `point_0` the point from which to draw.
+/// `point_1` the point to which to draw.
+/// `rgb` The RGB value.
+/// `radius` The radius from the center of the line to shade.
+pub fn draw_line(
+    mut input_image: &mut RgbImage, 
+    point_0: (f32, f32), 
+    point_1: (f32, f32), 
+    rgb: (u8, u8, u8), 
+    radius: f32
+) {
+    // Equation of line
+    let delta_x = point_1.0 - point_0.0;
+    let delta_y = point_1.1 - point_0.1;
+    if f32::abs(delta_x) <= 1f32 && f32::abs(delta_y) <= 1f32 {
+        draw_circle(&mut input_image, point_0, rgb, radius);
+    } else {
+        let m = delta_y / delta_x;
+        let b = point_0.1 - m * point_0.1;
+        let x_0 = f32::min(point_0.0, point_1.0);
+        let x_n = f32::max(point_0.0, point_1.0);
+        let num_pixels_between = f32::max(f32::abs(delta_x), f32::abs(delta_y));
+        let num_points = f32::max(num_pixels_between, 2f32);
+        let x_step = f32::abs(delta_x) / num_points;
+        let mut x = x_0;
+        while x <= x_n {
+            let y = m * (x as f32) + b;
+            draw_circle(&mut input_image, (x as f32, y), rgb, radius);
+            x += x_step;
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::gaussian_kernel;

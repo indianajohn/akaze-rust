@@ -114,8 +114,8 @@ fn match_features() {
             let mut path_to_matches_image = path_to_scale_space_dir.clone();
             path_to_matches_image.push("matches.png");
             match match_image.save(path_to_matches_image.to_owned()) {
-                Ok(_val) => debug!("Wrote keypoint image successfully."),
-                Err(_e) => debug!("Could not write keypoint image for some reason, skipping."),
+                Ok(_val) => debug!("Wrote matches image successfully."),
+                Err(_e) => debug!("Could not write matches image for some reason, skipping."),
             }
         }
         Err(_e) => {
