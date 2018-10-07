@@ -19,7 +19,7 @@ fn main() {
         .about(
             "A Rust implementation of the KAZE visual feature extractor and matching.
        See https://github.com/pablofdezalc/kaze for the original authors' project. 
-       Set RUST_LOG to debug for more verbose output. This executable runs the entire
+       Set AKAZE_LOG to debug for more verbose output. This executable runs the entire
        pipeline end-to-end for two images. For more granular control, see the binaries
        extract_features and match_features.",
         ).author("John Stalbaum")
@@ -48,7 +48,7 @@ fn main() {
         ).get_matches();
 
     let start = SystemTime::now();
-    let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info");
+    let env = env_logger::Env::default().filter_or("AKAZE_LOG", "info");
     env_logger::Builder::from_env(env).init();
     let input_path_0 = matches.value_of("INPUT_0").unwrap();
     let input_path_1 = matches.value_of("INPUT_1").unwrap();

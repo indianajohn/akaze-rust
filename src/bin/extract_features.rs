@@ -20,7 +20,7 @@ fn main() {
         .about(
             "A Rust implementation of the KAZE visual feature extractor. See 
        https://github.com/pablofdezalc/kaze for the original authors' project. 
-       Set RUST_LOG to debug for more verbose output.",
+       Set AKAZE_LOG to debug for more verbose output.",
         ).author("John Stalbaum")
         .arg(
             Arg::with_name("INPUT")
@@ -49,7 +49,7 @@ fn main() {
         ).get_matches();
 
     let start = SystemTime::now();
-    let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info");
+    let env = env_logger::Env::default().filter_or("AKAZE_LOG", "info");
     env_logger::Builder::from_env(env).init();
     let input_path = matches.value_of("INPUT").unwrap();
     let output_path = matches.value_of("OUTPUT").unwrap();
@@ -81,7 +81,7 @@ fn main() {
         options,
     );
     info!("Done, extracted {} features.", keypoints.len());
-    match matches.value_of("debug") {
+    match matches.value_of("debug_path") {
         Some(val) => {
             info!("Writing scale space since --debug_path/-d option was specified.");
             let string_to_pass = val.to_string();

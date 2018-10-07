@@ -19,7 +19,7 @@ fn main() {
         .about(
             "A Rust implementation of the KAZE visual feature matching using
             Hamming distance for binary descriptors. For use with AKAZE.
-       Set RUST_LOG to debug for more verbose output.",
+       Set AKAZE_LOG to debug for more verbose output.",
         ).author("John Stalbaum")
         .arg(
             Arg::with_name("INPUT_EXTRACTIONS_0")
@@ -39,7 +39,7 @@ fn main() {
         ).get_matches();
 
     let start = SystemTime::now();
-    let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info");
+    let env = env_logger::Env::default().filter_or("AKAZE_LOG", "info");
     env_logger::Builder::from_env(env).init();
     let input_extractions_0_path = matches.value_of("input_extractions_0").unwrap();
     let input_extractions_1_path = matches.value_of("input_extractions_1").unwrap();
