@@ -3,8 +3,8 @@ use std::path::PathBuf;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
-extern crate tempdir;
 extern crate image;
+extern crate tempdir;
 use std::time::SystemTime;
 use tempdir::TempDir;
 

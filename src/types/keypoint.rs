@@ -1,12 +1,12 @@
 use image::{DynamicImage, Pixel, RgbImage};
 use random;
 use random::Source;
+use serde_cbor;
+use serde_json;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::u32;
-use serde_json;
-use serde_cbor;
 
 /// A point of interest in an image.
 /// This pretty much follows from OpenCV conventions.

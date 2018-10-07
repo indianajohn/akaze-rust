@@ -30,7 +30,7 @@ pub struct Config {
     /// Detector response threshold to accept point
     pub detector_threshold: f64,
 
-    /// Number of channels in the descriptor (1, 2, 3) 
+    /// Number of channels in the descriptor (1, 2, 3)
     pub descriptor_channels: usize,
 
     /// Actual patch size is 2*pattern_size*point.scale

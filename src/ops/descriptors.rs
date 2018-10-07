@@ -28,15 +28,15 @@ fn get_mldb_descriptor(
     evolutions: &Vec<EvolutionStep>,
     options: Config,
 ) -> Descriptor {
-    let t = (6usize+36usize+120usize)*options.descriptor_channels;
+    let t = (6usize + 36usize + 120usize) * options.descriptor_channels;
     let mut output = Descriptor {
         // 486 bit descriptor
         vector: vec![0u8; t],
     };
     let max_channels = 3usize;
     debug_assert!(options.descriptor_channels <= max_channels);
-    let mut values: Vec<f32> = vec![0f32; (16*max_channels) as usize];
-    let size_mult = [1.0f32, 2.0f32/3.0f32, 1.0f32/2.0f32];
+    let mut values: Vec<f32> = vec![0f32; (16 * max_channels) as usize];
+    let size_mult = [1.0f32, 2.0f32 / 3.0f32, 1.0f32 / 2.0f32];
     let ratio = (1u32 << keypoint.octave) as f32;
     let scale = f32::round(0.5f32 * (keypoint.size as f32) / ratio);
     let xf = keypoint.point.0 / ratio;
@@ -49,19 +49,39 @@ fn get_mldb_descriptor(
         let val_count = (lvl + 2usize) * (lvl + 2usize);
         let sample_size = f32::ceil(pattern_size * size_mult[lvl]) as usize;
         mldb_fill_values(
-            &mut values, sample_size, keypoint.class_id, 
-            xf, yf, co, si, scale, options, &evolutions);
+            &mut values,
+            sample_size,
+            keypoint.class_id,
+            xf,
+            yf,
+            co,
+            si,
+            scale,
+            options,
+            &evolutions,
+        );
         mldb_binary_comparisons(
-            &values, &mut output.vector, val_count, 
-            &mut dpos, options.descriptor_channels);
+            &values,
+            &mut output.vector,
+            val_count,
+            &mut dpos,
+            options.descriptor_channels,
+        );
     }
     output
 }
 
 fn mldb_fill_values(
-    values: &mut Vec<f32>, sample_step: usize, level: usize, 
-    xf: f32, yf: f32, co: f32, si: f32, scale: f32,
-    options: Config, evolutions: &Vec<EvolutionStep>,
+    values: &mut Vec<f32>,
+    sample_step: usize,
+    level: usize,
+    xf: f32,
+    yf: f32,
+    co: f32,
+    si: f32,
+    scale: f32,
+    options: Config,
+    evolutions: &Vec<EvolutionStep>,
 ) {
     let pattern_size = options.descriptor_pattern_size;
     let nr_channels = options.descriptor_channels;
@@ -84,10 +104,10 @@ fn mldb_fill_values(
                         let rx = evolutions[level].Lx.get(x1, y1);
                         let ry = evolutions[level].Ly.get(x1, y1);
                         if nr_channels == 2 {
-                            dx += f32::sqrt(rx*rx + ry*ry);
+                            dx += f32::sqrt(rx * rx + ry * ry);
                         } else {
-                            let rry = rx*co + ry*si;
-                            let rrx = -rx*si + ry*co;
+                            let rry = rx * co + ry * si;
+                            let rrx = -rx * si + ry * co;
                             dx += rrx;
                             dy += rry;
                         }
@@ -113,8 +133,11 @@ fn mldb_fill_values(
 }
 
 fn mldb_binary_comparisons(
-    values: &Vec<f32>, descriptor: &mut Vec<u8>,
-    count: usize, dpos: &mut usize, nr_channels: usize,
+    values: &Vec<f32>,
+    descriptor: &mut Vec<u8>,
+    count: usize,
+    dpos: &mut usize,
+    nr_channels: usize,
 ) {
     for pos in 0..nr_channels {
         for i in 0..count {
