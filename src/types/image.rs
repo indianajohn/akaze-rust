@@ -326,8 +326,14 @@ fn gaussian(x: f32, r: f32) -> f32 {
 fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {
     let mut kernel = vec![0f32; kernel_size];
     let half_width = (kernel_size / 2) as i32;
-    for i in -half_width..half_width {
-        kernel[(i + half_width) as usize] = gaussian(i as f32, r);
+    let mut sum = 0f32;
+    for i in -half_width..=half_width {
+        let val = gaussian(i as f32, r);
+        kernel[(i + half_width) as usize] = val;
+        sum += val;
+    }
+    for val in kernel.iter_mut() {
+        *val /= sum;
     }
     kernel
 }
@@ -337,8 +343,10 @@ fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {
 /// `kernel_size` the size of the kernel.
 /// # Return value
 /// The resulting image after the filter was applied.
-pub fn gaussian_blur(image: &GrayFloatImage, r: f32, kernel_size: usize) -> GrayFloatImage {
+pub fn gaussian_blur(image: &GrayFloatImage, r: f32) -> GrayFloatImage {
     // a separable Gaussian kernel
+    //this.kernelSize = ((int)Math.Ceiling(sigma) * 2) + 1;
+    let kernel_size = (f32::ceil(r) as usize) * 2 + 1usize;
     let kernel = gaussian_kernel(r, kernel_size);
     let img_horizontal = horizontal_filter(&image, &kernel);
     vertical_filter(&img_horizontal, &kernel)
@@ -400,6 +408,21 @@ pub fn draw_circle(input_image: &mut RgbImage, point: (f32, f32), rgb: (u8, u8, 
                 pixel.channels_mut()[1] = color_to_set.1;
                 pixel.channels_mut()[2] = color_to_set.2;
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::gaussian_kernel;
+    #[test]
+    fn gaussian_kernel_correct() {
+        // test against known correct kernel
+        let kernel = gaussian_kernel(3.0, 7);
+        let known_correct_kernel = vec![0.10628852, 0.14032133, 0.16577007, 0.17524014, 0.16577007, 0.14032133, 0.10628852];
+        for it in kernel.iter().zip(known_correct_kernel.iter()) {
+            let (i, j) = it;
+            assert!(f32::abs(*i - *j) < 0.0001);
         }
     }
 }

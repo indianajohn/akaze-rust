@@ -58,7 +58,7 @@ fn create_nonlinear_scale_space(
 ) {
     debug!("Creating first evolution.");
     let start = PreciseTime::now();
-    evolutions[0].Lt = gaussian_blur(image, options.base_scale_offset as f32, 5);
+    evolutions[0].Lt = gaussian_blur(image, options.base_scale_offset as f32);
     debug!("Gaussian blur took {}.", start.to(PreciseTime::now()));
     evolutions[0].Lsmooth = evolutions[0].Lt.clone();
     debug!(
@@ -97,7 +97,7 @@ fn create_nonlinear_scale_space(
             evolutions[i].Lt = evolutions[i - 1].Lt.clone();
         }
         let start = PreciseTime::now();
-        evolutions[i].Lsmooth = gaussian_blur(&evolutions[i].Lt, 1.0f32, 5);
+        evolutions[i].Lsmooth = gaussian_blur(&evolutions[i].Lt, 1.0f32);
         debug!("Gaussian blur took {}.", start.to(PreciseTime::now()));
         let start = PreciseTime::now();
         evolutions[i].Lx = ops::derivatives::scharr(&evolutions[i].Lsmooth, true, false, 1);
