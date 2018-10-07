@@ -14,7 +14,7 @@ use akaze::types::keypoint::draw_keypoints_to_image;
 fn locate_test_data() -> PathBuf {
     let exe_path = ::std::env::current_exe().unwrap();
     let mut parent_path = exe_path.parent().unwrap().to_owned();
-    parent_path.push("../../../test-data/akaze-test-data");
+    parent_path.push("../../../test-data");
     parent_path
 }
 
@@ -34,11 +34,6 @@ fn test_locate_data() {
     image_file_path.push("2.jpg");
     let metadata = ::std::fs::metadata(image_file_path).unwrap();
     debug_assert!(metadata.is_file());
-    let test_data_path = locate_test_data();
-    let mut image_file_path = test_data_path;
-    image_file_path.push("1-output");
-    let metadata = ::std::fs::metadata(image_file_path).unwrap();
-    debug_assert!(metadata.is_dir());
 }
 
 #[test]
