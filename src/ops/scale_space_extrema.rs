@@ -2,6 +2,7 @@ use nalgebra::{Matrix2, Vector2, LU};
 use types::evolution::{Config, EvolutionStep};
 use types::image::ImageFunctions;
 use types::keypoint::Keypoint;
+use std::f32::consts::PI;
 
 pub fn find_scale_space_extrema(
     evolutions: &mut Vec<EvolutionStep>,
@@ -163,14 +164,13 @@ pub fn do_subpixel_refinement(
             result.push(keypoint_clone);
         }
     }
-    warn!("TODO: compute_main_orientaion");
     info!(
         "{}/{} remain after subpixel refinement.",
         result.len(),
         in_keypoints.len()
     );
-    for keypoint in result.iter_mut() {
-        compute_main_orientation(&keypoint, &evolutions);
+    for mut keypoint in result.iter_mut() {
+        compute_main_orientation(&mut keypoint, &evolutions);
     }
     result
 }
@@ -181,7 +181,71 @@ pub fn detect_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config) ->
     keypoints
 }
 
-fn compute_main_orientation(_keypoint: &Keypoint, _evolutions: &Vec<EvolutionStep>
-) -> f32 {
-    0.0f32
+static GAUSS25: [[f32; 7usize]; 7usize] = [
+        [0.02546481f32, 0.02350698f32,    0.01849125f32,    0.01239505f32,    0.00708017f32,    0.00344629f32,    0.00142946f32], 
+        [0.02350698f32, 0.02169968f32,    0.01706957f32,    0.01144208f32,    0.00653582f32,    0.00318132f32,    0.00131956f32], 
+        [0.01849125f32, 0.01706957f32,    0.01342740f32,    0.00900066f32,    0.00514126f32,    0.00250252f32,    0.00103800f32], 
+        [0.01239505f32, 0.01144208f32,    0.00900066f32,    0.00603332f32,    0.00344629f32,    0.00167749f32,    0.00069579f32], 
+        [0.00708017f32, 0.00653582f32,    0.00514126f32,    0.00344629f32,    0.00196855f32,    0.00095820f32,    0.00039744f32], 
+        [0.00344629f32, 0.00318132f32,    0.00250252f32,    0.00167749f32,    0.00095820f32,    0.00046640f32,    0.00019346f32], 
+        [0.00142946f32, 0.00131956f32,    0.00103800f32,    0.00069579f32,    0.00039744f32,    0.00019346f32,    0.00008024f32]
+    ];
+
+fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &Vec<EvolutionStep>
+) {
+    let mut res_x: [f32; 109usize] = [0f32; 109usize];
+    let mut res_y: [f32; 109usize] = [0f32; 109usize];
+    let mut angs: [f32; 109usize] = [0f32; 109usize];
+    let id: [usize; 13usize] = [6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6];
+    let ratio = (1<<evolutions[keypoint.class_id].octave) as f32;
+    let s = f32::round(0.5f32*(keypoint.size as f32)/ratio);
+    let xf = keypoint.point.0/ratio;
+    let yf = keypoint.point.1/ratio;
+    let level = keypoint.class_id;
+    // Calculate derivatives responses for points within radius of 6*scale
+    let mut idx = 0;
+    for i in -6..=6 {
+        for j in -6..=6 {
+            if i*i + j*j < 36 {
+                let iy = f32::round(yf + (j as f32)*s) as usize;
+                let ix = f32::round(xf + (i as f32)*s) as usize;
+                let gweight = GAUSS25[id[(i+6) as usize]][id[(j+6) as usize]];
+                res_x[idx] = gweight*evolutions[level].Lx.get(ix, iy);
+                res_y[idx] = gweight*evolutions[level].Ly.get(ix, iy);
+                angs[idx] = f32::atan2(res_x[idx], res_y[idx])*(PI/180.0f32);
+                idx += 1;
+            }
+        }
+    }
+    // Loop slides pi/3 window around feature point
+    let mut ang1 = 0f32;
+    let mut sum_x = 0f32;
+    let mut sum_y = 0f32;
+    let mut max = 0f32;
+    while ang1 < 2.0f32*PI {
+        let mut ang2 = ang1+PI/3.0f32;
+        if ang1+PI/3.0f32 > 2.0f32*PI {
+            ang2 = ang1-5.0f32*PI/3.0f32;
+        }
+        ang1 += 0.15f32;
+        for k in 0..109 {
+            let ang = angs[k];
+            if ang1 < ang2 && ang1 < ang && ang < ang2 {
+                sum_x += res_x[k];
+                sum_y += res_y[k];
+            }
+            else if ang2 < ang1 && ((ang > 0f32 && ang < ang2) || (ang > ang1 && ang < 2.0*PI)) {
+                sum_x += res_x[k];
+                sum_y += res_y[k];
+            }
+        }
+        // if the vector produced from this window is longer than all
+        // previous vectors then this forms the new dominant direction
+        let val = sum_x*sum_x + sum_y*sum_y;
+        if val > max {
+            // store largest orientation
+            max = val;
+            keypoint.angle =  f32::atan2(sum_x, sum_y)*(PI/180.0);
+        }
+    }
 }
