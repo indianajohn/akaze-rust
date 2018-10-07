@@ -1,7 +1,6 @@
-use image::DynamicImage;
-use image::GenericImageView;
-use image::GrayImage;
-use image::Pixel;
+use image::{DynamicImage, GenericImageView, GrayImage, Pixel, RgbImage};
+use random;
+use random::Source;
 use std::f32;
 use std::path::PathBuf;
 
@@ -331,4 +330,56 @@ pub fn gaussian_blur(image: &GrayFloatImage, r: f32, kernel_size: usize) -> Gray
     let kernel = gaussian_kernel(r, kernel_size);
     let img_horizontal = horizontal_filter(&image, &kernel);
     vertical_filter(&img_horizontal, &kernel)
+}
+
+pub fn random_color() -> (u8, u8, u8) {
+    let mut source = random::default();
+    (
+        source.read::<u8>(),
+        source.read::<u8>(),
+        source.read::<u8>(),
+    )
+}
+
+fn blend(p1: (u8, u8, u8), p2: (u8, u8, u8)) -> (u8, u8, u8) {
+    (
+        (((p1.0 as f32) + (p2.0 as f32)) / 2f32) as u8,
+        (((p1.1 as f32) + (p2.1 as f32)) / 2f32) as u8,
+        (((p1.2 as f32) + (p2.2 as f32)) / 2f32) as u8,
+    )
+}
+
+/// Draw a circle to an image.
+/// Values inside of the circle will be blended between their current color
+/// value and the input.
+///
+/// `input_image` the image to draw on, directly mutated.
+/// `point` the point at which to draw.
+/// `rgb` The RGB value.
+/// `radius` The maximum radius from the point to shade.
+pub fn draw_circle(input_image: &mut RgbImage, point: (f32, f32), rgb: (u8, u8, u8), radius: f32) {
+    for x in (point.0 as u32).saturating_sub(radius as u32)
+        ..(point.0 as u32).saturating_add(radius as u32)
+    {
+        for y in (point.1 as u32).saturating_sub(radius as u32)
+            ..(point.1 as u32).saturating_add(radius as u32)
+        {
+            let xy = (x as f32, y as f32);
+            let delta_x = xy.0 - point.0;
+            let delta_y = xy.1 - point.1;
+            let radius_check = f32::sqrt(delta_x * delta_x + delta_y * delta_y);
+            if radius_check <= radius {
+                let pixel = input_image.get_pixel_mut(x, y);
+                let rgb_point = (
+                    pixel.channels()[0],
+                    pixel.channels()[1],
+                    pixel.channels()[2],
+                );
+                let color_to_set = blend(rgb, rgb_point);
+                pixel.channels_mut()[0] = color_to_set.0;
+                pixel.channels_mut()[1] = color_to_set.1;
+                pixel.channels_mut()[2] = color_to_set.2;
+            }
+        }
+    }
 }

@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use types::image::save;
 use types::image::{GrayFloatImage, ImageFunctions};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Config {
     /// Default number of sublevels per scale level
     pub num_sublevels: u32,

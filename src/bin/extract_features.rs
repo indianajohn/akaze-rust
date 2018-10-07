@@ -5,33 +5,48 @@ extern crate log;
 extern crate clap;
 extern crate env_logger;
 extern crate image;
+extern crate serde;
+extern crate serde_json;
 use akaze::types::evolution::{write_evolutions, Config};
 use akaze::types::keypoint::draw_keypoints_to_image;
 use clap::{App, Arg};
+use std::fs::File;
+use std::io::{Read, Write};
 use std::time::SystemTime;
 
 fn main() {
     let matches = App::new("KAZE extractor.")
-       .version("0.1")
-       .about("A Rust implementation of the KAZE visual feature extractor. See 
+        .version("0.1")
+        .about(
+            "A Rust implementation of the KAZE visual feature extractor. See 
        https://github.com/pablofdezalc/kaze for the original authors' project. 
-       Set RUST_LOG to debug for more verbose output.")
-       .author("John Stalbaum")
-       .arg(Arg::with_name("INPUT")
-                               .help("The input image.")
-                               .required(true)
-                               .index(1))
-       .arg(Arg::with_name("OUTPUT")
-                               .help("The output image.")
-                               .required(true)
-                               .index(2))
-       .arg(Arg::with_name("debug_path")
-                               .short("d")
-                               .long("debug_path")
-                               .value_name("DIRECTORY")
-                               .help("Sets a directory to write debug information to.")
-                               .takes_value(true))
-       .get_matches();
+       Set RUST_LOG to debug for more verbose output.",
+        ).author("John Stalbaum")
+        .arg(
+            Arg::with_name("INPUT")
+                .help("The input image.")
+                .required(true)
+                .index(1),
+        ).arg(
+            Arg::with_name("OUTPUT")
+                .help("The output extractions. Extension can be JSON or CBOR.")
+                .required(true)
+                .index(2),
+        ).arg(
+            Arg::with_name("debug_path")
+                .short("d")
+                .long("debug_path")
+                .value_name("DIRECTORY")
+                .help("Sets a directory to write debug information to.")
+                .takes_value(true),
+        ).arg(
+            Arg::with_name("options")
+                .short("o")
+                .long("options")
+                .value_name("PATH")
+                .help("A JSON file containing options.")
+                .takes_value(true),
+        ).get_matches();
 
     let start = SystemTime::now();
     let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info");
@@ -42,13 +57,30 @@ fn main() {
         "Input image path is {}, output extractions path is {}.",
         input_path, output_path
     );
-    let options = Config::default();
+    let mut options = Config::default();
+    match matches.value_of("options") {
+        Some(options_path) => {
+            if Path::new(options_path).exists() {
+                info!("Reading options file from {}", options_path);
+                let mut file = File::open(options_path.clone()).unwrap();
+                let mut buffer = String::new();
+                file.read_to_string(&mut buffer).unwrap();
+                options = serde_json::from_str(&buffer).unwrap();
+            } else {
+                let mut file = File::create(options_path.clone()).unwrap();
+                let serialized = serde_json::to_string(&options).unwrap();
+                file.write(serialized.as_bytes()).unwrap();
+                info!("Writing options file from {}", options_path);
+            }
+        }
+        None => debug!("Using default options."),
+    }
     let (evolutions, keypoints, _descriptors) = akaze::extract_features(
         Path::new(input_path).to_owned(),
         Path::new(output_path).to_owned(),
         options,
     );
-    info!("Done, extracted {} featuers.", keypoints.len());
+    info!("Done, extracted {} features.", keypoints.len());
     match matches.value_of("debug") {
         Some(val) => {
             info!("Writing scale space since --debug_path/-d option was specified.");

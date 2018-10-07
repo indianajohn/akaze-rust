@@ -1,12 +1,10 @@
-use image::{DynamicImage, Pixel, RgbImage};
-use random;
-use random::Source;
+use image::{DynamicImage, RgbImage};
 use serde_cbor;
 use serde_json;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use std::u32;
+use types::image::{draw_circle, random_color};
 
 /// A point of interest in an image.
 /// This pretty much follows from OpenCV conventions.
@@ -45,58 +43,6 @@ pub struct Descriptor {
 pub struct Results {
     pub keypoints: Vec<Keypoint>,
     pub descriptors: Vec<Descriptor>,
-}
-
-fn random_color() -> (u8, u8, u8) {
-    let mut source = random::default();
-    (
-        source.read::<u8>(),
-        source.read::<u8>(),
-        source.read::<u8>(),
-    )
-}
-
-fn blend(p1: (u8, u8, u8), p2: (u8, u8, u8)) -> (u8, u8, u8) {
-    (
-        (((p1.0 as f32) + (p2.0 as f32)) / 2f32) as u8,
-        (((p1.1 as f32) + (p2.1 as f32)) / 2f32) as u8,
-        (((p1.2 as f32) + (p2.2 as f32)) / 2f32) as u8,
-    )
-}
-
-/// Draw a circle to an image.
-/// Values inside of the circle will be blended between their current color
-/// value and the input.
-///
-/// `input_image` the image to draw on, directly mutated.
-/// `point` the point at which to draw.
-/// `rgb` The RGB value.
-/// `radius` The maximum radius from the point to shade.
-fn draw_circle(input_image: &mut RgbImage, point: (f32, f32), rgb: (u8, u8, u8), radius: f32) {
-    for x in (point.0 as u32).saturating_sub(radius as u32)
-        ..(point.0 as u32).saturating_add(radius as u32)
-    {
-        for y in (point.1 as u32).saturating_sub(radius as u32)
-            ..(point.1 as u32).saturating_add(radius as u32)
-        {
-            let xy = (x as f32, y as f32);
-            let delta_x = xy.0 - point.0;
-            let delta_y = xy.1 - point.1;
-            let radius_check = f32::sqrt(delta_x * delta_x + delta_y * delta_y);
-            if radius_check <= radius {
-                let pixel = input_image.get_pixel_mut(x, y);
-                let rgb_point = (
-                    pixel.channels()[0],
-                    pixel.channels()[1],
-                    pixel.channels()[2],
-                );
-                let color_to_set = blend(rgb, rgb_point);
-                pixel.channels_mut()[0] = color_to_set.0;
-                pixel.channels_mut()[1] = color_to_set.1;
-                pixel.channels_mut()[2] = color_to_set.2;
-            }
-        }
-    }
 }
 
 /// Draw keypoints onto an image
@@ -152,7 +98,7 @@ pub fn serialize_to_file(keypoints: &Vec<Keypoint>, descriptors: &Vec<Descriptor
     }
 }
 
-/// Serialize results to a file.
+/// Deserialize results from a file.
 /// 'path' - Path from which to read.
 /// # Return value
 /// The deserialized results.
