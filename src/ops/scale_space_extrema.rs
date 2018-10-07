@@ -125,7 +125,7 @@ pub fn find_scale_space_extrema(
             output_keypoints.push(kp_i);
         }
     }
-    info!("Extracted {} scale space extrema.", output_keypoints.len());
+    debug!("Extracted {} scale space extrema.", output_keypoints.len());
     output_keypoints
 }
 
@@ -164,7 +164,7 @@ pub fn do_subpixel_refinement(
             result.push(keypoint_clone);
         }
     }
-    info!(
+    debug!(
         "{}/{} remain after subpixel refinement.",
         result.len(),
         in_keypoints.len()

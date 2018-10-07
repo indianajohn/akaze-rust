@@ -56,7 +56,7 @@ fn create_nonlinear_scale_space(
     image: &GrayFloatImage,
     options: Config,
 ) {
-    info!("Creating first evolution.");
+    debug!("Creating first evolution.");
     let start = PreciseTime::now();
     evolutions[0].Lt = gaussian_blur(image, options.base_scale_offset as f32, 5);
     debug!("Gaussian blur took {}.", start.to(PreciseTime::now()));
@@ -81,7 +81,7 @@ fn create_nonlinear_scale_space(
         options.contrast_percentile, options.contrast_factor_num_bins, contrast_factor
     );
     for i in 1..evolutions.len() {
-        info!("Creating evolution {}.", i);
+        debug!("Creating evolution {}.", i);
         if evolutions[i].octave > evolutions[i - 1].octave {
             let start = PreciseTime::now();
             evolutions[i].Lt = evolutions[i - 1].Lt.half_size();
