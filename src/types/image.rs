@@ -5,17 +5,29 @@ use std::f32;
 use std::path::PathBuf;
 
 /// The image type we use in this library.
-/// This is simply a wrapper around a contiguous vector. I would
-/// typically err on the side of of avoiding premature optimization,
-/// and using a higher-level interface for images. However, at first,
+/// 
+/// This is simply a wrapper around a contiguous f32 vector. A reader might
+/// question why we opted for this approach, instead of using the image
+/// crate's image type, and in fact I would typically err on the side 
+/// of of avoiding premature optimization and re-using existing code.
 /// I tried just using the image crate's types with f32 as a
-/// template type. All operations were approximately 40% slower.
+/// template argument. All operations were approximately 40% slower. That
+/// implementation is in the history of this repository if you're curious.
 ///
 /// The below traits have been violated in various parts of this crate,
 /// with some image operations applying directly to the buffer. This,
 /// again, ended up being a necessary optimization. Using iterators
 /// to perform image filters sped them up in some cases by a factor of
-/// 2.
+/// 2. Unfortunately this makes the resulting code a bit less readable.
+/// 
+/// We continue to use the image crate for loading and saving images.
+/// 
+/// There exists the imageproc crate at the time of this writing, that
+/// have existing implementations of generalized image convolutions,
+/// Gaussian blur, and image resizing. I re-implemented these things here
+/// because the image crate versions are missing some key optimizations
+/// like using a separable filter, and using the filters implemented
+/// here ended up speeding up everything a lot.
 #[derive(Debug, Clone)]
 pub struct GrayFloatImage {
     pub buffer: Vec<f32>,
@@ -100,7 +112,7 @@ impl ImageFunctions for GrayFloatImage {
     }
 }
 
-/// Create a unit float image from the image crate'd DynamicImage type.
+/// Create a unit float image from the image crate's DynamicImage type.
 /// `input_image` - the input image.
 /// # Return value
 /// An image with pixel values between 0 and 1.
@@ -332,6 +344,9 @@ pub fn gaussian_blur(image: &GrayFloatImage, r: f32, kernel_size: usize) -> Gray
     vertical_filter(&img_horizontal, &kernel)
 }
 
+/// Generate a random RGB value
+/// # Return value
+/// A random RGB value
 pub fn random_color() -> (u8, u8, u8) {
     let mut source = random::default();
     (
@@ -341,6 +356,11 @@ pub fn random_color() -> (u8, u8, u8) {
     )
 }
 
+/// Take the average between two pixels
+/// `p1` the first color value.
+/// `p2` the second color value.
+/// # Return value
+/// The averaged pixel.
 fn blend(p1: (u8, u8, u8), p2: (u8, u8, u8)) -> (u8, u8, u8) {
     (
         (((p1.0 as f32) + (p2.0 as f32)) / 2f32) as u8,
