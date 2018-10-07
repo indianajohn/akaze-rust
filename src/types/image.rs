@@ -433,7 +433,7 @@ pub fn draw_line(
         draw_circle(&mut input_image, point_0, rgb, radius);
     } else {
         let m = delta_y / delta_x;
-        let b = point_0.1 - m * point_0.1;
+        let b = point_0.1 - m * point_0.0;
         let x_0 = f32::min(point_0.0, point_1.0);
         let x_n = f32::max(point_0.0, point_1.0);
         let num_pixels_between = f32::max(f32::abs(delta_x), f32::abs(delta_y));

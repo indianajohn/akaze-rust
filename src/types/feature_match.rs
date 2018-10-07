@@ -16,7 +16,7 @@ pub struct Match {
     /// The index in the second image.
     pub index_1: usize,
     /// The distance between the two points in descriptor space.
-    pub distance: f32,
+    pub distance: f64,
 }
 
 fn map_pixel_in_1(

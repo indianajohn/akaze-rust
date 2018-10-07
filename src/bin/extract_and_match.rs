@@ -40,10 +40,17 @@ fn main() {
                 .index(3),
         ).arg(
             Arg::with_name("match_image_path")
-                .short("d")
-                .long("debug_path")
-                .value_name("DIRECTORY")
-                .help("Sets a directory to write debug information to.")
+                .short("m")
+                .long("match_image")
+                .value_name("IMAGE_FILE_PATH")
+                .help("Sets a path to write the match image to.")
+                .takes_value(true),
+        ).arg(
+            Arg::with_name("threshold")
+                .short("t")
+                .long("threshold")
+                .value_name("FLOAT")
+                .help("The distance threshold for the matcher.")
                 .takes_value(true),
         ).get_matches();
 
@@ -53,9 +60,10 @@ fn main() {
     let input_path_0 = matches.value_of("INPUT_0").unwrap();
     let input_path_1 = matches.value_of("INPUT_1").unwrap();
     let output_prefix = matches.value_of("OUTPUT_PREFIX").unwrap();
+    let threshold: f64 = matches.value_of("threshold").unwrap_or("10").parse().unwrap();
     info!(
-        "Input image paths are {}/{}, output extractions path is {}.",
-        input_path_0, input_path_1, output_prefix
+        "Input image paths are {}/{}, output extractions path is {}, threshols is {}.",
+        input_path_0, input_path_1, output_prefix, threshold,
     );
     let options = Config::default();
     let prefix_string: String = output_prefix.to_owned();
@@ -80,11 +88,12 @@ fn main() {
         options,
     );
     info!(
-        "Done, extracted {} features from image 1.",
+        "Done, extracted {} features from image 1, proceeding with matching.",
         keypoints_1.len()
     );
     let output_matches =
-        descriptor_match(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
+        descriptor_match(&descriptors_0,&descriptors_1, threshold);
+    info!("Got {} matches.", output_matches.len());
     feature_match::serialize_to_file(&output_matches, Path::new(&matches_path).to_owned());
     match matches.value_of("match_image_path") {
         Some(match_image_path) => {

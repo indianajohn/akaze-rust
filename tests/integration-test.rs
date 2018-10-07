@@ -92,9 +92,9 @@ fn match_features() {
     let output_path = tmp_dir.path().join("features_1.json");
     let (_evolutions_1, keypoints_1, descriptors_1) =
         akaze::extract_features(test_image_path_1.clone(), output_path.to_owned(), options);
-    let matches = descriptor_match(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
-    info!("Got {} matches.", matches.len());
     debug!("Beginning matching process.");
+    let matches = descriptor_match(&descriptors_0, &descriptors_1, 10.);
+    info!("Got {} matches.", matches.len());
     let start = SystemTime::now();
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {
         Ok(val) => {
