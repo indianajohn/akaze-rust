@@ -178,7 +178,12 @@ pub fn extract_features(
         start.to(PreciseTime::now())
     );
     let keypoints = find_image_keypoints(&mut evolutions, options);
+    let start = PreciseTime::now();
     let descriptors = ops::descriptors::extract_descriptors(&evolutions, &keypoints, options);
+    debug!(
+        "Computing descriptors took {}.",
+        start.to(PreciseTime::now())
+    );
     types::keypoint::serialize_to_file(&keypoints, &descriptors, output_features_path);
     (evolutions, keypoints, descriptors)
 }
