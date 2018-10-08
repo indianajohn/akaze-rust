@@ -51,7 +51,11 @@ fn main() {
     let input_extractions_0_path = matches.value_of("input_extractions_0").unwrap();
     let input_extractions_1_path = matches.value_of("input_extractions_1").unwrap();
     let output_path = matches.value_of("OUTPUT").unwrap();
-    let threshold: f64 = matches.value_of("threshold").unwrap_or("10").parse().unwrap();
+    let threshold: f64 = matches
+        .value_of("threshold")
+        .unwrap_or("10")
+        .parse()
+        .unwrap();
     info!(
         "Input extractions: {}/{}, output matches: {}, threshold: {}.",
         input_extractions_0_path, input_extractions_1_path, output_path, threshold

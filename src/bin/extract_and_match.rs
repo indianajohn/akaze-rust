@@ -53,7 +53,11 @@ fn main() {
     let input_path_0 = matches.value_of("INPUT_0").unwrap();
     let input_path_1 = matches.value_of("INPUT_1").unwrap();
     let output_prefix = matches.value_of("OUTPUT_PREFIX").unwrap();
-    let threshold: f64 = matches.value_of("threshold").unwrap_or("10").parse().unwrap();
+    let threshold: f64 = matches
+        .value_of("threshold")
+        .unwrap_or("10")
+        .parse()
+        .unwrap();
     info!(
         "Input image paths are {}/{}, output extractions path is {}, threshols is {}.",
         input_path_0, input_path_1, output_prefix, threshold,
@@ -84,10 +88,7 @@ fn main() {
         "Done, extracted {} features from image 1, proceeding with matching.",
         keypoints_1.len()
     );
-    let output_matches = ransac_match(
-            &keypoints_0, &descriptors_0, 
-            &keypoints_1, &descriptors_1, 
-    );
+    let output_matches = ransac_match(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
     info!("Got {} matches.", output_matches.len());
     feature_match::serialize_to_file(&output_matches, Path::new(&matches_path).to_owned());
     match matches.value_of("match_image_path") {

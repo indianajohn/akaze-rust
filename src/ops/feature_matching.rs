@@ -1,26 +1,26 @@
-use types::feature_match::Match;
-use types::keypoint::Keypoint;
-use types::keypoint::Descriptor;
-use std::collections::HashSet;
 use ops::estimate_fundamental_matrix::remove_outliers;
+use std::collections::HashSet;
+use types::feature_match::Match;
+use types::keypoint::Descriptor;
+use types::keypoint::Keypoint;
 /// Match two sets of keypoints and descriptors. The
 /// Hamming distance is used to determine the matches,
 /// and a brute force algorithm is used to get the
 /// best matches.
-/// 
+///
 /// Matching is performed only in the forward direction,
 /// and no geometric verification such as planar homographies or
 /// RANSAC is used. We apply Lowe's ratio and remove successful
 /// matches in the forward direction just to avoid having too
 /// many matches to deal with and visualize, and also to speed
 /// up matching time.
-/// 
+///
 /// TODO: RANSAC and/or homographies. The current results are
 /// not sufficient.
-/// 
+///
 /// `descriptors_0` The first set of descriptors.
 /// `descriptors_1` The second set of desctiptors.
-/// `distance_threshold` The distance threshold below which 
+/// `distance_threshold` The distance threshold below which
 /// to accept a match.
 /// # Return value
 /// A vector of matches.
@@ -36,7 +36,7 @@ pub fn descriptor_match(
     let mut mean = 0.;
     let mut max = 0.;
     let mut min = std::f64::MAX;
-    
+
     for (i, d0) in descriptors_0.iter().enumerate() {
         let mut min_distance = std::usize::MAX;
         let mut min_j = 0;
@@ -46,7 +46,7 @@ pub fn descriptor_match(
             if j_blacklist.contains(&j) {
                 continue;
             }
-            let distance  = hamming_distance(d0, d1);
+            let distance = hamming_distance(d0, d1);
             if distance < min_distance {
                 second_to_min_distance = min_distance;
                 min_distance = distance;
@@ -60,7 +60,11 @@ pub fn descriptor_match(
         // apply thresholding and Lowe's ratio
         if (min_distance as f64) < (second_to_min_distance as f64) * lowes_ratio {
             if min_distance < (distance_threshold as usize) {
-                output.push(Match{index_0: i, index_1: min_j, distance: min_distance as f64});
+                output.push(Match {
+                    index_0: i,
+                    index_1: min_j,
+                    distance: min_distance as f64,
+                });
                 j_blacklist.insert(min_j);
                 mean += min_distance as f64;
                 if (min_distance as f64) < min {
@@ -77,7 +81,12 @@ pub fn descriptor_match(
     mean /= (filtered_by_threshold + output.len()) as f64;
     debug!(
         "{} matches, {} filtered, dist min={}, mean={}, max={}",
-        output.len(), filtered_by_threshold, min, mean, max);
+        output.len(),
+        filtered_by_threshold,
+        min,
+        mean,
+        max
+    );
     output
 }
 
@@ -87,12 +96,17 @@ pub fn ransac_match(
     keypoints_1: &Vec<Keypoint>,
     descriptors_1: &Vec<Descriptor>,
 ) -> Vec<Match> {
-    // Take all matches that pass Lowe's ratio. 10000 is greater than 
-    // the largest possible Hamming distance here 
+    // Take all matches that pass Lowe's ratio. 10000 is greater than
+    // the largest possible Hamming distance here
     let mut output = descriptor_match(&descriptors_0, descriptors_1, 100000f64, 0.7);
     let inliers = remove_outliers(
-        &keypoints_0, &keypoints_1, &mut output,
-        10000, 0.05f32, 0.25f32);
+        &keypoints_0,
+        &keypoints_1,
+        &mut output,
+        10000,
+        0.05f32,
+        0.25f32,
+    );
     inliers
 }
 
@@ -105,8 +119,7 @@ pub fn ransac_match(
 /// `d1` the second descriptor.
 /// # Return value
 /// The Hamming distance
-fn hamming_distance(d0: &Descriptor, d1: &Descriptor
-) -> usize {
+fn hamming_distance(d0: &Descriptor, d1: &Descriptor) -> usize {
     let mut distance = 0usize;
     for it in d0.vector.iter().zip(d1.vector.iter()) {
         let (x0, x1) = it;

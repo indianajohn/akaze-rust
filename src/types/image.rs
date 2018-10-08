@@ -5,10 +5,10 @@ use std::f32;
 use std::path::PathBuf;
 
 /// The image type we use in this library.
-/// 
+///
 /// This is simply a wrapper around a contiguous f32 vector. A reader might
 /// question why we opted for this approach, instead of using the image
-/// crate's image type, and in fact I would typically err on the side 
+/// crate's image type, and in fact I would typically err on the side
 /// of of avoiding premature optimization and re-using existing code.
 /// I tried just using the image crate's types with f32 as a
 /// template argument. All operations were approximately 40% slower. That
@@ -19,9 +19,9 @@ use std::path::PathBuf;
 /// again, ended up being a necessary optimization. Using iterators
 /// to perform image filters sped them up in some cases by a factor of
 /// 2. Unfortunately this makes the resulting code a bit less readable.
-/// 
+///
 /// We continue to use the image crate for loading and saving images.
-/// 
+///
 /// There exists the imageproc crate at the time of this writing, that
 /// have existing implementations of generalized image convolutions,
 /// Gaussian blur, and image resizing. I re-implemented these things here
@@ -419,11 +419,11 @@ pub fn draw_circle(input_image: &mut RgbImage, point: (f32, f32), rgb: (u8, u8, 
 /// `rgb` The RGB value.
 /// `radius` The radius from the center of the line to shade.
 pub fn draw_line(
-    mut input_image: &mut RgbImage, 
-    point_0: (f32, f32), 
-    point_1: (f32, f32), 
-    rgb: (u8, u8, u8), 
-    radius: f32
+    mut input_image: &mut RgbImage,
+    point_0: (f32, f32),
+    point_1: (f32, f32),
+    rgb: (u8, u8, u8),
+    radius: f32,
 ) {
     // Equation of line
     let delta_x = point_1.0 - point_0.0;
@@ -454,7 +454,9 @@ mod tests {
     fn gaussian_kernel_correct() {
         // test against known correct kernel
         let kernel = gaussian_kernel(3.0, 7);
-        let known_correct_kernel = vec![0.10628852, 0.14032133, 0.16577007, 0.17524014, 0.16577007, 0.14032133, 0.10628852];
+        let known_correct_kernel = vec![
+            0.10628852, 0.14032133, 0.16577007, 0.17524014, 0.16577007, 0.14032133, 0.10628852,
+        ];
         for it in kernel.iter().zip(known_correct_kernel.iter()) {
             let (i, j) = it;
             assert!(f32::abs(*i - *j) < 0.0001);
