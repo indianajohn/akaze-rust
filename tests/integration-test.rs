@@ -8,7 +8,7 @@ extern crate tempdir;
 use std::time::SystemTime;
 use tempdir::TempDir;
 
-use akaze::ops::feature_matching::descriptor_match;
+use akaze::ops::feature_matching::ransac_match;
 use akaze::types::evolution::{write_evolutions, Config};
 use akaze::types::feature_match::draw_matches;
 use akaze::types::keypoint::draw_keypoints_to_image;
@@ -93,7 +93,7 @@ fn match_features() {
     let (_evolutions_1, keypoints_1, descriptors_1) =
         akaze::extract_features(test_image_path_1.clone(), output_path.to_owned(), options);
     debug!("Beginning matching process.");
-    let matches = descriptor_match(&descriptors_0, &descriptors_1, 10.);
+    let matches = ransac_match(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
     info!("Got {} matches.", matches.len());
     let start = SystemTime::now();
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {

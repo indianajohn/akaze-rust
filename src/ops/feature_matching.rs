@@ -1,6 +1,8 @@
 use types::feature_match::Match;
+use types::keypoint::Keypoint;
 use types::keypoint::Descriptor;
 use std::collections::HashSet;
+use ops::estimate_fundamental_matrix::remove_outliers;
 /// Match two sets of keypoints and descriptors. The
 /// Hamming distance is used to determine the matches,
 /// and a brute force algorithm is used to get the
@@ -26,6 +28,7 @@ pub fn descriptor_match(
     descriptors_0: &Vec<Descriptor>,
     descriptors_1: &Vec<Descriptor>,
     distance_threshold: f64,
+    lowes_ratio: f64,
 ) -> Vec<Match> {
     let mut output: Vec<Match> = vec![];
     let mut j_blacklist = HashSet::new();
@@ -55,7 +58,7 @@ pub fn descriptor_match(
             }
         }
         // apply thresholding and Lowe's ratio
-        if (min_distance as f64) < (second_to_min_distance as f64) * 0.7 {
+        if (min_distance as f64) < (second_to_min_distance as f64) * lowes_ratio {
             if min_distance < (distance_threshold as usize) {
                 output.push(Match{index_0: i, index_1: min_j, distance: min_distance as f64});
                 j_blacklist.insert(min_j);
@@ -76,6 +79,21 @@ pub fn descriptor_match(
         "{} matches, {} filtered, dist min={}, mean={}, max={}",
         output.len(), filtered_by_threshold, min, mean, max);
     output
+}
+
+pub fn ransac_match(
+    keypoints_0: &Vec<Keypoint>,
+    descriptors_0: &Vec<Descriptor>,
+    keypoints_1: &Vec<Keypoint>,
+    descriptors_1: &Vec<Descriptor>,
+) -> Vec<Match> {
+    // Take all matches that pass Lowe's ratio. 10000 is greater than 
+    // the largest possible Hamming distance here 
+    let mut output = descriptor_match(&descriptors_0, descriptors_1, 100000f64, 0.7);
+    let inliers = remove_outliers(
+        &keypoints_0, &keypoints_1, &mut output,
+        10000, 0.05f32, 0.25f32);
+    inliers
 }
 
 /// The Hamming distance between two descriptors.

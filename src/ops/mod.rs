@@ -6,3 +6,4 @@ pub mod feature_matching;
 pub mod fed_tau;
 pub mod nonlinear_diffusion;
 pub mod scale_space_extrema;
+pub mod estimate_fundamental_matrix;

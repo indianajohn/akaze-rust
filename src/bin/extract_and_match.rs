@@ -7,7 +7,7 @@ extern crate env_logger;
 extern crate image;
 extern crate serde;
 extern crate serde_json;
-use akaze::ops::feature_matching::descriptor_match;
+use akaze::ops::feature_matching::ransac_match;
 use akaze::types::evolution::Config;
 use akaze::types::feature_match;
 use clap::{App, Arg};
@@ -44,13 +44,6 @@ fn main() {
                 .long("match_image")
                 .value_name("IMAGE_FILE_PATH")
                 .help("Sets a path to write the match image to.")
-                .takes_value(true),
-        ).arg(
-            Arg::with_name("threshold")
-                .short("t")
-                .long("threshold")
-                .value_name("FLOAT")
-                .help("The distance threshold for the matcher.")
                 .takes_value(true),
         ).get_matches();
 
@@ -91,8 +84,10 @@ fn main() {
         "Done, extracted {} features from image 1, proceeding with matching.",
         keypoints_1.len()
     );
-    let output_matches =
-        descriptor_match(&descriptors_0,&descriptors_1, threshold);
+    let output_matches = ransac_match(
+            &keypoints_0, &descriptors_0, 
+            &keypoints_1, &descriptors_1, 
+    );
     info!("Got {} matches.", output_matches.len());
     feature_match::serialize_to_file(&output_matches, Path::new(&matches_path).to_owned());
     match matches.value_of("match_image_path") {
