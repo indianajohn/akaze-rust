@@ -48,7 +48,7 @@ pub fn descriptor_match(
             if j_blacklist.contains(&j) {
                 continue;
             }
-            let distance = hamming_distance(d0, d1);
+            let distance = hamming_distance(d0, d1, second_to_min_distance);
             if distance < min_distance {
                 second_to_min_distance = min_distance;
                 min_distance = distance;
@@ -122,7 +122,9 @@ pub fn ransac_match(
 /// `d1` the second descriptor.
 /// # Return value
 /// The Hamming distance
-fn hamming_distance(d0: &Descriptor, d1: &Descriptor) -> usize {
+fn hamming_distance(
+    d0: &Descriptor, d1: &Descriptor,
+    bailout_distance: usize) -> usize {
     let mut distance = 0usize;
     for it in d0.vector.iter().zip(d1.vector.iter()) {
         let (x0, x1) = it;
@@ -130,6 +132,9 @@ fn hamming_distance(d0: &Descriptor, d1: &Descriptor) -> usize {
         let both_not = (!*x0) & (!*x1);
         let both_not_or_both = both_not | both;
         distance += both_not_or_both.count_zeros() as usize;
+        if distance > bailout_distance {
+            break;
+        }
     }
     distance as usize
 }
