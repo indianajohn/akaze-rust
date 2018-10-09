@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use types::feature_match::Match;
 use types::keypoint::Descriptor;
 use types::keypoint::Keypoint;
+use time::PreciseTime;
 /// Match two sets of keypoints and descriptors. The
 /// Hamming distance is used to determine the matches,
 /// and a brute force algorithm is used to get the
@@ -30,6 +31,7 @@ pub fn descriptor_match(
     distance_threshold: f64,
     lowes_ratio: f64,
 ) -> Vec<Match> {
+    let start = PreciseTime::now();
     let mut output: Vec<Match> = vec![];
     let mut j_blacklist = HashSet::new();
     let mut filtered_by_threshold = 0;
@@ -80,12 +82,13 @@ pub fn descriptor_match(
     }
     mean /= (filtered_by_threshold + output.len()) as f64;
     debug!(
-        "{} matches, {} filtered, dist min={}, mean={}, max={}",
+        "{} matches, {} filtered, dist min={}, mean={}, max={}, took {}.",
         output.len(),
         filtered_by_threshold,
         min,
         mean,
-        max
+        max,
+        start.to(PreciseTime::now()),
     );
     output
 }
