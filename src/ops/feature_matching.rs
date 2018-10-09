@@ -123,13 +123,10 @@ fn hamming_distance(d0: &Descriptor, d1: &Descriptor) -> usize {
     let mut distance = 0usize;
     for it in d0.vector.iter().zip(d1.vector.iter()) {
         let (x0, x1) = it;
-        for n in 0..8 {
-            let b0 = *x0 & (1 << n);
-            let b1 = *x1 & (1 << n);
-            if b0 != b1 {
-                distance += 1;
-            }
-        }
+        let both = *x0 & *x1;
+        let both_not = (!*x0) & (!*x1);
+        let both_not_or_both = both_not | both;
+        distance += both_not_or_both.count_zeros() as usize;
     }
     distance as usize
 }
