@@ -1,5 +1,4 @@
 use ops::estimate_fundamental_matrix::remove_outliers;
-use std::collections::HashSet;
 use types::feature_match::Match;
 use types::keypoint::Descriptor;
 use types::keypoint::Keypoint;
@@ -33,7 +32,6 @@ pub fn descriptor_match(
 ) -> Vec<Match> {
     let start = PreciseTime::now();
     let mut output: Vec<Match> = vec![];
-    let mut j_blacklist = HashSet::new();
     let mut filtered_by_threshold = 0;
     let mut mean = 0.;
     let mut max = 0.;
@@ -44,10 +42,6 @@ pub fn descriptor_match(
         let mut min_j = 0;
         let mut second_to_min_distance = min_distance;
         for (j, d1) in descriptors_1.iter().enumerate() {
-            // Do successively less work each time.
-            if j_blacklist.contains(&j) {
-                continue;
-            }
             let distance = hamming_distance(d0, d1, second_to_min_distance);
             if distance < min_distance {
                 second_to_min_distance = min_distance;
@@ -67,7 +61,6 @@ pub fn descriptor_match(
                     index_1: min_j,
                     distance: min_distance as f64,
                 });
-                j_blacklist.insert(min_j);
                 mean += min_distance as f64;
                 if (min_distance as f64) < min {
                     min = min_distance as f64;
