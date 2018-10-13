@@ -2,6 +2,15 @@
 name = "akaze"
 version = "0.1.0"
 authors = ["John <indianajohn@github>"]
+description = "A Rust implementation of the A-KAZE algorithm."
+homepage = "https://github.com/indianajohn/akaze/"
+repository = "https://github.com/indianajohn/akaze/"
+readme = "README.md"
+keywords = ["CV", "computer vision", "sfm", "feature extractor", "feature matching"]
+categories = ["science::robotics", "multimedia::images"]
+license = "MIT"
+license-file = "README.md"
+
 
 [dependencies]
 image = "0.20.0"
