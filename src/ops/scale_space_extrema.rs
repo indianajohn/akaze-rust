@@ -5,14 +5,11 @@ use types::image::ImageFunctions;
 use types::keypoint::Keypoint;
 
 /// Compute scale space extrema to get the detector response.
-/// 
+///
 /// # Argument
 /// * `evolutions` - evolutions to mutate in place.
 /// * `options` - options to use.
-fn find_scale_space_extrema(
-    evolutions: &mut Vec<EvolutionStep>,
-    options: Config,
-) -> Vec<Keypoint> {
+fn find_scale_space_extrema(evolutions: &mut Vec<EvolutionStep>, options: Config) -> Vec<Keypoint> {
     let mut keypoint_cache: Vec<Keypoint> = vec![];
     let smax = 10.0f32 * f32::sqrt(2.0f32);
     for (e_id, evolution) in evolutions.iter_mut().enumerate() {
@@ -135,7 +132,7 @@ fn find_scale_space_extrema(
 }
 
 /// Do sub-pixel refinement
-/// 
+///
 /// # Arguments
 /// * `in_keypoints` - The keypoints to use.
 /// * `evolutions` - The non-linear scale space.
@@ -189,7 +186,7 @@ fn do_subpixel_refinement(
 
 /// Detect keypoints in an image given a nonlinear scale space. Detects
 /// scale space extrema and performs sub-pixel refinement.
-/// 
+///
 /// # Arguments
 /// * `evolutions` - The fully-constructed non-linear scale space.
 /// * `options` - The options to use.

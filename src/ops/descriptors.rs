@@ -4,7 +4,7 @@ use types::image::ImageFunctions;
 use types::keypoint::{Descriptor, Keypoint};
 
 /// Extract descriptors from keypoints/an evolution
-/// 
+///
 /// # Arguments
 /// * `evolutions` - the nonlinear scale space
 /// * `keypoints` - the keypoints detected.
@@ -26,7 +26,7 @@ pub fn extract_descriptors(
 }
 
 /// Computes the rotation invariant M-LDB binary descriptor (maximum descriptor length)
-/// 
+///
 /// # Arguments
 /// `* kpt` - Input keypoint
 /// * `evolutions` - Input evolutions

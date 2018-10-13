@@ -69,7 +69,7 @@ pub fn estimate_fundamental_matrix(
 }
 
 /// Apply the fundamental matrix and return the error. to a pair of keypoints.
-/// 
+///
 /// # Arguments
 /// * `fund_mat` - the Fundamental Matrix
 /// * `keypoint_0` - the keypoint in image plane l
@@ -84,7 +84,7 @@ fn evaluate_model(fund_mat: Matrix3<f32>, keypoint_0: &Keypoint, keypoint_1: &Ke
 
 /// Remove outliers using RANSAC.
 /// Contains RANSAC implementation.
-/// 
+///
 /// # Arguments
 /// * `keypoints_0` - Tirst set of keypoints
 /// * `keypoints_1` - Second set of keypoints
@@ -92,7 +92,7 @@ fn evaluate_model(fund_mat: Matrix3<f32>, keypoint_0: &Keypoint, keypoint_1: &Ke
 /// * `num_trials` - Maximum number of RANSAC iterations
 /// * `epsilon_model` - epsilon used when solving SVD
 /// * `epsilon_inliers` - Maximum error to accept an inlier.
-/// 
+///
 /// # Return value
 /// The inlier matches. If no model was found, the size
 /// of the vector will be 0.

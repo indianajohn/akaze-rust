@@ -24,7 +24,7 @@ fn map_pixel_in_1(combined_width: f32, x: f32, y: f32) -> (f32, f32) {
 }
 
 /// Draw matches onto two images.
-/// 
+///
 /// # Arguments
 /// * `input_image_0` - The first image.
 /// * `input_image_1` - The second image.
@@ -86,7 +86,7 @@ pub fn draw_matches(
 }
 
 /// Serialize matches to a file.
-/// 
+///
 /// # Arguments
 /// * 'matches' - The matches to serialize.
 /// * `path` - Path to which to write.
@@ -108,7 +108,7 @@ pub fn serialize_to_file(matches: &Vec<Match>, path: PathBuf) {
 }
 
 /// Deserialize matches from a file.
-/// 
+///
 /// # Arguments
 /// * 'path' - Path from which to read.
 /// # Return value

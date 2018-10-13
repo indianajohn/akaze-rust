@@ -15,7 +15,7 @@ use std::f64::consts::PI;
 /// This function allocates an array of the least number of time steps such
 /// that a certain stopping time for the whole process can be obtained and fills
 /// it with the respective FED time step sizes for one cycle
-/// 
+///
 /// # Arguments
 /// * `T` - Desired process stopping time
 /// * `M` - Desired number of cycles
@@ -32,7 +32,7 @@ pub fn fed_tau_by_process_time(T: f64, M: i32, tau_max: f64, reordering: bool) -
 /// This function allocates an array of the least number of time steps such
 /// that a certain stopping time for the whole process can be obtained and fills it
 /// it with the respective FED time step sizes for one cycle
-/// 
+///
 /// # Arguments
 /// * `t` - Desired cycle stopping time
 /// * `tau_max` - Stability limit for the explicit scheme
@@ -50,7 +50,7 @@ fn fed_tau_by_cycle_time(t: f64, tau_max: f64, reordering: bool) -> Vec<f64> {
 
 /// This function allocates an array of time steps and fills it with FED
 /// time step sizes
-/// 
+///
 /// # Arguments
 /// * `n` - Number of internal steps
 /// * `scale` - Ratio of t we search to maximal t

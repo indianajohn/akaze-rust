@@ -6,7 +6,7 @@ use types::image::{GrayFloatImage, ImageFunctions};
 /// This function computes a good empirical value for the k contrast factor
 /// given an input image, the percentile (0-1), the gradient scale and the
 /// number of bins in the histogram.
-/// 
+///
 /// # Arguments
 /// * `image` Input imagm
 /// * `percentile` - Percentile of the image gradient histogram (0-1)

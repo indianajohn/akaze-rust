@@ -1,6 +1,6 @@
+use time::PreciseTime;
 use types::feature_match::Match;
 use types::keypoint::Descriptor;
-use time::PreciseTime;
 /// Match two sets of keypoints and descriptors. The
 /// Hamming distance is used to match the descriptor sets,
 /// using a brute force algorithm.
@@ -12,12 +12,12 @@ use time::PreciseTime;
 ///                         to accept a match.
 /// * `lowes_ratio` - The ratio of descriptor 0 to descriptor 1
 ///                   above which a match is rejected.
-/// 
+///
 /// Note: this implementation seems considerably slower than
 /// OpenCV's implementation, and the only thing I can guess is
 /// that the Hamming distance calculation is slower. It probably
 /// warrants some further investigation.
-/// 
+///
 /// # Return value
 /// A vector of matches.
 pub fn descriptor_match(
@@ -87,7 +87,7 @@ pub fn descriptor_match(
 /// 0100100
 /// 0100000
 /// Hamming distance = 1: 1 bit position differs
-/// 
+///
 /// # Arguments
 /// * `d0` - The first descriptor.
 /// * `d1` - The second descriptor.
@@ -99,9 +99,7 @@ pub fn descriptor_match(
 ///    consider anyway.
 /// # Return value
 /// The Hamming distance
-fn hamming_distance(
-    d0: &Descriptor, d1: &Descriptor,
-    bailout_distance: usize) -> usize {
+fn hamming_distance(d0: &Descriptor, d1: &Descriptor, bailout_distance: usize) -> usize {
     let mut distance = 0usize;
     for it in d0.vector.iter().zip(d1.vector.iter()) {
         let (x0, x1) = it;

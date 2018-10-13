@@ -7,10 +7,10 @@ extern crate env_logger;
 extern crate image;
 extern crate serde;
 extern crate serde_json;
-use akaze::types::keypoint::serialize_to_file;
 use akaze::match_features;
 use akaze::types::evolution::Config;
 use akaze::types::feature_match;
+use akaze::types::keypoint::serialize_to_file;
 use clap::{App, Arg};
 use std::time::SystemTime;
 
@@ -23,30 +23,35 @@ fn main() {
        Set AKAZE_LOG to debug for more verbose output. This executable runs the entire
        pipeline end-to-end for two images. For more granular control, see the binaries
        extract_features and match_features.",
-        ).author("John Stalbaum")
+        )
+        .author("John Stalbaum")
         .arg(
             Arg::with_name("INPUT_0")
                 .help("The first input image.")
                 .required(true)
                 .index(1),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("INPUT_1")
                 .help("The second input image.")
                 .required(true)
                 .index(2),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("OUTPUT_PREFIX")
                 .help("The output prefix for all files.")
                 .required(true)
                 .index(3),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("match_image_path")
                 .short("m")
                 .long("match_image")
                 .value_name("IMAGE_FILE_PATH")
                 .help("Sets a path to write the match image to.")
                 .takes_value(true),
-        ).get_matches();
+        )
+        .get_matches();
 
     let start = SystemTime::now();
     let env = env_logger::Env::default().filter_or("AKAZE_LOG", "info");
@@ -71,20 +76,24 @@ fn main() {
     extractions_1_path.push_str("-extractions_1.cbor");
     let mut matches_path = prefix_string.clone();
     matches_path.push_str("-matches.cbor");
-    let (_evolutions_0, keypoints_0, descriptors_0) = akaze::extract_features(
-        Path::new(input_path_0).to_owned(),
-        options,
+    let (_evolutions_0, keypoints_0, descriptors_0) =
+        akaze::extract_features(Path::new(input_path_0).to_owned(), options);
+    serialize_to_file(
+        &keypoints_0,
+        &descriptors_0,
+        Path::new(&extractions_0_path).to_owned(),
     );
-    serialize_to_file(&keypoints_0, &descriptors_0, Path::new(&extractions_0_path).to_owned());
     info!(
         "Done, extracted {} features from image 0.",
         keypoints_0.len()
     );
-    let (_evolutions_1, keypoints_1, descriptors_1) = akaze::extract_features(
-        Path::new(input_path_1).to_owned(),
-        options,
+    let (_evolutions_1, keypoints_1, descriptors_1) =
+        akaze::extract_features(Path::new(input_path_1).to_owned(), options);
+    serialize_to_file(
+        &keypoints_0,
+        &descriptors_0,
+        Path::new(&extractions_1_path).to_owned(),
     );
-    serialize_to_file(&keypoints_0, &descriptors_0, Path::new(&extractions_1_path).to_owned());
     info!(
         "Done, extracted {} features from image 1, proceeding with matching.",
         keypoints_1.len()

@@ -4,9 +4,9 @@ extern crate log;
 extern crate env_logger;
 extern crate image;
 extern crate tempdir;
+use std::path::PathBuf;
 use std::time::SystemTime;
 use tempdir::TempDir;
-use std::path::PathBuf;
 
 use akaze::types::evolution::{write_evolutions, Config};
 use akaze::types::feature_match::draw_matches;

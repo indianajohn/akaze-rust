@@ -20,30 +20,35 @@ fn main() {
             "A Rust implementation of the KAZE visual feature matching using
             Hamming distance for binary descriptors. For use with AKAZE.
             Set AKAZE_LOG to debug for more verbose output.",
-        ).author("John Stalbaum")
+        )
+        .author("John Stalbaum")
         .arg(
             Arg::with_name("INPUT_EXTRACTIONS_0")
                 .help("The input extraction results for image 0.")
                 .required(true)
                 .index(1),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("INPUT_EXTRACTIONS_1")
                 .help("The input extraction results for image 1.")
                 .required(true)
                 .index(2),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("OUTPUT")
                 .help("The output matches.")
                 .required(true)
                 .index(3),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("threshold")
                 .short("t")
                 .long("threshold")
                 .value_name("FLOAT")
                 .help("The distance threshold for the matcher.")
                 .takes_value(true),
-        ).get_matches();
+        )
+        .get_matches();
 
     let start = SystemTime::now();
     let env = env_logger::Env::default().filter_or("AKAZE_LOG", "info");

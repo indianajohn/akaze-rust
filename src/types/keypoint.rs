@@ -49,7 +49,7 @@ pub struct Results {
 /// Keypoints of a random color will be drawn to the input image. The
 /// points will be shaded between the existing pixel value and the
 /// random color value.
-/// 
+///
 /// # Arguments
 /// * `input_image` - The image on which to draw.
 /// * `keypoints` - A vector of keypoints to draw.
@@ -63,7 +63,7 @@ pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &Vec<Keypo
 /// Keypoints of a random color will be drawn to the input image. The
 /// points will be shaded between the existing pixel value and the
 /// random color value.
-/// 
+///
 /// # Arguments
 /// * `input_image` - The image on which to draw.
 /// * `keypoints` - A vector of keypoints to draw.

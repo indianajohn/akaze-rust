@@ -30,7 +30,7 @@ fn compute_multiscale_derivatives(evolutions: &mut Vec<EvolutionStep>, options: 
 
 /// Compute the detector response - the determinant of the Hessian - and save the result
 /// in the evolutions.
-/// 
+///
 /// # Arguments
 /// * `evolutions` - The computed evolutions.
 /// * `options` - The options

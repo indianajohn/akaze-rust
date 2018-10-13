@@ -21,32 +21,37 @@ fn main() {
             "A Rust implementation of the KAZE visual feature extractor. See 
        https://github.com/pablofdezalc/kaze for the original authors' project. 
        Set AKAZE_LOG to debug for more verbose output.",
-        ).author("John Stalbaum")
+        )
+        .author("John Stalbaum")
         .arg(
             Arg::with_name("INPUT")
                 .help("The input image.")
                 .required(true)
                 .index(1),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("OUTPUT")
                 .help("The output extractions. Extension can be JSON or CBOR.")
                 .required(true)
                 .index(2),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("debug_path")
                 .short("d")
                 .long("debug_path")
                 .value_name("DIRECTORY")
                 .help("Sets a directory to write debug information to.")
                 .takes_value(true),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("options")
                 .short("o")
                 .long("options")
                 .value_name("PATH")
                 .help("A JSON file containing options.")
                 .takes_value(true),
-        ).get_matches();
+        )
+        .get_matches();
 
     let start = SystemTime::now();
     let env = env_logger::Env::default().filter_or("AKAZE_LOG", "info");
@@ -75,10 +80,8 @@ fn main() {
         }
         None => debug!("Using default options."),
     }
-    let (evolutions, keypoints, descriptors) = akaze::extract_features(
-        Path::new(input_path).to_owned(),
-        options,
-    );
+    let (evolutions, keypoints, descriptors) =
+        akaze::extract_features(Path::new(input_path).to_owned(), options);
     serialize_to_file(&keypoints, &descriptors, Path::new(&output_path).to_owned());
     info!("Done, extracted {} features.", keypoints.len());
     match matches.value_of("debug_path") {

@@ -93,7 +93,7 @@ pub struct EvolutionStep {
 
 impl EvolutionStep {
     /// Construct a new EvolutionStep for a given octave and sublevel
-    /// 
+    ///
     /// # Arguments
     /// * `octave` - The target octave.
     /// * `octave` - The target sublevel.
@@ -126,7 +126,7 @@ impl EvolutionStep {
 }
 
 /// Allocate and calculate prerequisites to the construction of a scale space.
-/// 
+///
 /// # Arguments
 /// `width` - The width of the input image.
 /// `height` - The height of the input image.
@@ -168,7 +168,7 @@ fn build_path(mut destination_dir: PathBuf, path_label: String, idx: usize) -> P
 }
 
 /// Write all elements of the evolutions collection to a directory.
-/// 
+///
 /// # Arguments
 /// * `evolutions` - The evolutions to write.
 /// * `destination_dir` - The destination directory.

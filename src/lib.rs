@@ -20,15 +20,15 @@ use time::PreciseTime;
 
 pub mod ops;
 pub mod types;
-use types::evolution::{Config, EvolutionStep};
-use types::image::{GrayFloatImage, ImageFunctions, gaussian_blur};
-use types::keypoint::{Descriptor, Keypoint};
-use types::feature_match::Match;
 use ops::estimate_fundamental_matrix::remove_outliers;
+use types::evolution::{Config, EvolutionStep};
+use types::feature_match::Match;
+use types::image::{gaussian_blur, GrayFloatImage, ImageFunctions};
+use types::keypoint::{Descriptor, Keypoint};
 
 /// This function computes the Perona and Malik conductivity coefficient g2
 /// g2 = 1 / (1 + dL^2 / k^2)
-/// 
+///
 /// # Arguments
 /// * `Lx` - First order image derivative in X-direction (horizontal)
 /// * `Ly` - First order image derivative in Y-direction (vertical)
@@ -54,7 +54,7 @@ fn pm_g2(Lx: &GrayFloatImage, Ly: &GrayFloatImage, k: f64) -> GrayFloatImage {
 }
 
 /// A nonlinear scale space performs selective blurring to preserve edges.
-/// 
+///
 /// # Arguments
 /// * `evolutions` - The output scale space.
 /// * `image` - The input image.
@@ -160,12 +160,12 @@ fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config) ->
 /// * `input_image_path` - The input image for which to extract features.
 /// * `output_features_path` - The output path to which to write an output JSON file.
 /// * `options` The options for the algorithm.
-/// 
+///
 /// # Return value
 /// * The evolutions of the process. Can be used for further analysis or visualization, or ignored.
 /// * The keypoints at which features occur.
 /// * The descriptors that were computed.
-/// 
+///
 /// # Examples
 /// ```no_run
 /// extern crate akaze;
@@ -173,7 +173,7 @@ fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config) ->
 /// let options = akaze::types::evolution::Config::default();
 /// let (_evolutions, keypoints, descriptors) =
 ///     akaze::extract_features(
-///       Path::new("image.jpg").to_owned(), 
+///       Path::new("image.jpg").to_owned(),
 ///       options);
 /// akaze::types::keypoint::serialize_to_file(&keypoints, &descriptors, Path::new("extractions.cbor").to_owned());
 /// ```
@@ -212,7 +212,7 @@ pub fn extract_features(
 /// using a brute force algorithm. Then, geometric verification
 /// is performed using RANSAC with the Fundamental matrix and
 /// 8-point algorithm.
-/// 
+///
 /// There are some variations on all of the above - for example,
 /// we could consider using a cascade hashing matching process -
 /// but this is sufficient for validation of this repository. Any
@@ -223,10 +223,10 @@ pub fn extract_features(
 /// * `descriptors_0` - The first set of descriptors.
 /// * `keypoints_1` - The first set of keypoints.
 /// * `descriptors_1` - The second set of desctiptors.
-/// 
+///
 /// # Return value
 /// A vector of matches.
-/// 
+///
 /// # Examples
 /// ```no_run
 /// extern crate akaze;
@@ -234,19 +234,19 @@ pub fn extract_features(
 /// let options = akaze::types::evolution::Config::default();
 /// let (_evolutions_0, keypoints_0, descriptors_0) =
 ///     akaze::extract_features(
-///       Path::new("image_1.jpg").to_owned(), 
+///       Path::new("image_1.jpg").to_owned(),
 ///       options);
-/// 
+///
 /// let (_evolutions_1, keypoints_1, descriptors_1) =
 ///     akaze::extract_features(
-///       Path::new("image_1.jpg").to_owned(), 
+///       Path::new("image_1.jpg").to_owned(),
 ///       options);
 /// let matches = akaze::match_features(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
 /// akaze::types::feature_match::serialize_to_file(&matches, Path::new("matches.cbor").to_owned());
 /// println!("Got {} matches.", matches.len());
 /// ```
 ///
-pub fn match_features (
+pub fn match_features(
     keypoints_0: &Vec<Keypoint>,
     descriptors_0: &Vec<Descriptor>,
     keypoints_1: &Vec<Keypoint>,
@@ -256,7 +256,12 @@ pub fn match_features (
     // turning this off
     let distance_threshold = 50usize;
     // Take all matches that pass Lowe's ratio.
-    let mut output = ops::feature_matching::descriptor_match(&descriptors_0, descriptors_1, distance_threshold, 0.7);
+    let mut output = ops::feature_matching::descriptor_match(
+        &descriptors_0,
+        descriptors_1,
+        distance_threshold,
+        0.7,
+    );
     let inliers = remove_outliers(
         &keypoints_0,
         &keypoints_1,
