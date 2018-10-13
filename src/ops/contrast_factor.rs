@@ -9,9 +9,9 @@ use types::image::{GrayFloatImage, ImageFunctions};
 /// 
 /// # Arguments
 /// * `image` Input imagm
-/// * `percentile` Percentile of the image gradient histogram (0-1)
-/// * `gradient_histogram_scale` Scale for computing the image gradient histogram
-/// * `nbins` nbins Number of histogram bins
+/// * `percentile` - Percentile of the image gradient histogram (0-1)
+/// * `gradient_histogram_scale` - Scale for computing the image gradient histogram
+/// * `nbins` - Number of histogram bins
 /// # Return value
 /// k contrast factor
 #[allow(non_snake_case)]

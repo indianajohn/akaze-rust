@@ -51,8 +51,8 @@ pub struct Results {
 /// random color value.
 /// 
 /// # Arguments
-/// * `input_image` The image on which to draw.
-/// * `keypoints` a vector of keypoints to draw.
+/// * `input_image` - The image on which to draw.
+/// * `keypoints` - A vector of keypoints to draw.
 pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &Vec<Keypoint>) {
     for keypoint in keypoints.iter() {
         draw_circle(input_image, keypoint.point, random_color(), keypoint.size);
@@ -65,8 +65,8 @@ pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &Vec<Keypo
 /// random color value.
 /// 
 /// # Arguments
-/// * `input_image` The image on which to draw.
-/// * `keypoints` a vector of keypoints to draw.
+/// * `input_image` - The image on which to draw.
+/// * `keypoints` - A vector of keypoints to draw.
 /// # Return value
 /// An new RGB image with keypoints drawn.
 pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> RgbImage {

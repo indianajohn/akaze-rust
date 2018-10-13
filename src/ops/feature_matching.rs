@@ -6,12 +6,12 @@ use time::PreciseTime;
 /// using a brute force algorithm.
 ///
 /// # Arguments
-/// * `descriptors_0` The first set of descriptors.
-/// * `descriptors_1` The second set of desctiptors.
-/// * `distance_threshold` The distance threshold below which
-///    to accept a match.
-/// * `lowes_ratio` the ratio of descriptor 0 to descriptor 1
-///    above which a match is rejected.
+/// * `descriptors_0` - The first set of descriptors.
+/// * `descriptors_1` - The second set of desctiptors.
+/// * `distance_threshold` - The distance threshold below which
+///                         to accept a match.
+/// * `lowes_ratio` - The ratio of descriptor 0 to descriptor 1
+///                   above which a match is rejected.
 /// 
 /// Note: this implementation seems considerably slower than
 /// OpenCV's implementation, and the only thing I can guess is
@@ -89,9 +89,9 @@ pub fn descriptor_match(
 /// Hamming distance = 1: 1 bit position differs
 /// 
 /// # Arguments
-/// * `d0` the first descriptor.
-/// * `d1` the second descriptor.
-/// * `bailout_distance` If this distance is exceeded,
+/// * `d0` - The first descriptor.
+/// * `d1` - The second descriptor.
+/// * `bailout_distance` - If this distance is exceeded,
 ///    the calculation is immediately aborted and returned.
 ///    This can save a lot of time in searching for a minimum
 ///    distnce because we don't need to continue the distance

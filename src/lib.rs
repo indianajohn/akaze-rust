@@ -30,9 +30,9 @@ use ops::estimate_fundamental_matrix::remove_outliers;
 /// g2 = 1 / (1 + dL^2 / k^2)
 /// 
 /// # Arguments
-/// * `Lx` First order image derivative in X-direction (horizontal)
-/// * `Ly` First order image derivative in Y-direction (vertical)
-/// * `k` Contrast factor parameter
+/// * `Lx` - First order image derivative in X-direction (horizontal)
+/// * `Ly` - First order image derivative in Y-direction (vertical)
+/// * `k` - Contrast factor parameter
 /// # Return value
 /// Output image
 #[allow(non_snake_case)]
@@ -56,9 +56,9 @@ fn pm_g2(Lx: &GrayFloatImage, Ly: &GrayFloatImage, k: f64) -> GrayFloatImage {
 /// A nonlinear scale space performs selective blurring to preserve edges.
 /// 
 /// # Arguments
-/// * `evolutions` the output scale space.
-/// * `image` - the input image.
-/// * `options` - the options to use.
+/// * `evolutions` - The output scale space.
+/// * `image` - The input image.
+/// * `options` - The options to use.
 fn create_nonlinear_scale_space(
     evolutions: &mut Vec<EvolutionStep>,
     image: &GrayFloatImage,
@@ -157,9 +157,9 @@ fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config) ->
 /// but this function can document how the various parts fit together.
 ///
 /// # Arguments
-/// * `input_image_path` - the input image for which to extract features.
-/// * `output_features_path` - the output path to which to write an output JSON file.
-/// * `options` the options for the algorithm.
+/// * `input_image_path` - The input image for which to extract features.
+/// * `output_features_path` - The output path to which to write an output JSON file.
+/// * `options` The options for the algorithm.
 /// 
 /// # Return value
 /// * The evolutions of the process. Can be used for further analysis or visualization, or ignored.
@@ -219,10 +219,10 @@ pub fn extract_features(
 /// further optimization is out of scope for this repository.
 ///
 /// # Arguments
-/// * `keypoints_0` The first set of keypoints.
-/// * `descriptors_0` The first set of descriptors.
-/// * `keypoints_1` The first set of keypoints.
-/// * `descriptors_1` The second set of desctiptors.
+/// * `keypoints_0` - The first set of keypoints.
+/// * `descriptors_0` - The first set of descriptors.
+/// * `keypoints_1` - The first set of keypoints.
+/// * `descriptors_1` - The second set of desctiptors.
 /// 
 /// # Return value
 /// A vector of matches.

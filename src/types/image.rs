@@ -48,8 +48,8 @@ pub trait ImageFunctions {
     /// Create a new image
     /// 
     /// # Arguments
-    /// * `width` width of image
-    /// * `height` height of image.
+    /// * `width` - Width of image
+    /// * `height` - Height of image.
     /// # Return value
     /// The image.
     fn new(width: usize, height: usize) -> Self;
@@ -60,8 +60,8 @@ pub trait ImageFunctions {
     /// get a float pixel at x, y
     /// 
     /// # Arguments
-    /// * `x` x coordinate.
-    /// * `y` y coordinate.
+    /// * `x` - x coordinate.
+    /// * `y` - y coordinate.
     /// # Return value
     /// the value of the pixel.
     fn get(&self, x: usize, y: usize) -> f32;
@@ -69,8 +69,8 @@ pub trait ImageFunctions {
     /// put a float pixel to x, y
     /// 
     /// # Arguments
-    /// * `x` x coordinate.
-    /// * `y` y coordinate.
+    /// * `x` - x coordinate.
+    /// * `y` - y coordinate.
     /// pixel_value: value to put
     fn put(&mut self, x: usize, y: usize, pixel_value: f32);
 }
@@ -334,8 +334,8 @@ pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatIm
 /// The Gaussian function.
 /// 
 /// # Arguments
-/// * `x` the offset.
-/// * `r` sigma.
+/// * `x` - the offset.
+/// * `r` - sigma.
 /// # Return value
 /// The kernel value at x.
 fn gaussian(x: f32, r: f32) -> f32 {
@@ -345,8 +345,8 @@ fn gaussian(x: f32, r: f32) -> f32 {
 /// Generate a Gaussina kernel.
 /// 
 /// # Arguments
-/// * `r` sigma.
-/// * `kernel_size` the size of the kernel.
+/// * `r` - sigma.
+/// * `kernel_size` - The size of the kernel.
 /// # Return value
 /// The kernel (a vector).
 fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {
@@ -367,8 +367,8 @@ fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {
 /// Perform Gaussian blur on an image.
 /// 
 /// # Arguments
-/// * `r` sigma.
-/// * `kernel_size` the size of the kernel.
+/// * `r` - sigma.
+/// * `kernel_size` - The size of the kernel.
 /// # Return value
 /// The resulting image after the filter was applied.
 pub fn gaussian_blur(image: &GrayFloatImage, r: f32) -> GrayFloatImage {
@@ -394,8 +394,8 @@ pub fn random_color() -> (u8, u8, u8) {
 /// Take the average between two pixels
 /// 
 /// # Arguments
-/// * `p1` the first color value.
-/// * `p2` the second color value.
+/// * `p1` - The first color value.
+/// * `p2` - The second color value.
 /// # Return value
 /// The averaged pixel.
 fn blend(p1: (u8, u8, u8), p2: (u8, u8, u8)) -> (u8, u8, u8) {
@@ -411,8 +411,8 @@ fn blend(p1: (u8, u8, u8), p2: (u8, u8, u8)) -> (u8, u8, u8) {
 /// value and the input.
 ///
 /// # Arguments
-/// `input_image` the image to draw on, directly mutated.
-/// `point` the point at which to draw.
+/// `input_image` - The image to draw on, directly mutated.
+/// `point` - The point at which to draw.
 /// `rgb` The RGB value.
 /// `radius` The maximum radius from the point to shade.
 pub fn draw_circle(input_image: &mut RgbImage, point: (f32, f32), rgb: (u8, u8, u8), radius: f32) {
@@ -445,11 +445,11 @@ pub fn draw_circle(input_image: &mut RgbImage, point: (f32, f32), rgb: (u8, u8, 
 /// Draw a line to an image.
 ///
 /// # Arguments
-/// * `input_image` the image to draw on, directly mutated.
-/// * `point_0` the point from which to draw.
-/// * `point_1` the point to which to draw.
-/// * `rgb` The RGB value.
-/// * `radius` The radius from the center of the line to shade.
+/// * `input_image` - The image to draw on, directly mutated.
+/// * `point_0` - The point from which to draw.
+/// * `point_1` - The point to which to draw.
+/// * `rgb` - The RGB value.
+/// * `radius` - The radius from the center of the line to shade.
 pub fn draw_line(
     mut input_image: &mut RgbImage,
     point_0: (f32, f32),

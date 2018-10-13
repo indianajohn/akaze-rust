@@ -17,10 +17,10 @@ use std::f64::consts::PI;
 /// it with the respective FED time step sizes for one cycle
 /// 
 /// # Arguments
-/// * `T` Desired process stopping time
-/// * `M` Desired number of cycles
-/// * `tau_max` Stability limit for the explicit scheme
-/// * `reordering` Reordering flag
+/// * `T` - Desired process stopping time
+/// * `M` - Desired number of cycles
+/// * `tau_max` - Stability limit for the explicit scheme
+/// * `reordering` - Reordering flag
 /// # Return value
 /// The vector with the dynamic step sizes
 #[allow(non_snake_case)]
@@ -34,9 +34,9 @@ pub fn fed_tau_by_process_time(T: f64, M: i32, tau_max: f64, reordering: bool) -
 /// it with the respective FED time step sizes for one cycle
 /// 
 /// # Arguments
-/// * `t` Desired cycle stopping time
-/// * `tau_max` Stability limit for the explicit scheme
-/// * `reordering` Reordering flag
+/// * `t` - Desired cycle stopping time
+/// * `tau_max` - Stability limit for the explicit scheme
+/// * `reordering` - Reordering flag
 /// # Return value
 /// tau The vector with the dynamic step sizes
 #[allow(non_snake_case)]
@@ -52,10 +52,10 @@ fn fed_tau_by_cycle_time(t: f64, tau_max: f64, reordering: bool) -> Vec<f64> {
 /// time step sizes
 /// 
 /// # Arguments
-/// * `n` Number of internal steps
-/// * `scale` Ratio of t we search to maximal t
-/// * `tau_max` Stability limit for the explicit scheme
-/// * `reordering` Reordering flag
+/// * `n` - Number of internal steps
+/// * `scale` - Ratio of t we search to maximal t
+/// * `tau_max` - Stability limit for the explicit scheme
+/// * `reordering` - Reordering flag
 /// # Return value
 /// The vector with the dynamic step sizes
 fn fed_tau_internal(n: usize, scale: f64, tau_max: f64, reordering: bool) -> Vec<f64> {

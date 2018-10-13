@@ -28,9 +28,9 @@ pub fn extract_descriptors(
 /// Computes the rotation invariant M-LDB binary descriptor (maximum descriptor length)
 /// 
 /// # Arguments
-/// `* kpt` Input keypoint
-/// * `evolutions` Input evolutions
-/// * `options` Input options
+/// `* kpt` - Input keypoint
+/// * `evolutions` - Input evolutions
+/// * `options` - Input options
 /// # Return value
 /// Binary-based descriptor
 fn get_mldb_descriptor(

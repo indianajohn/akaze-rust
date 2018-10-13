@@ -26,11 +26,11 @@ fn map_pixel_in_1(combined_width: f32, x: f32, y: f32) -> (f32, f32) {
 /// Draw matches onto two images.
 /// 
 /// # Arguments
-/// * `input_image_0` The first image.
-/// * `input_image_1` The second image.
-/// * `keypoints_0` keypoints on the first image.
-/// * `keypoints_1` keypoints on the second image.
-/// * `matches` matches between the two sets of keypoints/images.
+/// * `input_image_0` - The first image.
+/// * `input_image_1` - The second image.
+/// * `keypoints_0` - Keypoints on the first image.
+/// * `keypoints_1` - Keypoints on the second image.
+/// * `matches` - Matches between the two sets of keypoints/images.
 /// # Return value
 /// An new RGB image with matches drawn.
 pub fn draw_matches(
