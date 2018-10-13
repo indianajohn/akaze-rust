@@ -24,11 +24,13 @@ fn map_pixel_in_1(combined_width: f32, x: f32, y: f32) -> (f32, f32) {
 }
 
 /// Draw matches onto two images.
-/// `input_image_0` The first image.
-/// `input_image_1` The second image.
-/// `keypoints_0` keypoints on the first image.
-/// `keypoints_1` keypoints on the second image.
-/// `matches` matches between the two sets of keypoints/images.
+/// 
+/// # Arguments
+/// * `input_image_0` The first image.
+/// * `input_image_1` The second image.
+/// * `keypoints_0` keypoints on the first image.
+/// * `keypoints_1` keypoints on the second image.
+/// * `matches` matches between the two sets of keypoints/images.
 /// # Return value
 /// An new RGB image with matches drawn.
 pub fn draw_matches(
@@ -84,8 +86,10 @@ pub fn draw_matches(
 }
 
 /// Serialize matches to a file.
-/// 'matches' - The matches to serialize.
-/// `path` - Path to which to write.
+/// 
+/// # Arguments
+/// * 'matches' - The matches to serialize.
+/// * `path` - Path to which to write.
 pub fn serialize_to_file(matches: &Vec<Match>, path: PathBuf) {
     debug!("Writing results to {:?}", path);
     let mut file = File::create(path.clone()).unwrap();
@@ -104,7 +108,9 @@ pub fn serialize_to_file(matches: &Vec<Match>, path: PathBuf) {
 }
 
 /// Deserialize matches from a file.
-/// 'path' - Path from which to read.
+/// 
+/// # Arguments
+/// * 'path' - Path from which to read.
 /// # Return value
 /// The deserialized results.
 pub fn deserialize_from_file(path: PathBuf) -> Vec<Match> {

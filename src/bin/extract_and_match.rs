@@ -8,7 +8,7 @@ extern crate image;
 extern crate serde;
 extern crate serde_json;
 use akaze::types::keypoint::serialize_to_file;
-use akaze::ops::feature_matching::ransac_match;
+use akaze::match_features;
 use akaze::types::evolution::Config;
 use akaze::types::feature_match;
 use clap::{App, Arg};
@@ -89,7 +89,7 @@ fn main() {
         "Done, extracted {} features from image 1, proceeding with matching.",
         keypoints_1.len()
     );
-    let output_matches = ransac_match(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
+    let output_matches = match_features(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
     info!("Got {} matches.", output_matches.len());
     feature_match::serialize_to_file(&output_matches, Path::new(&matches_path).to_owned());
     match matches.value_of("match_image_path") {

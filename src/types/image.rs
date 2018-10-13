@@ -46,8 +46,10 @@ pub trait ImageFunctions {
     fn height(&self) -> usize;
 
     /// Create a new image
-    /// `width` width of image
-    /// `height` height of image.
+    /// 
+    /// # Arguments
+    /// * `width` width of image
+    /// * `height` height of image.
     /// # Return value
     /// The image.
     fn new(width: usize, height: usize) -> Self;
@@ -56,15 +58,19 @@ pub trait ImageFunctions {
     fn half_size(&self) -> Self;
 
     /// get a float pixel at x, y
-    /// `x` x coordinate.
-    /// `y` y coordinate.
+    /// 
+    /// # Arguments
+    /// * `x` x coordinate.
+    /// * `y` y coordinate.
     /// # Return value
     /// the value of the pixel.
     fn get(&self, x: usize, y: usize) -> f32;
 
     /// put a float pixel to x, y
-    /// `x` x coordinate.
-    /// `y` y coordinate.
+    /// 
+    /// # Arguments
+    /// * `x` x coordinate.
+    /// * `y` y coordinate.
     /// pixel_value: value to put
     fn put(&mut self, x: usize, y: usize, pixel_value: f32);
 }
@@ -113,7 +119,9 @@ impl ImageFunctions for GrayFloatImage {
 }
 
 /// Create a unit float image from the image crate's DynamicImage type.
-/// `input_image` - the input image.
+/// 
+/// # Arguments
+/// * `input_image` - the input image.
 /// # Return value
 /// An image with pixel values between 0 and 1.
 pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
@@ -132,7 +140,9 @@ pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
 }
 
 /// Generate a dynamic image from a GrayFloatImage
-/// `input_image` - the input image.
+/// 
+/// # Arguments
+/// * `input_image` - the input image.
 /// # Return value
 /// A dynamic image (can be written to file, etc..)
 pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
@@ -150,7 +160,9 @@ pub fn create_dynamic_image(input_image: &GrayFloatImage) -> DynamicImage {
 }
 
 /// Normalize an image between 0 and 1
-/// `input_image` - the input image.
+/// 
+/// # Arguments
+/// * `input_image` - the input image.
 /// # Return value
 /// the normalized image.
 pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
@@ -185,8 +197,10 @@ pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
 }
 
 /// Helper function to write an image to a file.
-/// `input_image` - the image to write.
-/// `path` - the path to which to write the image.
+/// 
+/// # Arguments
+/// * `input_image` - the image to write.
+/// * `path` - the path to which to write the image.
 pub fn save(input_image: &GrayFloatImage, path: PathBuf) {
     if input_image.width() > 0 && input_image.height() > 0 {
         let normalized_image = normalize(&input_image);
@@ -195,10 +209,12 @@ pub fn save(input_image: &GrayFloatImage, path: PathBuf) {
     }
 }
 
-/// Return sqrt(image_1[i] + image_2[i]) for all pixels in the input images.
+/// Return sqrt(image_1_i + image_2_i) for all pixels in the input images.
 /// Save the result in image_1.
-/// `image_1` - the first image.
-/// `image_2` - the second image.
+/// 
+/// # Arguments
+/// * `image_1` - the first image.
+/// * `image_2` - the second image.
 pub fn sqrt_squared(image_1: &mut GrayFloatImage, image_2: &GrayFloatImage) {
     debug_assert!(image_1.width() == image_2.width());
     debug_assert!(image_1.height() == image_2.height());
@@ -216,8 +232,10 @@ pub fn sqrt_squared(image_1: &mut GrayFloatImage, image_2: &GrayFloatImage) {
 
 /// Fill border with neighboring pixels. A way of preventing instability
 /// around the image borders for things like derivatives.
-/// `output` - the image to operate upon.
-/// `half_width` the number of pixels around the borders to operate on.
+/// 
+/// # Arguments
+/// * `output` - the image to operate upon.
+/// * `half_width` the number of pixels around the borders to operate on.
 pub fn fill_border(output: &mut GrayFloatImage, half_width: usize) {
     for x in 0..output.width() {
         let plus = output.get(x, half_width);
@@ -242,8 +260,10 @@ pub fn fill_border(output: &mut GrayFloatImage, half_width: usize) {
 }
 
 /// Horizontal image filter for variable kernel sizes.
-/// `image` - the input image.
-/// `kernel` the kernel to apply.
+/// 
+/// # Arguments
+/// * `image` - the input image.
+/// * `kernel` the kernel to apply.
 /// # Return value
 /// The filter result.
 #[inline(always)]
@@ -275,8 +295,10 @@ pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloat
 }
 
 /// Vertical image filter for variable kernel sizes.
-/// `image` - the input image.
-/// `kernel` the kernel to apply.
+/// 
+/// # Arguments
+/// * `image` - the input image.
+/// * `kernel` the kernel to apply.
 /// # Return value
 /// The filter result.
 #[inline(always)]
@@ -310,8 +332,10 @@ pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatIm
 }
 
 /// The Gaussian function.
-/// `x` the offset.
-/// `r` sigma.
+/// 
+/// # Arguments
+/// * `x` the offset.
+/// * `r` sigma.
 /// # Return value
 /// The kernel value at x.
 fn gaussian(x: f32, r: f32) -> f32 {
@@ -319,8 +343,10 @@ fn gaussian(x: f32, r: f32) -> f32 {
 }
 
 /// Generate a Gaussina kernel.
-/// `r` sigma.
-/// `kernel_size` the size of the kernel.
+/// 
+/// # Arguments
+/// * `r` sigma.
+/// * `kernel_size` the size of the kernel.
 /// # Return value
 /// The kernel (a vector).
 fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {
@@ -339,8 +365,10 @@ fn gaussian_kernel(r: f32, kernel_size: usize) -> Vec<f32> {
 }
 
 /// Perform Gaussian blur on an image.
-/// `r` sigma.
-/// `kernel_size` the size of the kernel.
+/// 
+/// # Arguments
+/// * `r` sigma.
+/// * `kernel_size` the size of the kernel.
 /// # Return value
 /// The resulting image after the filter was applied.
 pub fn gaussian_blur(image: &GrayFloatImage, r: f32) -> GrayFloatImage {
@@ -364,8 +392,10 @@ pub fn random_color() -> (u8, u8, u8) {
 }
 
 /// Take the average between two pixels
-/// `p1` the first color value.
-/// `p2` the second color value.
+/// 
+/// # Arguments
+/// * `p1` the first color value.
+/// * `p2` the second color value.
 /// # Return value
 /// The averaged pixel.
 fn blend(p1: (u8, u8, u8), p2: (u8, u8, u8)) -> (u8, u8, u8) {
@@ -380,6 +410,7 @@ fn blend(p1: (u8, u8, u8), p2: (u8, u8, u8)) -> (u8, u8, u8) {
 /// Values inside of the circle will be blended between their current color
 /// value and the input.
 ///
+/// # Arguments
 /// `input_image` the image to draw on, directly mutated.
 /// `point` the point at which to draw.
 /// `rgb` The RGB value.
@@ -413,11 +444,12 @@ pub fn draw_circle(input_image: &mut RgbImage, point: (f32, f32), rgb: (u8, u8, 
 
 /// Draw a line to an image.
 ///
-/// `input_image` the image to draw on, directly mutated.
-/// `point_0` the point from which to draw.
-/// `point_1` the point to which to draw.
-/// `rgb` The RGB value.
-/// `radius` The radius from the center of the line to shade.
+/// # Arguments
+/// * `input_image` the image to draw on, directly mutated.
+/// * `point_0` the point from which to draw.
+/// * `point_1` the point to which to draw.
+/// * `rgb` The RGB value.
+/// * `radius` The radius from the center of the line to shade.
 pub fn draw_line(
     mut input_image: &mut RgbImage,
     point_0: (f32, f32),

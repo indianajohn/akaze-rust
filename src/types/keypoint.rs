@@ -49,8 +49,10 @@ pub struct Results {
 /// Keypoints of a random color will be drawn to the input image. The
 /// points will be shaded between the existing pixel value and the
 /// random color value.
-/// `input_image` The image on which to draw.
-/// `keypoints` a vector of keypoints to draw.
+/// 
+/// # Arguments
+/// * `input_image` The image on which to draw.
+/// * `keypoints` a vector of keypoints to draw.
 pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &Vec<Keypoint>) {
     for keypoint in keypoints.iter() {
         draw_circle(input_image, keypoint.point, random_color(), keypoint.size);
@@ -61,8 +63,10 @@ pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &Vec<Keypo
 /// Keypoints of a random color will be drawn to the input image. The
 /// points will be shaded between the existing pixel value and the
 /// random color value.
-/// `input_image` The image on which to draw.
-/// `keypoints` a vector of keypoints to draw.
+/// 
+/// # Arguments
+/// * `input_image` The image on which to draw.
+/// * `keypoints` a vector of keypoints to draw.
 /// # Return value
 /// An new RGB image with keypoints drawn.
 pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> RgbImage {
@@ -72,11 +76,13 @@ pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> 
 }
 
 /// Serialize results to a file.
-/// 'keypoints' - the keypoints detected from an image.
-/// `descriptors` - The descriptors extracted from the keypoints. Will
-///                 panic if the size of this vector is not equal to the
-///                 size of the keypoints, or 0.
-/// `path` - Path to which to write.
+///
+/// # Arguments
+/// * 'keypoints' - the keypoints detected from an image.
+/// * `descriptors` - The descriptors extracted from the keypoints. Will
+///                   panic if the size of this vector is not equal to the
+///                   size of the keypoints, or 0.
+/// * `path` - Path to which to write.
 pub fn serialize_to_file(keypoints: &Vec<Keypoint>, descriptors: &Vec<Descriptor>, path: PathBuf) {
     debug!("Writing results to {:?}", path);
     let mut file = File::create(path.clone()).unwrap();
@@ -99,7 +105,9 @@ pub fn serialize_to_file(keypoints: &Vec<Keypoint>, descriptors: &Vec<Descriptor
 }
 
 /// Deserialize results from a file.
-/// 'path' - Path from which to read.
+///
+/// # Arguments
+/// * 'path' - Path from which to read.
 /// # Return value
 /// The deserialized results.
 pub fn deserialize_from_file(path: PathBuf) -> Results {

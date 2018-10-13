@@ -8,10 +8,10 @@ use types::keypoint::Keypoint;
 
 /// Do singular value decomposition to estimate the fundamental matrix
 /// given a set of 8 prospective inliers.
-/// `keypoints_0 ` Keypoints in set 0
-/// `keypoints_1 ` Keypoints in set 1
-/// `matches` Set of matches referring to keypoints_0 and keypoints_1.
-/// `epsilon` The epsilon to feed into SVD.
+/// * `keypoints_0 ` Keypoints in set 0
+/// * `keypoints_1 ` Keypoints in set 1
+/// * `matches` Set of matches referring to keypoints_0 and keypoints_1.
+/// * `epsilon` The epsilon to feed into SVD.
 /// # Return value
 /// Optionally, the fundamental matrix, a 3x3 matrix
 pub fn estimate_fundamental_matrix(
@@ -69,9 +69,11 @@ pub fn estimate_fundamental_matrix(
 }
 
 /// Apply the fundamental matrix and return the error. to a pair of keypoints.
-/// `fund_mat` the Fundamental Matrix
-/// `keypoint_0` the keypoint in image plane l
-/// `keypoint_1` the keypoint in image plane r
+/// 
+/// # Arguments
+/// * `fund_mat` the Fundamental Matrix
+/// * `keypoint_0` the keypoint in image plane l
+/// * `keypoint_1` the keypoint in image plane r
 /// # Return value - the value of p_r.transpose()*F*p_l (= 0 defines epipolar lines)
 fn evaluate_model(fund_mat: Matrix3<f32>, keypoint_0: &Keypoint, keypoint_1: &Keypoint) -> f32 {
     let p_r = Vector3::new(keypoint_1.point.0, keypoint_1.point.1, 1f32);
@@ -79,6 +81,20 @@ fn evaluate_model(fund_mat: Matrix3<f32>, keypoint_0: &Keypoint, keypoint_1: &Ke
     (p_r.transpose() * fund_mat * p_l).norm()
 }
 
+/// Remove outliers using RANSAC.
+/// Contains RANSAC implementation.
+/// 
+/// # Arguments
+/// * `keypoints_0` first set of keypoints
+/// * `keypoints_1` second set of keypoints
+/// * `matches` candidate matches
+/// * `num_trials` maximum number of RANSAC iterations
+/// * `epsilon_model` epsilon used when solving SVD
+/// * `epsilon_inliers` Maximum error to accept an inlier.
+/// 
+/// # Return value
+/// The inlier matches. If no model was found, the size
+/// of the vector will be 0.
 pub fn remove_outliers(
     keypoints_0: &Vec<Keypoint>,
     keypoints_1: &Vec<Keypoint>,

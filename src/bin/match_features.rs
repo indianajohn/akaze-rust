@@ -7,7 +7,7 @@ extern crate env_logger;
 extern crate image;
 extern crate serde;
 extern crate serde_json;
-use akaze::ops::feature_matching::ransac_match;
+use akaze::match_features;
 use akaze::types::feature_match;
 use akaze::types::keypoint;
 use clap::{App, Arg};
@@ -64,7 +64,7 @@ fn main() {
         keypoint::deserialize_from_file(Path::new(input_extractions_0_path).to_owned());
     let extractions_1 =
         keypoint::deserialize_from_file(Path::new(input_extractions_1_path).to_owned());
-    let matches = ransac_match(
+    let matches = match_features(
         &extractions_0.keypoints,
         &extractions_0.descriptors,
         &extractions_1.keypoints,

@@ -94,9 +94,10 @@ pub struct EvolutionStep {
 impl EvolutionStep {
     /// Construct a new EvolutionStep for a given octave and sublevel
     /// 
-    /// `octave` the target octave.
-    /// `octave` the target sublevel.
-    /// `options` the options to use.
+    /// # Arguments
+    /// * `octave` the target octave.
+    /// * `octave` the target sublevel.
+    /// * `options` the options to use.
     fn new(octave: u32, sublevel: u32, options: Config) -> EvolutionStep {
         let esigma = options.base_scale_offset * f64::powf(
             2.0f64,
@@ -125,6 +126,8 @@ impl EvolutionStep {
 }
 
 /// Allocate and calculate prerequisites to the construction of a scale space.
+/// 
+/// # Arguments
 /// `width` - the width of the input image.
 /// `height` - the height of the input image.
 /// `options` - the configuration to use.
@@ -165,8 +168,10 @@ fn build_path(mut destination_dir: PathBuf, path_label: String, idx: usize) -> P
 }
 
 /// Write all elements of the evolutions collection to a directory.
-/// `evolutions` - the evolutions to write.
-/// `destination_dir` - the destination directory.
+/// 
+/// # Arguments
+/// * `evolutions` - the evolutions to write.
+/// * `destination_dir` - the destination directory.
 pub fn write_evolutions(evolutions: &Vec<EvolutionStep>, destination_dir: PathBuf) {
     for i in 0..evolutions.len() {
         save(

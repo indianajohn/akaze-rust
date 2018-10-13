@@ -1,18 +1,17 @@
-use ops::estimate_fundamental_matrix::remove_outliers;
 use types::feature_match::Match;
 use types::keypoint::Descriptor;
-use types::keypoint::Keypoint;
 use time::PreciseTime;
 /// Match two sets of keypoints and descriptors. The
 /// Hamming distance is used to match the descriptor sets,
 /// using a brute force algorithm.
 ///
-/// `descriptors_0` The first set of descriptors.
-/// `descriptors_1` The second set of desctiptors.
-/// `distance_threshold` The distance threshold below which
-/// to accept a match.
-/// `lowes_ratio` the ratio of descriptor 0 to descriptor 1
-/// above which a match is rejected.
+/// # Arguments
+/// * `descriptors_0` The first set of descriptors.
+/// * `descriptors_1` The second set of desctiptors.
+/// * `distance_threshold` The distance threshold below which
+///    to accept a match.
+/// * `lowes_ratio` the ratio of descriptor 0 to descriptor 1
+///    above which a match is rejected.
 /// 
 /// Note: this implementation seems considerably slower than
 /// OpenCV's implementation, and the only thing I can guess is
@@ -83,80 +82,21 @@ pub fn descriptor_match(
     output
 }
 
-/// Match two sets of keypoints and descriptors. The
-/// Hamming distance is used to match the descriptor sets,
-/// using a brute force algorithm. Then, geometric verification
-/// is performed using RANSAC with the Fundamental matrix and
-/// 8-point algorithm.
-/// 
-/// There are some variations on all of the above - for example,
-/// we could consider using a cascade hashing matching process -
-/// but this is sufficient for validation of this repository. Any
-/// further optimization is out of scope for this repository.
-///
-/// `keypoints_0` The first set of keypoints.
-/// `descriptors_0` The first set of descriptors.
-/// `keypoints_1` The first set of keypoints.
-/// `descriptors_1` The second set of desctiptors.
-/// 
-/// # Return value
-/// A vector of matches.
-/// 
-/// # Examples
-/// ```no_run
-/// extern crate akaze;
-/// use akaze::ops::feature_matching::ransac_match;
-/// use std::path::Path;
-/// let options = akaze::types::evolution::Config::default();
-/// let (_evolutions_0, keypoints_0, descriptors_0) =
-///     akaze::extract_features(
-///       Path::new("image_1.jpg").to_owned(), 
-///       options);
-/// 
-/// let (_evolutions_1, keypoints_1, descriptors_1) =
-///     akaze::extract_features(
-///       Path::new("image_1.jpg").to_owned(), 
-///       options);
-/// let matches = ransac_match(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
-/// akaze::types::feature_match::serialize_to_file(&matches, Path::new("matches.cbor").to_owned());
-/// println!("Got {} matches.", matches.len());
-/// ```
-///
-pub fn ransac_match(
-    keypoints_0: &Vec<Keypoint>,
-    descriptors_0: &Vec<Descriptor>,
-    keypoints_1: &Vec<Keypoint>,
-    descriptors_1: &Vec<Descriptor>,
-) -> Vec<Match> {
-    // 50usize is a level such that no plausible matches will be filtered - effectively
-    // turning this off
-    let distance_threshold = 50usize;
-    // Take all matches that pass Lowe's ratio.
-    let mut output = descriptor_match(&descriptors_0, descriptors_1, distance_threshold, 0.7);
-    let inliers = remove_outliers(
-        &keypoints_0,
-        &keypoints_1,
-        &mut output,
-        10000,
-        0.05f32,
-        0.25f32,
-    );
-    inliers
-}
-
 /// The Hamming distance between two descriptors.
 /// Ex.
 /// 0100100
 /// 0100000
 /// Hamming distance = 1: 1 bit position differs
-/// `d0` the first descriptor.
-/// `d1` the second descriptor.
-/// `bailout_distance` If this distance is exceeded,
-/// the calculation is immediately aborted and returned.
-/// This can save a lot of time in searching for a minimum
-/// distnce because we don't need to continue the distance
-/// computation if the result would have been too large to
-/// consider anyway.
+/// 
+/// # Arguments
+/// * `d0` the first descriptor.
+/// * `d1` the second descriptor.
+/// * `bailout_distance` If this distance is exceeded,
+///    the calculation is immediately aborted and returned.
+///    This can save a lot of time in searching for a minimum
+///    distnce because we don't need to continue the distance
+///    computation if the result would have been too large to
+///    consider anyway.
 /// # Return value
 /// The Hamming distance
 fn hamming_distance(

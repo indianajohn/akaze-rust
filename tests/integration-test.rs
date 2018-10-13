@@ -8,7 +8,6 @@ use std::time::SystemTime;
 use tempdir::TempDir;
 use std::path::PathBuf;
 
-use akaze::ops::feature_matching::ransac_match;
 use akaze::types::evolution::{write_evolutions, Config};
 use akaze::types::feature_match::draw_matches;
 use akaze::types::keypoint::draw_keypoints_to_image;
@@ -98,7 +97,7 @@ fn match_features() {
         akaze::extract_features(test_image_path_1.clone(), options);
     akaze::types::keypoint::serialize_to_file(&keypoints_0, &descriptors_0, output_path.to_owned());
     debug!("Beginning matching process.");
-    let matches = ransac_match(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
+    let matches = akaze::match_features(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
     info!("Got {} matches.", matches.len());
     let start = SystemTime::now();
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {

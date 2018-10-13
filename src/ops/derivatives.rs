@@ -32,8 +32,8 @@ mod tests {
 /// The implementation of this function is using a separable kernel, for speed.
 ///
 /// # Arguments
-/// `image` - the input image.
-/// `sigma_size` - the scale of the derivative.
+/// * `image` - the input image.
+/// * `sigma_size` - the scale of the derivative.
 ///
 /// # Return value
 /// Output image derivative (an image.)
@@ -50,8 +50,8 @@ fn scharr_horizontal(image: &GrayFloatImage, sigma_size: u32) -> GrayFloatImage 
 /// The implementation of this function is using a separable kernel, for speed.
 ///
 /// # Arguments
-/// `image` - the input image.
-/// `sigma_size` - the scale of the derivative.
+/// * `image` - the input image.
+/// * `sigma_size` - the scale of the derivative.
 ///
 /// # Return value
 /// Output image derivative (an image.)
@@ -66,7 +66,7 @@ fn scharr_vertical(image: &GrayFloatImage, sigma_size: u32) -> GrayFloatImage {
 /// Produce the Scharr kernel for a certain scale, in the off-axis direction.
 ///
 /// # Arguments
-/// `scale` - the scale of the kernel.
+/// * `scale` - the scale of the kernel.
 ///
 /// # Return value
 /// The kernel.
@@ -83,7 +83,7 @@ fn scharr_off_axis_kernel(scale: u32) -> Vec<f32> {
 /// Produce the Scharr kernel for a certain scale, in the main-axis direction.
 ///
 /// # Arguments
-/// `scale` - the scale of the kernel.
+/// * `scale` - the scale of the kernel.
 ///
 /// # Return value
 /// The kernel.
@@ -102,9 +102,9 @@ fn scharr_main_axis_kernel(scale: u32) -> Vec<f32> {
 /// Produce the Scharr image derivative.
 ///
 /// # Arguments
-/// `x_order` - Order of derivative in x direction.
-/// `y_order` - Order of derivative in y direction.
-/// `sigma_size` - the scale of the kernel.
+/// * `x_order` - Order of derivative in x direction.
+/// * `y_order` - Order of derivative in y direction.
+/// * `sigma_size` - the scale of the kernel.
 ///
 /// # Return value
 /// The image derivative (an image).
