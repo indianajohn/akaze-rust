@@ -49,6 +49,8 @@ println!("Got {} matches.", matches.len());
 
 ## Running Demonstrations
 ```
+# All executables (and your code probably) should be run in release mode, otherwise
+# these can be quite slow.
 # Extraction
 cargo run --release --bin extract_features -- ./test-data/2.jpg ./output.cbor 
 
