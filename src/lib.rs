@@ -173,7 +173,7 @@ fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config) ->
 /// let options = akaze::types::evolution::Config::default();
 /// let (_evolutions, keypoints, descriptors) =
 ///     akaze::extract_features(
-///       Path::new("image.jpg").to_owned(),
+///       Path::new("test-data/1.jpg").to_owned(),
 ///       options);
 /// akaze::types::keypoint::serialize_to_file(&keypoints, &descriptors, Path::new("extractions.cbor").to_owned());
 /// ```
@@ -234,12 +234,12 @@ pub fn extract_features(
 /// let options = akaze::types::evolution::Config::default();
 /// let (_evolutions_0, keypoints_0, descriptors_0) =
 ///     akaze::extract_features(
-///       Path::new("image_1.jpg").to_owned(),
+///       Path::new("test-data/1.jpg").to_owned(),
 ///       options);
 ///
 /// let (_evolutions_1, keypoints_1, descriptors_1) =
 ///     akaze::extract_features(
-///       Path::new("image_1.jpg").to_owned(),
+///       Path::new("test-data/2.jpg").to_owned(),
 ///       options);
 /// let matches = akaze::match_features(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
 /// akaze::types::feature_match::serialize_to_file(&matches, Path::new("matches.cbor").to_owned());
