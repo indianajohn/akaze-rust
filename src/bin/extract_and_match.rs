@@ -7,6 +7,7 @@ extern crate env_logger;
 extern crate image;
 extern crate serde;
 extern crate serde_json;
+use akaze::types::keypoint::serialize_to_file;
 use akaze::ops::feature_matching::ransac_match;
 use akaze::types::evolution::Config;
 use akaze::types::feature_match;
@@ -72,18 +73,18 @@ fn main() {
     matches_path.push_str("-matches.cbor");
     let (_evolutions_0, keypoints_0, descriptors_0) = akaze::extract_features(
         Path::new(input_path_0).to_owned(),
-        Path::new(&extractions_0_path).to_owned(),
         options,
     );
+    serialize_to_file(&keypoints_0, &descriptors_0, Path::new(&extractions_0_path).to_owned());
     info!(
         "Done, extracted {} features from image 0.",
         keypoints_0.len()
     );
     let (_evolutions_1, keypoints_1, descriptors_1) = akaze::extract_features(
         Path::new(input_path_1).to_owned(),
-        Path::new(&extractions_1_path).to_owned(),
         options,
     );
+    serialize_to_file(&keypoints_0, &descriptors_0, Path::new(&extractions_1_path).to_owned());
     info!(
         "Done, extracted {} features from image 1, proceeding with matching.",
         keypoints_1.len()

@@ -1,5 +1,4 @@
 extern crate akaze;
-use std::path::PathBuf;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
@@ -7,6 +6,7 @@ extern crate image;
 extern crate tempdir;
 use std::time::SystemTime;
 use tempdir::TempDir;
+use std::path::PathBuf;
 
 use akaze::ops::feature_matching::ransac_match;
 use akaze::types::evolution::{write_evolutions, Config};
@@ -50,8 +50,9 @@ fn extract_features() {
     let tmp_dir = TempDir::new("output_dir").unwrap();
     let output_path = tmp_dir.path().join("output.json");
     let options = Config::default();
-    let (evolutions, keypoints, _descriptors) =
-        akaze::extract_features(test_image_path.clone(), output_path.to_owned(), options);
+    let (evolutions, keypoints, descriptors) =
+        akaze::extract_features(test_image_path.clone(), options);
+    akaze::types::keypoint::serialize_to_file(&keypoints, &descriptors, output_path.to_owned());
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {
         Ok(val) => {
             info!("Writing scale space; if you want to skip this step, undefine the env var AKAZE_SCALE_SPACE_DIR");
@@ -90,10 +91,12 @@ fn match_features() {
     let output_path = tmp_dir.path().join("features_0.json");
     let options = Config::default();
     let (_evolutions_0, keypoints_0, descriptors_0) =
-        akaze::extract_features(test_image_path_0.clone(), output_path.to_owned(), options);
+        akaze::extract_features(test_image_path_0.clone(), options);
+    akaze::types::keypoint::serialize_to_file(&keypoints_0, &descriptors_0, output_path.to_owned());
     let output_path = tmp_dir.path().join("features_1.json");
     let (_evolutions_1, keypoints_1, descriptors_1) =
-        akaze::extract_features(test_image_path_1.clone(), output_path.to_owned(), options);
+        akaze::extract_features(test_image_path_1.clone(), options);
+    akaze::types::keypoint::serialize_to_file(&keypoints_0, &descriptors_0, output_path.to_owned());
     debug!("Beginning matching process.");
     let matches = ransac_match(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
     info!("Got {} matches.", matches.len());

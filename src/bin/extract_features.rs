@@ -8,7 +8,7 @@ extern crate image;
 extern crate serde;
 extern crate serde_json;
 use akaze::types::evolution::{write_evolutions, Config};
-use akaze::types::keypoint::draw_keypoints_to_image;
+use akaze::types::keypoint::{draw_keypoints_to_image, serialize_to_file};
 use clap::{App, Arg};
 use std::fs::File;
 use std::io::{Read, Write};
@@ -75,11 +75,11 @@ fn main() {
         }
         None => debug!("Using default options."),
     }
-    let (evolutions, keypoints, _descriptors) = akaze::extract_features(
+    let (evolutions, keypoints, descriptors) = akaze::extract_features(
         Path::new(input_path).to_owned(),
-        Path::new(output_path).to_owned(),
         options,
     );
+    serialize_to_file(&keypoints, &descriptors, Path::new(&output_path).to_owned());
     info!("Done, extracted {} features.", keypoints.len());
     match matches.value_of("debug_path") {
         Some(val) => {

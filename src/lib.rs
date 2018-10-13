@@ -157,14 +157,26 @@ pub fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config
 /// `input_image_path` - the input image for which to extract features.
 /// `output_features_path` - the output path to which to write an output JSON file.
 /// `options` the options for the algorithm.
+/// 
 /// # Return value
 /// * The evolutions of the process. Can be used for further analysis or visualization, or ignored.
 /// * The keypoints at which features occur.
 /// * The descriptors that were computed.
+/// 
+/// # Examples
+/// ```no_run
+/// extern crate akaze;
+/// use std::path::Path;
+/// let options = akaze::types::evolution::Config::default();
+/// let (_evolutions, keypoints, descriptors) =
+///     akaze::extract_features(
+///       Path::new("image.jpg").to_owned(), 
+///       options);
+/// akaze::types::keypoint::serialize_to_file(&keypoints, &descriptors, Path::new("extractions.cbor").to_owned());
+/// ```
 ///
 pub fn extract_features(
     input_image_path: PathBuf,
-    output_features_path: PathBuf,
     options: Config,
 ) -> (Vec<EvolutionStep>, Vec<Keypoint>, Vec<Descriptor>) {
     let input_image = image::open(input_image_path).unwrap();
@@ -189,6 +201,5 @@ pub fn extract_features(
         "Computing descriptors took {}.",
         start.to(PreciseTime::now())
     );
-    types::keypoint::serialize_to_file(&keypoints, &descriptors, output_features_path);
     (evolutions, keypoints, descriptors)
 }

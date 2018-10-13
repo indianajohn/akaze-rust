@@ -101,6 +101,27 @@ pub fn descriptor_match(
 /// 
 /// # Return value
 /// A vector of matches.
+/// 
+/// # Examples
+/// ```no_run
+/// extern crate akaze;
+/// use akaze::ops::feature_matching::ransac_match;
+/// use std::path::Path;
+/// let options = akaze::types::evolution::Config::default();
+/// let (_evolutions_0, keypoints_0, descriptors_0) =
+///     akaze::extract_features(
+///       Path::new("image_1.jpg").to_owned(), 
+///       options);
+/// 
+/// let (_evolutions_1, keypoints_1, descriptors_1) =
+///     akaze::extract_features(
+///       Path::new("image_1.jpg").to_owned(), 
+///       options);
+/// let matches = ransac_match(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
+/// akaze::types::feature_match::serialize_to_file(&matches, Path::new("matches.cbor").to_owned());
+/// println!("Got {} matches.", matches.len());
+/// ```
+///
 pub fn ransac_match(
     keypoints_0: &Vec<Keypoint>,
     descriptors_0: &Vec<Descriptor>,
