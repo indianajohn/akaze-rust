@@ -53,10 +53,10 @@ println!("Got {} matches.", matches.len());
 cargo run --release --bin extract_features -- ./test-data/2.jpg ./output.cbor 
 
 # Matching
-cargo run --release --bin extract_and_match -- -m $PWD/match_image.png ./test-data/1.jpg ./test-data/2.jpg
+cargo run --release --bin extract_and_match -- -m ./match_image.png ./test-data/1.jpg ./test-data/2.jpg
 
 # Visualizing scale space
-cargo run --release --bin extract_features -- ./test-data/2.jpg ./output.cbor  -d $PWD/scale-space/
+cargo run --release --bin extract_features -- ./test-data/2.jpg ./output.cbor  -d ./scale-space/
 ```
 
 ## License
