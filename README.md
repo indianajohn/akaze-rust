@@ -47,6 +47,18 @@ akaze::types::feature_match::serialize_to_file(&matches, Path::new("matches.cbor
 println!("Got {} matches.", matches.len());
 ```
 
+## Running Demonstrations
+```
+# Extraction
+cargo run --release --bin extract_features -- ./test-data/2.jpg ./output.cbor 
+
+# Matching
+cargo run --release --bin extract_and_match -- -m $PWD/match_image.png ./test-data/1.jpg ./test-data/2.jpg
+
+# Visualizing scale space
+cargo run --release --bin extract_features -- ./test-data/2.jpg ./output.cbor  -d $PWD/scale-space/
+```
+
 ## License
 This code is released under the MIT license. See LICENSE.md for more details. You're free to
 use this however you'd like.
