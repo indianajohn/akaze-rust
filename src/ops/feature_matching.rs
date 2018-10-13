@@ -27,7 +27,7 @@ use time::PreciseTime;
 pub fn descriptor_match(
     descriptors_0: &Vec<Descriptor>,
     descriptors_1: &Vec<Descriptor>,
-    distance_threshold: f64,
+    distance_threshold: usize,
     lowes_ratio: f64,
 ) -> Vec<Match> {
     let start = PreciseTime::now();
@@ -38,7 +38,7 @@ pub fn descriptor_match(
     let mut min = std::f64::MAX;
 
     for (i, d0) in descriptors_0.iter().enumerate() {
-        let mut min_distance = std::usize::MAX;
+        let mut min_distance = distance_threshold;
         let mut min_j = 0;
         let mut second_to_min_distance = min_distance;
         for (j, d1) in descriptors_1.iter().enumerate() {
@@ -92,9 +92,11 @@ pub fn ransac_match(
     keypoints_1: &Vec<Keypoint>,
     descriptors_1: &Vec<Descriptor>,
 ) -> Vec<Match> {
-    // Take all matches that pass Lowe's ratio. 10000 is greater than
-    // the largest possible Hamming distance here
-    let mut output = descriptor_match(&descriptors_0, descriptors_1, 100000f64, 0.7);
+    // 50usize is a level such that no plausible matches will be filtered - effectively
+    // turning this off
+    let distance_threshold = 50usize;
+    // Take all matches that pass Lowe's ratio.
+    let mut output = descriptor_match(&descriptors_0, descriptors_1, distance_threshold, 0.7);
     let inliers = remove_outliers(
         &keypoints_0,
         &keypoints_1,
@@ -121,10 +123,7 @@ fn hamming_distance(
     let mut distance = 0usize;
     for it in d0.vector.iter().zip(d1.vector.iter()) {
         let (x0, x1) = it;
-        let both = *x0 & *x1;
-        let both_not = (!*x0) & (!*x1);
-        let both_not_or_both = both_not | both;
-        distance += both_not_or_both.count_zeros() as usize;
+        distance += (*x0 ^ *x1).count_ones() as usize;
         if distance > bailout_distance {
             break;
         }
