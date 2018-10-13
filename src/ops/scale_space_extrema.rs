@@ -4,7 +4,10 @@ use types::evolution::{Config, EvolutionStep};
 use types::image::ImageFunctions;
 use types::keypoint::Keypoint;
 
-pub fn find_scale_space_extrema(
+/// Compute scale space extrema to get the detector response.
+/// `evolutions` - evolutions to mutate in place.
+/// `options` - options to use.
+fn find_scale_space_extrema(
     evolutions: &mut Vec<EvolutionStep>,
     options: Config,
 ) -> Vec<Keypoint> {
@@ -129,7 +132,12 @@ pub fn find_scale_space_extrema(
     output_keypoints
 }
 
-pub fn do_subpixel_refinement(
+/// Do sub-pixel refinement
+/// `in_keypoints` - The keypoints to use.
+/// `evolutions` - The non-linear scale space.
+/// # Return value
+/// The resulting keypoints.
+fn do_subpixel_refinement(
     in_keypoints: &Vec<Keypoint>,
     evolutions: &Vec<EvolutionStep>,
 ) -> Vec<Keypoint> {
@@ -175,12 +183,19 @@ pub fn do_subpixel_refinement(
     result
 }
 
+/// Detect keypoints in an image given a nonlinear scale space. Detects
+/// scale space extrema and performs sub-pixel refinement.
+/// `evolutions` - The fully-constructed non-linear scale space.
+/// `options` - The options to use.
+/// # Return value
+/// The resulting keypoints.
 pub fn detect_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config) -> Vec<Keypoint> {
     let mut keypoints = find_scale_space_extrema(evolutions, options);
     keypoints = do_subpixel_refinement(&keypoints, &evolutions);
     keypoints
 }
 
+/// A 7x7 Gaussian kernel.
 static GAUSS25: [[f32; 7usize]; 7usize] = [
     [
         0.02546481f32,
@@ -247,6 +262,7 @@ static GAUSS25: [[f32; 7usize]; 7usize] = [
     ],
 ];
 
+/// Compute the main orientation of the keypoint.
 fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &Vec<EvolutionStep>) {
     let mut res_x: [f32; 109usize] = [0f32; 109usize];
     let mut res_y: [f32; 109usize] = [0f32; 109usize];

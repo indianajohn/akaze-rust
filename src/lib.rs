@@ -52,6 +52,10 @@ fn pm_g2(Lx: &GrayFloatImage, Ly: &GrayFloatImage, k: f64) -> GrayFloatImage {
 }
 
 /// A nonlinear scale space performs selective blurring to preserve edges.
+/// 
+/// `evolutions` the output scale space.
+/// `image` - the input image.
+/// `options` - the options to use.
 fn create_nonlinear_scale_space(
     evolutions: &mut Vec<EvolutionStep>,
     image: &GrayFloatImage,

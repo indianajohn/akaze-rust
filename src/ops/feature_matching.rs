@@ -4,24 +4,21 @@ use types::keypoint::Descriptor;
 use types::keypoint::Keypoint;
 use time::PreciseTime;
 /// Match two sets of keypoints and descriptors. The
-/// Hamming distance is used to determine the matches,
-/// and a brute force algorithm is used to get the
-/// best matches.
-///
-/// Matching is performed only in the forward direction,
-/// and no geometric verification such as planar homographies or
-/// RANSAC is used. We apply Lowe's ratio and remove successful
-/// matches in the forward direction just to avoid having too
-/// many matches to deal with and visualize, and also to speed
-/// up matching time.
-///
-/// TODO: RANSAC and/or homographies. The current results are
-/// not sufficient.
+/// Hamming distance is used to match the descriptor sets,
+/// using a brute force algorithm.
 ///
 /// `descriptors_0` The first set of descriptors.
 /// `descriptors_1` The second set of desctiptors.
 /// `distance_threshold` The distance threshold below which
 /// to accept a match.
+/// `lowes_ratio` the ratio of descriptor 0 to descriptor 1
+/// above which a match is rejected.
+/// 
+/// Note: this implementation seems considerably slower than
+/// OpenCV's implementation, and the only thing I can guess is
+/// that the Hamming distance calculation is slower. It probably
+/// warrants some further investigation.
+/// 
 /// # Return value
 /// A vector of matches.
 pub fn descriptor_match(
@@ -86,6 +83,24 @@ pub fn descriptor_match(
     output
 }
 
+/// Match two sets of keypoints and descriptors. The
+/// Hamming distance is used to match the descriptor sets,
+/// using a brute force algorithm. Then, geometric verification
+/// is performed using RANSAC with the Fundamental matrix and
+/// 8-point algorithm.
+/// 
+/// There are some variations on all of the above - for example,
+/// we could consider using a cascade hashing matching process -
+/// but this is sufficient for validation of this repository. Any
+/// further optimization is out of scope for this repository.
+///
+/// `keypoints_0` The first set of keypoints.
+/// `descriptors_0` The first set of descriptors.
+/// `keypoints_1` The first set of keypoints.
+/// `descriptors_1` The second set of desctiptors.
+/// 
+/// # Return value
+/// A vector of matches.
 pub fn ransac_match(
     keypoints_0: &Vec<Keypoint>,
     descriptors_0: &Vec<Descriptor>,
@@ -115,6 +130,12 @@ pub fn ransac_match(
 /// Hamming distance = 1: 1 bit position differs
 /// `d0` the first descriptor.
 /// `d1` the second descriptor.
+/// `bailout_distance` If this distance is exceeded,
+/// the calculation is immediately aborted and returned.
+/// This can save a lot of time in searching for a minimum
+/// distnce because we don't need to continue the distance
+/// computation if the result would have been too large to
+/// consider anyway.
 /// # Return value
 /// The Hamming distance
 fn hamming_distance(

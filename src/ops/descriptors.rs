@@ -23,6 +23,12 @@ pub fn extract_descriptors(
     output_descriptors
 }
 
+/// Computes the rotation invariant M-LDB binary descriptor (maximum descriptor length)
+/// `kpt` Input keypoint
+/// `evolutions` Input evolutions
+/// `options` Input options
+/// # Return value
+/// Binary-based descriptor
 fn get_mldb_descriptor(
     keypoint: &Keypoint,
     evolutions: &Vec<EvolutionStep>,
@@ -71,6 +77,7 @@ fn get_mldb_descriptor(
     output
 }
 
+/// Fill the comparison values for the MLDB rotation invariant descriptor
 fn mldb_fill_values(
     values: &mut Vec<f32>,
     sample_step: usize,
@@ -132,6 +139,7 @@ fn mldb_fill_values(
     }
 }
 
+/// Do the binary comparisons to obtain the descriptor
 fn mldb_binary_comparisons(
     values: &Vec<f32>,
     descriptor: &mut Vec<u8>,

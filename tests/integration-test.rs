@@ -13,6 +13,8 @@ use akaze::types::evolution::{write_evolutions, Config};
 use akaze::types::feature_match::draw_matches;
 use akaze::types::keypoint::draw_keypoints_to_image;
 
+/// Test data is included with this repository. This
+/// function helps find it for testing.
 fn locate_test_data() -> PathBuf {
     let exe_path = ::std::env::current_exe().unwrap();
     let mut parent_path = exe_path.parent().unwrap().to_owned();

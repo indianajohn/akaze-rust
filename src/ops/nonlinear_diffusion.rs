@@ -1,6 +1,5 @@
 use types::evolution::EvolutionStep;
 use types::image::{GrayFloatImage, ImageFunctions};
-//use std::io;
 /// This function performs a scalar non-linear diffusion step
 /// `Ld` Output image in the evolution
 /// `c` Conductivity image. The function c is a scalar value that depends on the gradient norm

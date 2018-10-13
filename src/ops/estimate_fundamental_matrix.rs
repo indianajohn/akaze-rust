@@ -11,7 +11,7 @@ use types::keypoint::Keypoint;
 /// `keypoints_0 ` Keypoints in set 0
 /// `keypoints_1 ` Keypoints in set 1
 /// `matches` Set of matches referring to keypoints_0 and keypoints_1.
-/// `epsiolon` The epsilon to feed into SVD.
+/// `epsilon` The epsilon to feed into SVD.
 /// # Return value
 /// Optionally, the fundamental matrix, a 3x3 matrix
 pub fn estimate_fundamental_matrix(
