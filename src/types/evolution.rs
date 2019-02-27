@@ -101,7 +101,7 @@ impl EvolutionStep {
         let esigma = options.base_scale_offset
             * f64::powf(
                 2.0f64,
-                (sublevel as f64) / (options.num_sublevels as f64) + (octave as f64),
+                f64::from(sublevel) / f64::from(options.num_sublevels) + f64::from(octave),
             );
         let etime = 0.5 * (esigma * esigma);
         EvolutionStep {
@@ -134,9 +134,9 @@ impl EvolutionStep {
 pub fn allocate_evolutions(width: u32, height: u32, options: Config) -> Vec<EvolutionStep> {
     let mut out_vec: Vec<EvolutionStep> = vec![];
     for i in 0..options.max_octave_evolution {
-        let rfactor = 1.0f64 / f64::powf(2.0f64, i as f64);
-        let level_height = ((height as f64) * rfactor) as u32;
-        let level_width = ((width as f64) * rfactor) as u32;
+        let rfactor = 1.0f64 / f64::powf(2.0f64, f64::from(i));
+        let level_height = (f64::from(height) * rfactor) as u32;
+        let level_width = (f64::from(width) * rfactor) as u32;
         // Smallest possible octave and allow one scale if the image is small
         if (level_width >= 80 && level_height >= 40) || i == 0 {
             for j in 0..options.num_sublevels {
@@ -171,46 +171,46 @@ fn build_path(mut destination_dir: PathBuf, path_label: String, idx: usize) -> P
 /// # Arguments
 /// * `evolutions` - The evolutions to write.
 /// * `destination_dir` - The destination directory.
-pub fn write_evolutions(evolutions: &Vec<EvolutionStep>, destination_dir: PathBuf) {
-    for i in 0..evolutions.len() {
+pub fn write_evolutions(evolutions: &[EvolutionStep], destination_dir: PathBuf) {
+    for (i, evolution) in evolutions.iter().enumerate() {
         save(
-            &evolutions[i].Lt,
+            &evolution.Lt,
             build_path(destination_dir.clone(), "Lt_".to_string(), i),
         );
         save(
-            &evolutions[i].Lsmooth,
+            &evolution.Lsmooth,
             build_path(destination_dir.clone(), "Lsmooth_".to_string(), i),
         );
         save(
-            &evolutions[i].Lx,
+            &evolution.Lx,
             build_path(destination_dir.clone(), "Lx_".to_string(), i),
         );
         save(
-            &evolutions[i].Ly,
+            &evolution.Ly,
             build_path(destination_dir.clone(), "Ly_".to_string(), i),
         );
         save(
-            &evolutions[i].Lxx,
+            &evolution.Lxx,
             build_path(destination_dir.clone(), "Lxx_".to_string(), i),
         );
         save(
-            &evolutions[i].Lyy,
+            &evolution.Lyy,
             build_path(destination_dir.clone(), "Lyy_".to_string(), i),
         );
         save(
-            &evolutions[i].Lxy,
+            &evolution.Lxy,
             build_path(destination_dir.clone(), "Lxy_".to_string(), i),
         );
         save(
-            &evolutions[i].Lflow,
+            &evolution.Lflow,
             build_path(destination_dir.clone(), "Lflow_".to_string(), i),
         );
         save(
-            &evolutions[i].Lstep,
+            &evolution.Lstep,
             build_path(destination_dir.clone(), "Lstep_".to_string(), i),
         );
         save(
-            &evolutions[i].Ldet,
+            &evolution.Ldet,
             build_path(destination_dir.clone(), "Ldet_".to_string(), i),
         );
     }

@@ -5,6 +5,7 @@ use crate::types::image::{
 #[cfg(test)]
 mod tests {
     use super::{scharr_main_axis_kernel, scharr_off_axis_kernel};
+    use approx::relative_eq;
 
     #[test]
     fn scharr_3x3_main_axis_kernel() {
@@ -12,7 +13,7 @@ mod tests {
         let produced_kernel = scharr_main_axis_kernel(1u32);
         assert_eq!(expected_kernel.len(), produced_kernel.len());
         for i in 0..produced_kernel.len() {
-            assert_eq!(expected_kernel[i], produced_kernel[i]);
+            relative_eq!(expected_kernel[i], produced_kernel[i]);
         }
     }
 
@@ -22,7 +23,7 @@ mod tests {
         let produced_kernel = scharr_off_axis_kernel(1u32);
         assert_eq!(expected_kernel.len(), produced_kernel.len());
         for i in 0..produced_kernel.len() {
-            assert_eq!(expected_kernel[i], produced_kernel[i]);
+            relative_eq!(expected_kernel[i], produced_kernel[i]);
         }
     }
 }

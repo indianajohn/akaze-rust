@@ -94,7 +94,7 @@ fn create_nonlinear_scale_space(
             let start = PreciseTime::now();
             evolutions[i].Lt = evolutions[i - 1].Lt.half_size();
             debug!("Half-sizing took {}", start.to(PreciseTime::now()));
-            contrast_factor = contrast_factor * 0.75;
+            contrast_factor *= 0.75;
             debug!(
                 "New image size: {}x{}, new contrast factor: {}",
                 evolutions[i].Lt.width(),
@@ -247,28 +247,20 @@ pub fn extract_features(
 /// ```
 ///
 pub fn match_features(
-    keypoints_0: &Vec<Keypoint>,
-    descriptors_0: &Vec<Descriptor>,
-    keypoints_1: &Vec<Keypoint>,
-    descriptors_1: &Vec<Descriptor>,
+    keypoints_0: &[Keypoint],
+    descriptors_0: &[Descriptor],
+    keypoints_1: &[Keypoint],
+    descriptors_1: &[Descriptor],
 ) -> Vec<Match> {
     // 50usize is a level such that no plausible matches will be filtered - effectively
     // turning this off
     let distance_threshold = 50usize;
     // Take all matches that pass Lowe's ratio.
-    let mut output = ops::feature_matching::descriptor_match(
+    let output = ops::feature_matching::descriptor_match(
         &descriptors_0,
         descriptors_1,
         distance_threshold,
         0.7,
     );
-    let inliers = remove_outliers(
-        &keypoints_0,
-        &keypoints_1,
-        &mut output,
-        10000,
-        0.05f32,
-        0.25f32,
-    );
-    inliers
+    remove_outliers(&keypoints_0, &keypoints_1, &output, 10000, 0.05f32, 0.25f32)
 }

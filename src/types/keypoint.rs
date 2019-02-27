@@ -1,10 +1,10 @@
+use crate::types::image::{draw_circle, random_color};
 use image::{DynamicImage, RgbImage};
 use serde_cbor;
 use serde_json;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use crate::types::image::{draw_circle, random_color};
 
 /// A point of interest in an image.
 /// This pretty much follows from OpenCV conventions.
@@ -53,7 +53,7 @@ pub struct Results {
 /// # Arguments
 /// * `input_image` - The image on which to draw.
 /// * `keypoints` - A vector of keypoints to draw.
-pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &Vec<Keypoint>) {
+pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &[Keypoint]) {
     for keypoint in keypoints.iter() {
         draw_circle(input_image, keypoint.point, random_color(), keypoint.size);
     }
@@ -69,7 +69,7 @@ pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &Vec<Keypo
 /// * `keypoints` - A vector of keypoints to draw.
 /// # Return value
 /// An new RGB image with keypoints drawn.
-pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> RgbImage {
+pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &[Keypoint]) -> RgbImage {
     let mut rgb_image = input_image.to_rgb();
     draw_keypoints_to_image(&mut rgb_image, keypoints);
     rgb_image

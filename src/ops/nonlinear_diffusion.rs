@@ -26,7 +26,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let mut Ld_yp_i = Ld_yp.nth(w * (y + 1) + 1).unwrap();
 
         let mut Ld_xn = Ld.buffer.iter();
-        let mut Ld_xn_i = Ld_xn.nth(w * y + 0).unwrap();
+        let mut Ld_xn_i = Ld_xn.nth(w * y).unwrap();
 
         let mut Ld_x = Ld.buffer.iter();
         let mut Ld_x_i = Ld_x.nth(w * y + 1).unwrap();
@@ -41,7 +41,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let mut c_yp_i = c_yp.nth(w * (y + 1) + 1).unwrap();
 
         let mut c_xn = c.buffer.iter();
-        let mut c_xn_i = c_xn.nth(w * y + 0).unwrap();
+        let mut c_xn_i = c_xn.nth(w * y).unwrap();
 
         let mut c_x = c.buffer.iter();
         let mut c_x_i = c_x.nth(w * y + 1).unwrap();

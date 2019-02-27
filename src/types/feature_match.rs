@@ -1,9 +1,9 @@
+use crate::types::image::{draw_line, random_color};
+use crate::types::keypoint::Keypoint;
 use image::RgbImage;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use crate::types::image::{draw_line, random_color};
-use crate::types::keypoint::Keypoint;
 extern crate serde;
 extern crate serde_json;
 
@@ -36,9 +36,9 @@ fn map_pixel_in_1(combined_width: f32, x: f32, y: f32) -> (f32, f32) {
 pub fn draw_matches(
     input_image_0: &RgbImage,
     input_image_1: &RgbImage,
-    keypoints_0: &Vec<Keypoint>,
-    keypoints_1: &Vec<Keypoint>,
-    matches: &Vec<Match>,
+    keypoints_0: &[Keypoint],
+    keypoints_1: &[Keypoint],
+    matches: &[Match],
 ) -> RgbImage {
     debug!(
         "Writing match image for two images with sizes {}x{} and {}x{}.",

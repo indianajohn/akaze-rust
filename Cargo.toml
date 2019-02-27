@@ -32,3 +32,6 @@ clap = "2.32.0"
 
 [profile.release]
 codegen-units = 1
+
+[dev-dependencies]
+approx = "0.3.1"

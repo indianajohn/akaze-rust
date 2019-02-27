@@ -104,10 +104,10 @@ fn main() {
     match matches.value_of("match_image_path") {
         Some(match_image_path) => {
             info!("Writing scale space since --debug_path/-d option was specified.");
-            let mut input_image_0 = image::open(Path::new(input_path_0).to_owned())
+            let input_image_0 = image::open(Path::new(input_path_0).to_owned())
                 .unwrap()
                 .to_rgb();
-            let mut input_image_1 = image::open(Path::new(input_path_1).to_owned())
+            let input_image_1 = image::open(Path::new(input_path_1).to_owned())
                 .unwrap()
                 .to_rgb();
             let matches_image = feature_match::draw_matches(
