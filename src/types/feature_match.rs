@@ -2,8 +2,8 @@ use image::RgbImage;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use types::image::{draw_line, random_color};
-use types::keypoint::Keypoint;
+use crate::types::image::{draw_line, random_color};
+use crate::types::keypoint::Keypoint;
 extern crate serde;
 extern crate serde_json;
 

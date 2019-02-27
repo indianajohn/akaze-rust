@@ -1,5 +1,5 @@
-use types::evolution::EvolutionStep;
-use types::image::{GrayFloatImage, ImageFunctions};
+use crate::types::evolution::EvolutionStep;
+use crate::types::image::{GrayFloatImage, ImageFunctions};
 /// This function performs a scalar non-linear diffusion step
 ///
 /// # Arguments

@@ -4,7 +4,7 @@ use serde_json;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use types::image::{draw_circle, random_color};
+use crate::types::image::{draw_circle, random_color};
 
 /// A point of interest in an image.
 /// This pretty much follows from OpenCV conventions.

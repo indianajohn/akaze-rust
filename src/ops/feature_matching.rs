@@ -1,6 +1,6 @@
 use time::PreciseTime;
-use types::feature_match::Match;
-use types::keypoint::Descriptor;
+use crate::types::feature_match::Match;
+use crate::types::keypoint::Descriptor;
 /// Match two sets of keypoints and descriptors. The
 /// Hamming distance is used to match the descriptor sets,
 /// using a brute force algorithm.

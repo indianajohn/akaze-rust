@@ -1,4 +1,4 @@
-use types::image::{
+use crate::types::image::{
     horizontal_filter, sqrt_squared, vertical_filter, GrayFloatImage, ImageFunctions,
 };
 

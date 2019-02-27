@@ -1,6 +1,7 @@
 [package]
 name = "akaze"
 version = "0.1.0"
+edition = "2018"
 authors = ["John Stalbaum <indianajohn@github>"]
 description = "A Rust implementation of the A-KAZE algorithm."
 homepage = "https://github.com/indianajohn/akaze-rust/"
@@ -9,7 +10,6 @@ readme = "README.md"
 keywords = ["CV", "vision", "sfm", "features", "descriptors"]
 categories = ["science::robotics", "multimedia::images"]
 license = "MIT"
-license-file = "README.md"
 
 
 [dependencies]

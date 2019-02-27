@@ -1,8 +1,8 @@
 use nalgebra::{Matrix2, Vector2, LU};
 use std::f32::consts::PI;
-use types::evolution::{Config, EvolutionStep};
-use types::image::ImageFunctions;
-use types::keypoint::Keypoint;
+use crate::types::evolution::{Config, EvolutionStep};
+use crate::types::image::ImageFunctions;
+use crate::types::keypoint::Keypoint;
 
 /// Compute scale space extrema to get the detector response.
 ///

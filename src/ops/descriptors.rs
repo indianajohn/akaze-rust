@@ -1,7 +1,7 @@
-use types::evolution::{Config, EvolutionStep};
-use types::image::ImageFunctions;
+use crate::types::evolution::{Config, EvolutionStep};
+use crate::types::image::ImageFunctions;
 
-use types::keypoint::{Descriptor, Keypoint};
+use crate::types::keypoint::{Descriptor, Keypoint};
 
 /// Extract descriptors from keypoints/an evolution
 ///

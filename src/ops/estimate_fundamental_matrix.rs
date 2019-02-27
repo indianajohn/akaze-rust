@@ -3,8 +3,8 @@ use random;
 use random::Source;
 use std::collections::HashSet;
 use std::ops::{Index, IndexMut};
-use types::feature_match::Match;
-use types::keypoint::Keypoint;
+use crate::types::feature_match::Match;
+use crate::types::keypoint::Keypoint;
 
 /// Do singular value decomposition to estimate the fundamental matrix
 /// given a set of 8 prospective inliers.

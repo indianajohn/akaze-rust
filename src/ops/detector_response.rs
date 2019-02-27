@@ -1,9 +1,9 @@
 use num_cpus;
-use ops::derivatives;
+use crate::ops::derivatives;
 use scoped_threadpool::Pool;
-use types::evolution::Config;
-use types::evolution::EvolutionStep;
-use types::image::{GrayFloatImage, ImageFunctions};
+use crate::types::evolution::Config;
+use crate::types::evolution::EvolutionStep;
+use crate::types::image::{GrayFloatImage, ImageFunctions};
 
 fn compute_multiscale_derivatives_for_evolution(evolution: &mut EvolutionStep, sigma_size: u32) {
     evolution.Lx = derivatives::scharr(&evolution.Lsmooth, true, false, sigma_size);

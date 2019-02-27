@@ -1,8 +1,7 @@
-use ops::fed_tau;
-use std::fmt::Write;
+use crate::ops::fed_tau;
+use crate::types::image::save;
+use crate::types::image::{GrayFloatImage, ImageFunctions};
 use std::path::PathBuf;
-use types::image::save;
-use types::image::{GrayFloatImage, ImageFunctions};
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Config {

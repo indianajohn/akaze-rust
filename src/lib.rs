@@ -20,11 +20,11 @@ use time::PreciseTime;
 
 pub mod ops;
 pub mod types;
-use ops::estimate_fundamental_matrix::remove_outliers;
-use types::evolution::{Config, EvolutionStep};
-use types::feature_match::Match;
-use types::image::{gaussian_blur, GrayFloatImage, ImageFunctions};
-use types::keypoint::{Descriptor, Keypoint};
+use crate::ops::estimate_fundamental_matrix::remove_outliers;
+use crate::types::evolution::{Config, EvolutionStep};
+use crate::types::feature_match::Match;
+use crate::types::image::{gaussian_blur, GrayFloatImage, ImageFunctions};
+use crate::types::keypoint::{Descriptor, Keypoint};
 
 /// This function computes the Perona and Malik conductivity coefficient g2
 /// g2 = 1 / (1 + dL^2 / k^2)

@@ -1,7 +1,7 @@
 extern crate image;
-use ops;
-use types::image::gaussian_blur;
-use types::image::{GrayFloatImage, ImageFunctions};
+use crate::ops;
+use crate::types::image::gaussian_blur;
+use crate::types::image::{GrayFloatImage, ImageFunctions};
 
 /// This function computes a good empirical value for the k contrast factor
 /// given an input image, the percentile (0-1), the gradient scale and the
