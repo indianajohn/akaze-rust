@@ -152,13 +152,17 @@ fn do_subpixel_refinement(
         let x_m = evolutions[keypoint.class_id].Ldet.get(x - 1, y);
         let y_p = evolutions[keypoint.class_id].Ldet.get(x, y + 1);
         let y_m = evolutions[keypoint.class_id].Ldet.get(x, y - 1);
+        let x_p_y_p = evolutions[keypoint.class_id].Ldet.get(x + 1, y + 1);
+        let x_p_y_m = evolutions[keypoint.class_id].Ldet.get(x + 1, y - 1);
+        let x_m_y_p = evolutions[keypoint.class_id].Ldet.get(x - 1, y + 1);
+        let x_m_y_m = evolutions[keypoint.class_id].Ldet.get(x - 1, y - 1);
         // Derivative
         let d_x = 0.5f32 * (x_p - x_m);
         let d_y = 0.5f32 * (y_p - y_m);
         // Hessian
         let d_xx = x_p + x_m - 2f32 * x_i;
         let d_yy = y_p + y_m - 2f32 * x_i;
-        let d_xy = 0.25f32 * (x_p + x_m) - 0.25f32 * (x_p + x_m);
+        let d_xy = 0.25f32 * (x_p_y_p + x_m_y_m) - 0.25f32 * (x_p_y_m + x_m_y_p);
         let a = Matrix2::new(d_xx, d_xy, d_xy, d_yy);
         let mut b = Vector2::new(-d_x, -d_y);
         let lu = LU::new(a.clone());
