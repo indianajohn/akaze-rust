@@ -139,8 +139,8 @@ fn find_scale_space_extrema(evolutions: &mut Vec<EvolutionStep>, options: Config
 /// # Return value
 /// The resulting keypoints.
 fn do_subpixel_refinement(
-    in_keypoints: &Vec<Keypoint>,
-    evolutions: &Vec<EvolutionStep>,
+    in_keypoints: &[Keypoint],
+    evolutions: &[EvolutionStep],
 ) -> Vec<Keypoint> {
     let mut result: Vec<Keypoint> = vec![];
     for keypoint in in_keypoints.iter() {
@@ -270,7 +270,7 @@ static GAUSS25: [[f32; 7usize]; 7usize] = [
 ];
 
 /// Compute the main orientation of the keypoint.
-fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &Vec<EvolutionStep>) {
+fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &[EvolutionStep]) {
     let mut res_x: [f32; 109usize] = [0f32; 109usize];
     let mut res_y: [f32; 109usize] = [0f32; 109usize];
     let mut angs: [f32; 109usize] = [0f32; 109usize];
@@ -308,10 +308,8 @@ fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &Vec<EvolutionS
         ang1 += 0.15f32;
         for k in 0..109 {
             let ang = angs[k];
-            if ang1 < ang2 && ang1 < ang && ang < ang2 {
-                sum_x += res_x[k];
-                sum_y += res_y[k];
-            } else if ang2 < ang1 && ((ang > 0f32 && ang < ang2) || (ang > ang1 && ang < 2.0 * PI))
+            if (ang1 < ang2 && ang1 < ang && ang < ang2)
+                || (ang2 < ang1 && ((ang > 0f32 && ang < ang2) || (ang > ang1 && ang < 2.0 * PI)))
             {
                 sum_x += res_x[k];
                 sum_y += res_y[k];

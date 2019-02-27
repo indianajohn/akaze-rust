@@ -43,8 +43,8 @@ fn pm_g2(Lx: &GrayFloatImage, Ly: &GrayFloatImage, k: f64) -> GrayFloatImage {
     let inverse_k: f64 = 1.0f64 / (k * k);
     for y in 0..Lx.height() {
         for x in 0..Lx.width() {
-            let Lx_pixel: f64 = Lx.get(x, y) as f64;
-            let Ly_pixel: f64 = Ly.get(x, y) as f64;
+            let Lx_pixel: f64 = f64::from(Lx.get(x, y));
+            let Ly_pixel: f64 = f64::from(Ly.get(x, y));
             let dst_pixel: f64 =
                 1.0f64 / (1.0f64 + inverse_k * (Lx_pixel * Lx_pixel + Ly_pixel * Ly_pixel));
             dst.put(x, y, dst_pixel as f32);

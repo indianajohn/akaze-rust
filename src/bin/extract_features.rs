@@ -67,14 +67,14 @@ fn main() {
         Some(options_path) => {
             if Path::new(options_path).exists() {
                 info!("Reading options file from {}", options_path);
-                let mut file = File::open(options_path.clone()).unwrap();
+                let mut file = File::open(options_path).unwrap();
                 let mut buffer = String::new();
                 file.read_to_string(&mut buffer).unwrap();
                 options = serde_json::from_str(&buffer).unwrap();
             } else {
-                let mut file = File::create(options_path.clone()).unwrap();
+                let mut file = File::create(options_path).unwrap();
                 let serialized = serde_json::to_string(&options).unwrap();
-                file.write(serialized.as_bytes()).unwrap();
+                file.write_all(serialized.as_bytes()).unwrap();
                 info!("Writing options file from {}", options_path);
             }
         }
