@@ -99,10 +99,11 @@ impl EvolutionStep {
     /// * `octave` - The target sublevel.
     /// * `options` - The options to use.
     fn new(octave: u32, sublevel: u32, options: Config) -> EvolutionStep {
-        let esigma = options.base_scale_offset * f64::powf(
-            2.0f64,
-            (sublevel as f64) / (options.num_sublevels as f64) + (octave as f64),
-        );
+        let esigma = options.base_scale_offset
+            * f64::powf(
+                2.0f64,
+                (sublevel as f64) / (options.num_sublevels as f64) + (octave as f64),
+            );
         let etime = 0.5 * (esigma * esigma);
         EvolutionStep {
             etime: etime,
@@ -160,8 +161,7 @@ pub fn allocate_evolutions(width: u32, height: u32, options: Config) -> Vec<Evol
 }
 
 fn build_path(mut destination_dir: PathBuf, path_label: String, idx: usize) -> PathBuf {
-    let mut to_write = String::new();
-    write!(to_write, "{}{:05}.png", path_label, idx);
+    let to_write = format!("{}{:05}.png", path_label, idx);
     destination_dir.push(to_write);
     destination_dir.set_extension(".png");
     destination_dir
