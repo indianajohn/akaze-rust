@@ -90,20 +90,20 @@ pub fn draw_matches(
 /// # Arguments
 /// * 'matches' - The matches to serialize.
 /// * `path` - Path to which to write.
-pub fn serialize_to_file(matches: &Vec<Match>, path: PathBuf) {
+pub fn serialize_to_file(matches: &[Match], path: PathBuf) {
     debug!("Writing results to {:?}", path);
     let mut file = File::create(path.clone()).unwrap();
     let extension = path.extension().unwrap();
     if extension == "json" {
         let serialized = serde_json::to_string(&matches).unwrap();
-        file.write(serialized.as_bytes()).unwrap();
+        file.write_all(serialized.as_bytes()).unwrap();
     } else if extension == "cbor" {
         let serialized = serde_cbor::to_vec(&matches).unwrap();
-        file.write(&serialized[..]).unwrap();
+        file.write_all(&serialized[..]).unwrap();
     } else {
         // Default to JSON
         let serialized = serde_json::to_string(&matches).unwrap();
-        file.write(serialized.as_bytes()).unwrap();
+        file.write_all(serialized.as_bytes()).unwrap();
     }
 }
 

@@ -83,24 +83,24 @@ pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> 
 ///                   panic if the size of this vector is not equal to the
 ///                   size of the keypoints, or 0.
 /// * `path` - Path to which to write.
-pub fn serialize_to_file(keypoints: &Vec<Keypoint>, descriptors: &Vec<Descriptor>, path: PathBuf) {
+pub fn serialize_to_file(keypoints: &[Keypoint], descriptors: &[Descriptor], path: PathBuf) {
     debug!("Writing results to {:?}", path);
     let mut file = File::create(path.clone()).unwrap();
     let extension = path.extension().unwrap();
     let output = Results {
-        keypoints: keypoints.clone(),
-        descriptors: descriptors.clone(),
+        keypoints: keypoints.to_vec(),
+        descriptors: descriptors.to_vec(),
     };
     if extension == "json" {
         let serialized = serde_json::to_string(&output).unwrap();
-        file.write(serialized.as_bytes()).unwrap();
+        file.write_all(serialized.as_bytes()).unwrap();
     } else if extension == "cbor" {
         let serialized = serde_cbor::to_vec(&output).unwrap();
-        file.write(&serialized[..]).unwrap();
+        file.write_all(&serialized[..]).unwrap();
     } else {
         // Default to JSON
         let serialized = serde_json::to_string(&output).unwrap();
-        file.write(serialized.as_bytes()).unwrap();
+        file.write_all(serialized.as_bytes()).unwrap();
     }
 }
 
