@@ -82,6 +82,7 @@ fn get_mldb_descriptor(
 }
 
 /// Fill the comparison values for the MLDB rotation invariant descriptor
+#[allow(clippy::too_many_arguments)]
 fn mldb_fill_values(
     values: &mut [f32],
     sample_step: usize,
