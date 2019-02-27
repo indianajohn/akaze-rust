@@ -55,8 +55,9 @@ fn find_scale_space_extrema(evolutions: &mut Vec<EvolutionStep>, options: Config
                 let mut is_repeated = false;
                 let mut is_extremum = true;
                 for (k, prev_keypoint) in keypoint_cache.iter().enumerate() {
-                    if ((keypoint.class_id - 1) == prev_keypoint.class_id)
-                        || (keypoint.class_id == prev_keypoint.class_id)
+                    if keypoint.class_id == prev_keypoint.class_id
+                        || (keypoint.class_id != 0
+                            && keypoint.class_id - 1 == prev_keypoint.class_id)
                     {
                         let dist = (keypoint.point.0 * ratio - prev_keypoint.point.0)
                             * (keypoint.point.0 * ratio - prev_keypoint.point.0)
