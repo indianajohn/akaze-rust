@@ -26,7 +26,7 @@ use std::f64::consts::PI;
 #[allow(non_snake_case)]
 pub fn fed_tau_by_process_time(T: f64, M: i32, tau_max: f64, reordering: bool) -> Vec<f64> {
     // All cycles have the same fraction of the stopping time
-    fed_tau_by_cycle_time(T / (M as f64), tau_max, reordering)
+    fed_tau_by_cycle_time(T / f64::from(M), tau_max, reordering)
 }
 
 /// This function allocates an array of the least number of time steps such
@@ -59,10 +59,12 @@ fn fed_tau_by_cycle_time(t: f64, tau_max: f64, reordering: bool) -> Vec<f64> {
 /// # Return value
 /// The vector with the dynamic step sizes
 fn fed_tau_internal(n: usize, scale: f64, tau_max: f64, reordering: bool) -> Vec<f64> {
-    let mut tauh: Vec<f64> = vec![]; // unsorted tauh
-    if reordering {
-        tauh = vec![0f64; n];
-    }
+    let mut tauh = if reordering {
+        vec![0f64; n]
+    } else {
+        // unsorted tauh
+        vec![]
+    };
     if n == 0 {
         vec![]
     } else {
@@ -89,13 +91,13 @@ fn fed_tau_internal(n: usize, scale: f64, tau_max: f64, reordering: bool) -> Vec
                 prime += 1;
             }
             let mut k = 0;
-            for l in 0..n {
+            for t in tau.iter_mut() {
                 let mut index = ((k + 1) * kappa) % prime - 1;
                 while index >= n {
                     k += 1;
                     index = ((k + 1) * kappa) % prime - 1;
                 }
-                tau[l] = tauh[index];
+                *t = tauh[index];
                 k += 1;
             }
         }

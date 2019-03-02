@@ -20,11 +20,11 @@ use time::PreciseTime;
 
 pub mod ops;
 pub mod types;
-use ops::estimate_fundamental_matrix::remove_outliers;
-use types::evolution::{Config, EvolutionStep};
-use types::feature_match::Match;
-use types::image::{gaussian_blur, GrayFloatImage, ImageFunctions};
-use types::keypoint::{Descriptor, Keypoint};
+use crate::ops::estimate_fundamental_matrix::remove_outliers;
+use crate::types::evolution::{Config, EvolutionStep};
+use crate::types::feature_match::Match;
+use crate::types::image::{gaussian_blur, GrayFloatImage, ImageFunctions};
+use crate::types::keypoint::{Descriptor, Keypoint};
 
 /// This function computes the Perona and Malik conductivity coefficient g2
 /// g2 = 1 / (1 + dL^2 / k^2)
@@ -43,8 +43,8 @@ fn pm_g2(Lx: &GrayFloatImage, Ly: &GrayFloatImage, k: f64) -> GrayFloatImage {
     let inverse_k: f64 = 1.0f64 / (k * k);
     for y in 0..Lx.height() {
         for x in 0..Lx.width() {
-            let Lx_pixel: f64 = Lx.get(x, y) as f64;
-            let Ly_pixel: f64 = Ly.get(x, y) as f64;
+            let Lx_pixel: f64 = f64::from(Lx.get(x, y));
+            let Ly_pixel: f64 = f64::from(Ly.get(x, y));
             let dst_pixel: f64 =
                 1.0f64 / (1.0f64 + inverse_k * (Lx_pixel * Lx_pixel + Ly_pixel * Ly_pixel));
             dst.put(x, y, dst_pixel as f32);
@@ -94,7 +94,7 @@ fn create_nonlinear_scale_space(
             let start = PreciseTime::now();
             evolutions[i].Lt = evolutions[i - 1].Lt.half_size();
             debug!("Half-sizing took {}", start.to(PreciseTime::now()));
-            contrast_factor = contrast_factor * 0.75;
+            contrast_factor *= 0.75;
             debug!(
                 "New image size: {}x{}, new contrast factor: {}",
                 evolutions[i].Lt.width(),
@@ -247,28 +247,20 @@ pub fn extract_features(
 /// ```
 ///
 pub fn match_features(
-    keypoints_0: &Vec<Keypoint>,
-    descriptors_0: &Vec<Descriptor>,
-    keypoints_1: &Vec<Keypoint>,
-    descriptors_1: &Vec<Descriptor>,
+    keypoints_0: &[Keypoint],
+    descriptors_0: &[Descriptor],
+    keypoints_1: &[Keypoint],
+    descriptors_1: &[Descriptor],
 ) -> Vec<Match> {
     // 50usize is a level such that no plausible matches will be filtered - effectively
     // turning this off
     let distance_threshold = 50usize;
     // Take all matches that pass Lowe's ratio.
-    let mut output = ops::feature_matching::descriptor_match(
+    let output = ops::feature_matching::descriptor_match(
         &descriptors_0,
         descriptors_1,
         distance_threshold,
         0.7,
     );
-    let inliers = remove_outliers(
-        &keypoints_0,
-        &keypoints_1,
-        &mut output,
-        10000,
-        0.05f32,
-        0.25f32,
-    );
-    inliers
+    remove_outliers(&keypoints_0, &keypoints_1, &output, 10000, 0.05f32, 0.25f32)
 }

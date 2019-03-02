@@ -1,10 +1,10 @@
+use crate::types::image::{draw_circle, random_color};
 use image::{DynamicImage, RgbImage};
 use serde_cbor;
 use serde_json;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use types::image::{draw_circle, random_color};
 
 /// A point of interest in an image.
 /// This pretty much follows from OpenCV conventions.
@@ -53,7 +53,7 @@ pub struct Results {
 /// # Arguments
 /// * `input_image` - The image on which to draw.
 /// * `keypoints` - A vector of keypoints to draw.
-pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &Vec<Keypoint>) {
+pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &[Keypoint]) {
     for keypoint in keypoints.iter() {
         draw_circle(input_image, keypoint.point, random_color(), keypoint.size);
     }
@@ -69,7 +69,7 @@ pub fn draw_keypoints_to_image(input_image: &mut RgbImage, keypoints: &Vec<Keypo
 /// * `keypoints` - A vector of keypoints to draw.
 /// # Return value
 /// An new RGB image with keypoints drawn.
-pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> RgbImage {
+pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &[Keypoint]) -> RgbImage {
     let mut rgb_image = input_image.to_rgb();
     draw_keypoints_to_image(&mut rgb_image, keypoints);
     rgb_image
@@ -83,24 +83,24 @@ pub fn draw_keypoints(input_image: &DynamicImage, keypoints: &Vec<Keypoint>) -> 
 ///                   panic if the size of this vector is not equal to the
 ///                   size of the keypoints, or 0.
 /// * `path` - Path to which to write.
-pub fn serialize_to_file(keypoints: &Vec<Keypoint>, descriptors: &Vec<Descriptor>, path: PathBuf) {
+pub fn serialize_to_file(keypoints: &[Keypoint], descriptors: &[Descriptor], path: PathBuf) {
     debug!("Writing results to {:?}", path);
     let mut file = File::create(path.clone()).unwrap();
     let extension = path.extension().unwrap();
     let output = Results {
-        keypoints: keypoints.clone(),
-        descriptors: descriptors.clone(),
+        keypoints: keypoints.to_vec(),
+        descriptors: descriptors.to_vec(),
     };
     if extension == "json" {
         let serialized = serde_json::to_string(&output).unwrap();
-        file.write(serialized.as_bytes()).unwrap();
+        file.write_all(serialized.as_bytes()).unwrap();
     } else if extension == "cbor" {
         let serialized = serde_cbor::to_vec(&output).unwrap();
-        file.write(&serialized[..]).unwrap();
+        file.write_all(&serialized[..]).unwrap();
     } else {
         // Default to JSON
         let serialized = serde_json::to_string(&output).unwrap();
-        file.write(serialized.as_bytes()).unwrap();
+        file.write_all(serialized.as_bytes()).unwrap();
     }
 }
 

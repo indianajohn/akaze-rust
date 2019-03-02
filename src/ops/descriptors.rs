@@ -1,7 +1,7 @@
-use types::evolution::{Config, EvolutionStep};
-use types::image::ImageFunctions;
+use crate::types::evolution::{Config, EvolutionStep};
+use crate::types::image::ImageFunctions;
 
-use types::keypoint::{Descriptor, Keypoint};
+use crate::types::keypoint::{Descriptor, Keypoint};
 
 /// Extract descriptors from keypoints/an evolution
 ///
@@ -12,8 +12,8 @@ use types::keypoint::{Descriptor, Keypoint};
 /// # Return value
 /// A vector of descriptors.
 pub fn extract_descriptors(
-    evolutions: &Vec<EvolutionStep>,
-    keypoints: &Vec<Keypoint>,
+    evolutions: &[EvolutionStep],
+    keypoints: &[Keypoint],
     options: Config,
 ) -> Vec<Descriptor> {
     //int t = (6+36+120)*options_.descriptor_channels
@@ -35,7 +35,7 @@ pub fn extract_descriptors(
 /// Binary-based descriptor
 fn get_mldb_descriptor(
     keypoint: &Keypoint,
-    evolutions: &Vec<EvolutionStep>,
+    evolutions: &[EvolutionStep],
     options: Config,
 ) -> Descriptor {
     let t = (6usize + 36usize + 120usize) * options.descriptor_channels;
@@ -55,9 +55,9 @@ fn get_mldb_descriptor(
     let si = f32::sin(keypoint.angle);
     let mut dpos = 0usize;
     let pattern_size = options.descriptor_pattern_size as f32;
-    for lvl in 0..3 {
+    for (lvl, multiplier) in size_mult.iter().enumerate() {
         let val_count = (lvl + 2usize) * (lvl + 2usize);
-        let sample_size = f32::ceil(pattern_size * size_mult[lvl]) as usize;
+        let sample_size = f32::ceil(pattern_size * multiplier) as usize;
         mldb_fill_values(
             &mut values,
             sample_size,
@@ -82,8 +82,9 @@ fn get_mldb_descriptor(
 }
 
 /// Fill the comparison values for the MLDB rotation invariant descriptor
+#[allow(clippy::too_many_arguments)]
 fn mldb_fill_values(
-    values: &mut Vec<f32>,
+    values: &mut [f32],
     sample_step: usize,
     level: usize,
     xf: f32,
@@ -92,7 +93,7 @@ fn mldb_fill_values(
     si: f32,
     scale: f32,
     options: Config,
-    evolutions: &Vec<EvolutionStep>,
+    evolutions: &[EvolutionStep],
 ) {
     let pattern_size = options.descriptor_pattern_size;
     let nr_channels = options.descriptor_channels;
@@ -145,8 +146,8 @@ fn mldb_fill_values(
 
 /// Do the binary comparisons to obtain the descriptor
 fn mldb_binary_comparisons(
-    values: &Vec<f32>,
-    descriptor: &mut Vec<u8>,
+    values: &[f32],
+    descriptor: &mut [u8],
     count: usize,
     dpos: &mut usize,
     nr_channels: usize,
@@ -155,10 +156,11 @@ fn mldb_binary_comparisons(
         for i in 0..count {
             let ival = values[nr_channels * i + pos];
             for j in (i + 1)..count {
-                let mut res = 0u8;
-                if ival > values[nr_channels * j + pos] {
-                    res = 1u8;
-                }
+                let res = if ival > values[nr_channels * j + pos] {
+                    1u8
+                } else {
+                    0u8
+                };
                 descriptor[*dpos >> 3usize] |= res << (*dpos & 7);
                 *dpos += 1usize;
             }

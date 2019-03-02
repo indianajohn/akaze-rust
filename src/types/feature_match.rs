@@ -1,9 +1,9 @@
+use crate::types::image::{draw_line, random_color};
+use crate::types::keypoint::Keypoint;
 use image::RgbImage;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use types::image::{draw_line, random_color};
-use types::keypoint::Keypoint;
 extern crate serde;
 extern crate serde_json;
 
@@ -36,9 +36,9 @@ fn map_pixel_in_1(combined_width: f32, x: f32, y: f32) -> (f32, f32) {
 pub fn draw_matches(
     input_image_0: &RgbImage,
     input_image_1: &RgbImage,
-    keypoints_0: &Vec<Keypoint>,
-    keypoints_1: &Vec<Keypoint>,
-    matches: &Vec<Match>,
+    keypoints_0: &[Keypoint],
+    keypoints_1: &[Keypoint],
+    matches: &[Match],
 ) -> RgbImage {
     debug!(
         "Writing match image for two images with sizes {}x{} and {}x{}.",
@@ -90,20 +90,20 @@ pub fn draw_matches(
 /// # Arguments
 /// * 'matches' - The matches to serialize.
 /// * `path` - Path to which to write.
-pub fn serialize_to_file(matches: &Vec<Match>, path: PathBuf) {
+pub fn serialize_to_file(matches: &[Match], path: PathBuf) {
     debug!("Writing results to {:?}", path);
     let mut file = File::create(path.clone()).unwrap();
     let extension = path.extension().unwrap();
     if extension == "json" {
         let serialized = serde_json::to_string(&matches).unwrap();
-        file.write(serialized.as_bytes()).unwrap();
+        file.write_all(serialized.as_bytes()).unwrap();
     } else if extension == "cbor" {
         let serialized = serde_cbor::to_vec(&matches).unwrap();
-        file.write(&serialized[..]).unwrap();
+        file.write_all(&serialized[..]).unwrap();
     } else {
         // Default to JSON
         let serialized = serde_json::to_string(&matches).unwrap();
-        file.write(serialized.as_bytes()).unwrap();
+        file.write_all(serialized.as_bytes()).unwrap();
     }
 }
 

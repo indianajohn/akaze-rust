@@ -1,7 +1,7 @@
 extern crate image;
-use ops;
-use types::image::gaussian_blur;
-use types::image::{GrayFloatImage, ImageFunctions};
+use crate::ops;
+use crate::types::image::gaussian_blur;
+use crate::types::image::{GrayFloatImage, ImageFunctions};
 
 /// This function computes a good empirical value for the k contrast factor
 /// given an input image, the percentile (0-1), the gradient scale and the
@@ -29,8 +29,8 @@ pub fn compute_contrast_factor(
     let Ly = ops::derivatives::scharr(&gaussian, false, true, 1);
     for y in 1..(gaussian.height() - 1) {
         for x in 1..(gaussian.width() - 1) {
-            let Lx: f64 = Lx.get(x, y) as f64;
-            let Ly: f64 = Ly.get(x, y) as f64;
+            let Lx = f64::from(Lx.get(x, y));
+            let Ly = f64::from(Ly.get(x, y));
             let modg: f64 = f64::sqrt(Lx * Lx + Ly * Ly);
             if modg > hmax {
                 hmax = modg;
@@ -39,13 +39,13 @@ pub fn compute_contrast_factor(
     }
     for y in 1..(gaussian.height() - 1) {
         for x in 1..(gaussian.width() - 1) {
-            let Lx: f64 = Lx.get(x, y) as f64;
-            let Ly: f64 = Ly.get(x, y) as f64;
+            let Lx = f64::from(Lx.get(x, y));
+            let Ly = f64::from(Ly.get(x, y));
             let modg: f64 = f64::sqrt(Lx * Lx + Ly * Ly);
             if modg != 0.0 {
                 let mut bin_number = f64::floor((num_bins as f64) * (modg / hmax)) as usize;
                 if bin_number == num_bins {
-                    bin_number = bin_number - 1;
+                    bin_number -= 1;
                 }
                 histogram[bin_number] += 1f64;
                 num_points += 1f64;
@@ -56,16 +56,16 @@ pub fn compute_contrast_factor(
     let mut k: usize = 0;
     let mut num_elements: usize = 0;
     while num_elements < threshold && k < num_bins {
-        num_elements = num_elements + histogram[k] as usize;
+        num_elements += histogram[k] as usize;
         k += 1;
     }
     debug!(
         "hmax: {}, threshold: {}, num_elements: {}",
         hmax, threshold, num_elements
     );
-    let mut kperc: f64 = 0.03;
     if num_elements >= threshold {
-        kperc = hmax * (k as f64) / (num_bins as f64);
+        hmax * (k as f64) / (num_bins as f64)
+    } else {
+        0.03
     }
-    kperc
 }

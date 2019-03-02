@@ -106,8 +106,8 @@ fn match_features() {
             let string_to_pass = val.to_string();
             let path_to_scale_space_dir = std::path::Path::new(&string_to_pass.clone()).to_owned();
             std::fs::create_dir_all(&string_to_pass.clone()).unwrap();
-            let mut input_image_0 = image::open(test_image_path_0.clone()).unwrap().to_rgb();
-            let mut input_image_1 = image::open(test_image_path_1.clone()).unwrap().to_rgb();
+            let input_image_0 = image::open(test_image_path_0.clone()).unwrap().to_rgb();
+            let input_image_1 = image::open(test_image_path_1.clone()).unwrap().to_rgb();
             let match_image = draw_matches(
                 &input_image_0,
                 &input_image_1,

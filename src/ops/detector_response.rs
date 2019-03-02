@@ -1,9 +1,9 @@
+use crate::ops::derivatives;
+use crate::types::evolution::Config;
+use crate::types::evolution::EvolutionStep;
+use crate::types::image::{GrayFloatImage, ImageFunctions};
 use num_cpus;
-use ops::derivatives;
 use scoped_threadpool::Pool;
-use types::evolution::Config;
-use types::evolution::EvolutionStep;
-use types::image::{GrayFloatImage, ImageFunctions};
 
 fn compute_multiscale_derivatives_for_evolution(evolution: &mut EvolutionStep, sigma_size: u32) {
     evolution.Lx = derivatives::scharr(&evolution.Lsmooth, true, false, sigma_size);
@@ -19,7 +19,7 @@ fn compute_multiscale_derivatives(evolutions: &mut Vec<EvolutionStep>, options: 
     pool.scoped(|scoped| {
         for evolution in evolutions.iter_mut() {
             scoped.execute(move || {
-                let ratio = f64::powf(2.0f64, evolution.octave as f64);
+                let ratio = f64::powf(2.0f64, f64::from(evolution.octave));
                 let sigma_size =
                     f64::round(evolution.esigma * options.derivative_factor / ratio) as u32;
                 compute_multiscale_derivatives_for_evolution(evolution, sigma_size);
@@ -38,7 +38,7 @@ fn compute_multiscale_derivatives(evolutions: &mut Vec<EvolutionStep>, options: 
 pub fn detector_response(evolutions: &mut Vec<EvolutionStep>, options: Config) {
     compute_multiscale_derivatives(evolutions, options);
     for evolution in evolutions.iter_mut() {
-        let ratio = f64::powf(2.0, evolution.octave as f64);
+        let ratio = f64::powf(2.0, f64::from(evolution.octave));
         let sigma_size = f64::round(evolution.esigma * options.derivative_factor / ratio) as u32;
         let sigma_size_quat = sigma_size * sigma_size * sigma_size * sigma_size;
         let mut Lxx_iter = evolution.Lxx.buffer.iter();

@@ -1,8 +1,8 @@
+use crate::types::evolution::{Config, EvolutionStep};
+use crate::types::image::ImageFunctions;
+use crate::types::keypoint::Keypoint;
 use nalgebra::{Matrix2, Vector2, LU};
 use std::f32::consts::PI;
-use types::evolution::{Config, EvolutionStep};
-use types::image::ImageFunctions;
-use types::keypoint::Keypoint;
 
 /// Compute scale space extrema to get the detector response.
 ///
@@ -55,8 +55,9 @@ fn find_scale_space_extrema(evolutions: &mut Vec<EvolutionStep>, options: Config
                 let mut is_repeated = false;
                 let mut is_extremum = true;
                 for (k, prev_keypoint) in keypoint_cache.iter().enumerate() {
-                    if ((keypoint.class_id - 1) == prev_keypoint.class_id)
-                        || (keypoint.class_id == prev_keypoint.class_id)
+                    if keypoint.class_id == prev_keypoint.class_id
+                        || (keypoint.class_id != 0
+                            && keypoint.class_id - 1 == prev_keypoint.class_id)
                     {
                         let dist = (keypoint.point.0 * ratio - prev_keypoint.point.0)
                             * (keypoint.point.0 * ratio - prev_keypoint.point.0)
@@ -111,9 +112,8 @@ fn find_scale_space_extrema(evolutions: &mut Vec<EvolutionStep>, options: Config
     for i in 0..keypoint_cache.len() {
         let mut is_repeated = false;
         let kp_i = keypoint_cache[i];
-        for j in i..keypoint_cache.len() {
+        for kp_j in &keypoint_cache[i..] {
             // Compare response with the upper scale
-            let kp_j = keypoint_cache[j];
             if (kp_i.class_id + 1) == kp_j.class_id {
                 let dist = (kp_i.point.0 - kp_j.point.0) * (kp_i.point.0 - kp_j.point.0)
                     + (kp_i.point.1 - kp_j.point.1) * (kp_i.point.1 - kp_j.point.1);
@@ -139,8 +139,8 @@ fn find_scale_space_extrema(evolutions: &mut Vec<EvolutionStep>, options: Config
 /// # Return value
 /// The resulting keypoints.
 fn do_subpixel_refinement(
-    in_keypoints: &Vec<Keypoint>,
-    evolutions: &Vec<EvolutionStep>,
+    in_keypoints: &[Keypoint],
+    evolutions: &[EvolutionStep],
 ) -> Vec<Keypoint> {
     let mut result: Vec<Keypoint> = vec![];
     for keypoint in in_keypoints.iter() {
@@ -152,19 +152,23 @@ fn do_subpixel_refinement(
         let x_m = evolutions[keypoint.class_id].Ldet.get(x - 1, y);
         let y_p = evolutions[keypoint.class_id].Ldet.get(x, y + 1);
         let y_m = evolutions[keypoint.class_id].Ldet.get(x, y - 1);
+        let x_p_y_p = evolutions[keypoint.class_id].Ldet.get(x + 1, y + 1);
+        let x_p_y_m = evolutions[keypoint.class_id].Ldet.get(x + 1, y - 1);
+        let x_m_y_p = evolutions[keypoint.class_id].Ldet.get(x - 1, y + 1);
+        let x_m_y_m = evolutions[keypoint.class_id].Ldet.get(x - 1, y - 1);
         // Derivative
         let d_x = 0.5f32 * (x_p - x_m);
         let d_y = 0.5f32 * (y_p - y_m);
         // Hessian
         let d_xx = x_p + x_m - 2f32 * x_i;
         let d_yy = y_p + y_m - 2f32 * x_i;
-        let d_xy = 0.25f32 * (x_p + x_m) - 0.25f32 * (x_p + x_m);
+        let d_xy = 0.25f32 * (x_p_y_p + x_m_y_m) - 0.25f32 * (x_p_y_m + x_m_y_p);
         let a = Matrix2::new(d_xx, d_xy, d_xy, d_yy);
-        let mut b = Vector2::new(-d_x, -d_y);
-        let lu = LU::new(a.clone());
-        lu.solve(&mut b);
+        let b = Vector2::new(-d_x, -d_y);
+        let lu = LU::new(a);
+        lu.solve(&b);
         if f32::abs(b[0]) <= 1.0 && f32::abs(b[1]) <= 1.0 {
-            let mut keypoint_clone = keypoint.clone();
+            let mut keypoint_clone = *keypoint;
             keypoint_clone.point = ((x as f32) + b[0], (y as f32) + b[1]);
             keypoint_clone.point = (
                 keypoint_clone.point.0 * ratio + 0.5f32 * (ratio - 1f32),
@@ -199,74 +203,75 @@ pub fn detect_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config) ->
 }
 
 /// A 7x7 Gaussian kernel.
+#[allow(clippy::excessive_precision)]
 static GAUSS25: [[f32; 7usize]; 7usize] = [
     [
-        0.02546481f32,
-        0.02350698f32,
-        0.01849125f32,
-        0.01239505f32,
-        0.00708017f32,
-        0.00344629f32,
-        0.00142946f32,
+        0.0254_6481f32,
+        0.0235_0698f32,
+        0.0184_9125f32,
+        0.0123_9505f32,
+        0.0070_8017f32,
+        0.0034_4629f32,
+        0.0014_2946f32,
     ],
     [
-        0.02350698f32,
-        0.02169968f32,
-        0.01706957f32,
-        0.01144208f32,
-        0.00653582f32,
-        0.00318132f32,
-        0.00131956f32,
+        0.0235_0698f32,
+        0.0216_9968f32,
+        0.0170_6957f32,
+        0.0114_4208f32,
+        0.0065_3582f32,
+        0.0031_8132f32,
+        0.0013_1956f32,
     ],
     [
-        0.01849125f32,
-        0.01706957f32,
-        0.01342740f32,
-        0.00900066f32,
-        0.00514126f32,
-        0.00250252f32,
-        0.00103800f32,
+        0.0184_9125f32,
+        0.0170_6957f32,
+        0.0134_2740f32,
+        0.0090_0066f32,
+        0.0051_4126f32,
+        0.0025_0252f32,
+        0.0010_3800f32,
     ],
     [
-        0.01239505f32,
-        0.01144208f32,
-        0.00900066f32,
-        0.00603332f32,
-        0.00344629f32,
-        0.00167749f32,
-        0.00069579f32,
+        0.0123_9505f32,
+        0.0114_4208f32,
+        0.0090_0066f32,
+        0.0060_3332f32,
+        0.0034_4629f32,
+        0.0016_7749f32,
+        0.0006_9579f32,
     ],
     [
-        0.00708017f32,
-        0.00653582f32,
-        0.00514126f32,
-        0.00344629f32,
-        0.00196855f32,
-        0.00095820f32,
-        0.00039744f32,
+        0.0070_8017f32,
+        0.0065_3582f32,
+        0.0051_4126f32,
+        0.0034_4629f32,
+        0.0019_6855f32,
+        0.0009_5820f32,
+        0.0003_9744f32,
     ],
     [
-        0.00344629f32,
-        0.00318132f32,
-        0.00250252f32,
-        0.00167749f32,
-        0.00095820f32,
-        0.00046640f32,
-        0.00019346f32,
+        0.0034_4629f32,
+        0.0031_8132f32,
+        0.0025_0252f32,
+        0.0016_7749f32,
+        0.0009_5820f32,
+        0.0004_6640f32,
+        0.0001_9346f32,
     ],
     [
-        0.00142946f32,
-        0.00131956f32,
-        0.00103800f32,
-        0.00069579f32,
-        0.00039744f32,
-        0.00019346f32,
-        0.00008024f32,
+        0.0014_2946f32,
+        0.0013_1956f32,
+        0.0010_3800f32,
+        0.0006_9579f32,
+        0.0003_9744f32,
+        0.0001_9346f32,
+        0.0000_8024f32,
     ],
 ];
 
 /// Compute the main orientation of the keypoint.
-fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &Vec<EvolutionStep>) {
+fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &[EvolutionStep]) {
     let mut res_x: [f32; 109usize] = [0f32; 109usize];
     let mut res_y: [f32; 109usize] = [0f32; 109usize];
     let mut angs: [f32; 109usize] = [0f32; 109usize];
@@ -297,17 +302,16 @@ fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &Vec<EvolutionS
     let mut sum_y = 0f32;
     let mut max = 0f32;
     while ang1 < 2.0f32 * PI {
-        let mut ang2 = ang1 + PI / 3.0f32;
-        if ang1 + PI / 3.0f32 > 2.0f32 * PI {
-            ang2 = ang1 - 5.0f32 * PI / 3.0f32;
-        }
+        let ang2 = if ang1 + PI / 3.0f32 > 2.0f32 * PI {
+            ang1 - 5.0f32 * PI / 3.0f32
+        } else {
+            ang1 + PI / 3.0f32
+        };
         ang1 += 0.15f32;
         for k in 0..109 {
             let ang = angs[k];
-            if ang1 < ang2 && ang1 < ang && ang < ang2 {
-                sum_x += res_x[k];
-                sum_y += res_y[k];
-            } else if ang2 < ang1 && ((ang > 0f32 && ang < ang2) || (ang > ang1 && ang < 2.0 * PI))
+            if (ang1 < ang2 && ang1 < ang && ang < ang2)
+                || (ang2 < ang1 && ((ang > 0f32 && ang < ang2) || (ang > ang1 && ang < 2.0 * PI)))
             {
                 sum_x += res_x[k];
                 sum_y += res_y[k];

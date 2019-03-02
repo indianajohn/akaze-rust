@@ -1,6 +1,6 @@
+use crate::types::feature_match::Match;
+use crate::types::keypoint::Descriptor;
 use time::PreciseTime;
-use types::feature_match::Match;
-use types::keypoint::Descriptor;
 /// Match two sets of keypoints and descriptors. The
 /// Hamming distance is used to match the descriptor sets,
 /// using a brute force algorithm.
@@ -21,8 +21,8 @@ use types::keypoint::Descriptor;
 /// # Return value
 /// A vector of matches.
 pub fn descriptor_match(
-    descriptors_0: &Vec<Descriptor>,
-    descriptors_1: &Vec<Descriptor>,
+    descriptors_0: &[Descriptor],
+    descriptors_1: &[Descriptor],
     distance_threshold: usize,
     lowes_ratio: f64,
 ) -> Vec<Match> {
@@ -43,10 +43,8 @@ pub fn descriptor_match(
                 second_to_min_distance = min_distance;
                 min_distance = distance;
                 min_j = j;
-            } else {
-                if distance < second_to_min_distance {
-                    second_to_min_distance = distance;
-                }
+            } else if distance < second_to_min_distance {
+                second_to_min_distance = distance;
             }
         }
         // apply thresholding and Lowe's ratio

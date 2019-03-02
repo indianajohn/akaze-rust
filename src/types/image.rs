@@ -133,7 +133,7 @@ pub fn create_unit_float_image(input_image: &DynamicImage) -> GrayFloatImage {
         for gray_pixel in gray_image.pixels() {
             let output_ptr = itr_output.next().unwrap();
             let pixel_value: u8 = gray_pixel.channels()[0];
-            *output_ptr = (pixel_value as f32) * 1f32 / 255f32;
+            *output_ptr = f32::from(pixel_value) * 1f32 / 255f32;
         }
     }
     output_image
@@ -188,8 +188,8 @@ pub fn normalize(input_image: &GrayFloatImage) -> GrayFloatImage {
             let p1 = itr1.next().unwrap();
             let p2 = itr2.next().unwrap();
             let mut pixel = *p2;
-            pixel = pixel - min_pixel;
-            pixel = pixel / new_max_pixel;
+            pixel -= min_pixel;
+            pixel /= new_max_pixel;
             *p1 = pixel;
         }
     }
@@ -267,7 +267,7 @@ pub fn fill_border(output: &mut GrayFloatImage, half_width: usize) {
 /// # Return value
 /// The filter result.
 #[inline(always)]
-pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatImage {
+pub fn horizontal_filter(image: &GrayFloatImage, kernel: &[f32]) -> GrayFloatImage {
     // Cannot have an even-sized kernel
     debug_assert!(kernel.len() % 2 == 1);
     let half_width = (kernel.len() / 2) as i32;
@@ -302,7 +302,7 @@ pub fn horizontal_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloat
 /// # Return value
 /// The filter result.
 #[inline(always)]
-pub fn vertical_filter(image: &GrayFloatImage, kernel: &Vec<f32>) -> GrayFloatImage {
+pub fn vertical_filter(image: &GrayFloatImage, kernel: &[f32]) -> GrayFloatImage {
     // Cannot have an even-sized kernel
     debug_assert!(kernel.len() % 2 == 1);
     let half_width = (kernel.len() / 2) as i32;
@@ -400,9 +400,9 @@ pub fn random_color() -> (u8, u8, u8) {
 /// The averaged pixel.
 fn blend(p1: (u8, u8, u8), p2: (u8, u8, u8)) -> (u8, u8, u8) {
     (
-        (((p1.0 as f32) + (p2.0 as f32)) / 2f32) as u8,
-        (((p1.1 as f32) + (p2.1 as f32)) / 2f32) as u8,
-        (((p1.2 as f32) + (p2.2 as f32)) / 2f32) as u8,
+        ((f32::from(p1.0) + f32::from(p2.0)) / 2f32) as u8,
+        ((f32::from(p1.1) + f32::from(p2.1)) / 2f32) as u8,
+        ((f32::from(p1.2) + f32::from(p2.2)) / 2f32) as u8,
     )
 }
 
@@ -487,7 +487,13 @@ mod tests {
         // test against known correct kernel
         let kernel = gaussian_kernel(3.0, 7);
         let known_correct_kernel = vec![
-            0.10628852, 0.14032133, 0.16577007, 0.17524014, 0.16577007, 0.14032133, 0.10628852,
+            0.1062_8852,
+            0.1403_2133,
+            0.1657_7007,
+            0.1752_4014,
+            0.1657_7007,
+            0.1403_2133,
+            0.1062_8852,
         ];
         for it in kernel.iter().zip(known_correct_kernel.iter()) {
             let (i, j) = it;

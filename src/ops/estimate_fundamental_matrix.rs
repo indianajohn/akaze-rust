@@ -1,10 +1,10 @@
+use crate::types::feature_match::Match;
+use crate::types::keypoint::Keypoint;
 use nalgebra::{DMatrix, Matrix3, Vector3, SVD};
 use random;
 use random::Source;
 use std::collections::HashSet;
 use std::ops::{Index, IndexMut};
-use types::feature_match::Match;
-use types::keypoint::Keypoint;
 
 /// Do singular value decomposition to estimate the fundamental matrix
 /// given a set of 8 prospective inliers.
@@ -15,9 +15,9 @@ use types::keypoint::Keypoint;
 /// # Return value
 /// Optionally, the fundamental matrix, a 3x3 matrix
 pub fn estimate_fundamental_matrix(
-    keypoints_0: &Vec<Keypoint>,
-    keypoints_1: &Vec<Keypoint>,
-    matches: &mut Vec<Match>,
+    keypoints_0: &[Keypoint],
+    keypoints_1: &[Keypoint],
+    matches: &mut [Match],
     epsilon: f32,
 ) -> Option<Matrix3<f32>> {
     debug_assert!(matches.len() == 8);
@@ -97,16 +97,16 @@ fn evaluate_model(fund_mat: Matrix3<f32>, keypoint_0: &Keypoint, keypoint_1: &Ke
 /// The inlier matches. If no model was found, the size
 /// of the vector will be 0.
 pub fn remove_outliers(
-    keypoints_0: &Vec<Keypoint>,
-    keypoints_1: &Vec<Keypoint>,
-    matches: &Vec<Match>,
+    keypoints_0: &[Keypoint],
+    keypoints_1: &[Keypoint],
+    matches: &[Match],
     num_trials: usize,
     epsilon_model: f32,
     epsilon_inlier: f32,
 ) -> Vec<Match> {
     if matches.len() < 8 {
         warn!("Not enough points to do RANSAC.");
-        return matches.clone();
+        return matches.to_vec();
     } else {
         debug!("Removing outliers with RANSAC using fundamental matrix model.");
     }
@@ -125,30 +125,27 @@ pub fn remove_outliers(
         }
 
         // Get a model
-        match estimate_fundamental_matrix(
+        if let Some(model) = estimate_fundamental_matrix(
             &keypoints_0,
             &keypoints_1,
             &mut model_matches,
             epsilon_model,
         ) {
-            Some(model) => {
-                let mut inlier_count = 0;
-                for match_i in matches {
-                    let error_i = evaluate_model(
-                        model,
-                        &keypoints_0[match_i.index_0],
-                        &keypoints_1[match_i.index_1],
-                    );
-                    if error_i < epsilon_inlier {
-                        inlier_count += 1;
-                    }
-                }
-                if inlier_count > max_inlier_count {
-                    max_inlier_count = inlier_count;
-                    final_model = model;
+            let mut inlier_count = 0;
+            for match_i in matches {
+                let error_i = evaluate_model(
+                    model,
+                    &keypoints_0[match_i.index_0],
+                    &keypoints_1[match_i.index_1],
+                );
+                if error_i < epsilon_inlier {
+                    inlier_count += 1;
                 }
             }
-            None => {}
+            if inlier_count > max_inlier_count {
+                max_inlier_count = inlier_count;
+                final_model = model;
+            }
         }
     }
 

@@ -1,5 +1,6 @@
-use types::evolution::EvolutionStep;
-use types::image::{GrayFloatImage, ImageFunctions};
+use crate::types::evolution::EvolutionStep;
+use crate::types::image::{GrayFloatImage, ImageFunctions};
+use nalgebra::Vector4;
 /// This function performs a scalar non-linear diffusion step
 ///
 /// # Arguments
@@ -26,7 +27,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let mut Ld_yp_i = Ld_yp.nth(w * (y + 1) + 1).unwrap();
 
         let mut Ld_xn = Ld.buffer.iter();
-        let mut Ld_xn_i = Ld_xn.nth(w * y + 0).unwrap();
+        let mut Ld_xn_i = Ld_xn.nth(w * y).unwrap();
 
         let mut Ld_x = Ld.buffer.iter();
         let mut Ld_x_i = Ld_x.nth(w * y + 1).unwrap();
@@ -41,7 +42,7 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         let mut c_yp_i = c_yp.nth(w * (y + 1) + 1).unwrap();
 
         let mut c_xn = c.buffer.iter();
-        let mut c_xn_i = c_xn.nth(w * y + 0).unwrap();
+        let mut c_xn_i = c_xn.nth(w * y).unwrap();
 
         let mut c_x = c.buffer.iter();
         let mut c_x_i = c_x.nth(w * y + 1).unwrap();
@@ -73,59 +74,59 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
     // First row
     for x in 1..(Lstep.width() - 1) {
         let y = 0;
-        let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
-        let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
-        let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
+        let x_pos = eval(c, Ld, x, y, [0, 1, 1, 0], [0, 0, 0, 0]);
+        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, 1, 1, 0]);
+        let x_neg = eval(c, Ld, x, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
         Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos - x_neg + y_pos));
     }
     {
         let x = 0;
         let y = 0;
-        let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
-        let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
+        let x_pos = eval(c, Ld, x, y, [0, 1, 1, 0], [0, 0, 0, 0]);
+        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, 1, 1, 0]);
         Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos + y_pos));
     }
     {
         let x = Lstep.width() - 1;
         let y = 0;
-        let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
-        let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
+        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, 1, 1, 0]);
+        let x_neg = eval(c, Ld, x, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
         Lstep.put(x, y, 0.5 * (step_size as f32) * (-x_neg + y_pos));
     }
     // Last row
     let y = Lstep.height() - 1;
     for x in 1..(Lstep.width() - 1) {
-        let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
-        let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, -1, -1, 0);
-        let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
+        let x_pos = eval(c, Ld, x, y, [0, 1, 1, 0], [0, 0, 0, 0]);
+        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, -1, -1, 0]);
+        let x_neg = eval(c, Ld, x, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
         Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos - x_neg + y_pos));
     }
     {
         let x = 0;
-        let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
-        let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, -1, -1, 0);
+        let x_pos = eval(c, Ld, x, y, [0, 1, 1, 0], [0, 0, 0, 0]);
+        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, -1, -1, 0]);
         Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos + y_pos));
     }
     {
         let x = Lstep.width() - 1;
-        let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, -1, -1, 0);
-        let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
+        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, -1, -1, 0]);
+        let x_neg = eval(c, Ld, x, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
         Lstep.put(x, y, 0.5 * (step_size as f32) * (-x_neg + y_pos));
     }
     // First and last columns
     for y in 1..(Lstep.height() - 1) {
         {
             let x = 0;
-            let x_pos = eval(c, Ld, x, y, 0, 1, 1, 0, 0, 0, 0, 0);
-            let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
-            let y_neg = eval(c, Ld, x, y, 0, 0, 0, 0, -1, 0, 0, -1);
+            let x_pos = eval(c, Ld, x, y, [0, 1, 1, 0], [0, 0, 0, 0]);
+            let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, 1, 1, 0]);
+            let y_neg = eval(c, Ld, x, y, [0, 0, 0, 0], [-1, 0, 0, -1]);
             Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos + y_pos - y_neg));
         }
         {
             let x = Lstep.width() - 1;
-            let y_pos = eval(c, Ld, x, y, 0, 0, 0, 0, 0, 1, 1, 0);
-            let x_neg = eval(c, Ld, x, y, -1, 0, 0, -1, 0, 0, 0, 0);
-            let y_neg = eval(c, Ld, x, y, 0, 0, 0, 0, -1, 0, 0, -1);
+            let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, 1, 1, 0]);
+            let x_neg = eval(c, Ld, x, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
+            let y_neg = eval(c, Ld, x, y, [0, 0, 0, 0], [-1, 0, 0, -1]);
             Lstep.put(x, y, 0.5 * (step_size as f32) * (-x_neg + y_pos - y_neg));
         }
     }
@@ -144,32 +145,23 @@ pub fn eval(
     Ld: &GrayFloatImage,
     x: usize,
     y: usize,
-    plus_x_1: i32,
-    plus_x_2: i32,
-    plus_x_3: i32,
-    plus_x_4: i32,
-    plus_y_1: i32,
-    plus_y_2: i32,
-    plus_y_3: i32,
-    plus_y_4: i32,
+    plus_x: impl Into<Vector4<i32>>,
+    plus_y: impl Into<Vector4<i32>>,
 ) -> f32 {
-    let set_x_1 = (x as i32) + plus_x_1;
-    debug_assert!(set_x_1 >= 0);
-    let set_x_2 = (x as i32) + plus_x_2;
-    debug_assert!(set_x_2 >= 0);
-    let set_x_3 = (x as i32) + plus_x_3;
-    debug_assert!(set_x_3 >= 0);
-    let set_x_4 = (x as i32) + plus_x_4;
-    debug_assert!(set_x_4 >= 0);
-    let set_y_1 = (y as i32) + plus_y_1;
-    debug_assert!(set_y_1 >= 0);
-    let set_y_2 = (y as i32) + plus_y_2;
-    debug_assert!(set_y_2 >= 0);
-    let set_y_3 = (y as i32) + plus_y_3;
-    debug_assert!(set_y_3 >= 0);
-    let set_y_4 = (y as i32) + plus_y_4;
-    debug_assert!(set_y_4 >= 0);
+    let plus_x = plus_x.into();
+    let plus_y = plus_y.into();
+    let set_x = plus_x + Vector4::from_element(x as i32);
+    let set_y = plus_y + Vector4::from_element(y as i32);
     // If we access past the upper bounds of image the image class will assert
-    (c.get(set_x_1 as usize, set_y_1 as usize) + c.get(set_x_2 as usize, set_y_2 as usize))
-        * (Ld.get(set_x_3 as usize, set_y_3 as usize) - Ld.get(set_x_4 as usize, set_y_4 as usize))
+    let c_components = set_x
+        .rows_range(0..2)
+        .zip_map(&set_y.rows_range(0..2), |x, y| {
+            c.get(x as usize, y as usize)
+        });
+    let ld_components = set_x
+        .rows_range(2..4)
+        .zip_map(&set_y.rows_range(2..4), |x, y| {
+            Ld.get(x as usize, y as usize)
+        });
+    (c_components[0] + c_components[1]) * (ld_components[0] - ld_components[1])
 }
