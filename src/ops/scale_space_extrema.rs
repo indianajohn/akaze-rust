@@ -291,7 +291,7 @@ fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &[EvolutionStep
                 let gweight = GAUSS25[id[(i + 6) as usize]][id[(j + 6) as usize]];
                 res_x[idx] = gweight * evolutions[level].Lx.get(ix, iy);
                 res_y[idx] = gweight * evolutions[level].Ly.get(ix, iy);
-                angs[idx] = f32::atan2(res_x[idx], res_y[idx]);
+                angs[idx] = res_y[idx].atan2(res_y[idx]);
                 idx += 1;
             }
         }
@@ -323,7 +323,7 @@ fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &[EvolutionStep
         if val > max {
             // store largest orientation
             max = val;
-            keypoint.angle = f32::atan2(sum_x, sum_y);
+            keypoint.angle = sum_y.atan2(sum_x);
         }
     }
 }
