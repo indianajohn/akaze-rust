@@ -41,7 +41,7 @@ fn get_mldb_descriptor(
     let t = (6usize + 36usize + 120usize) * options.descriptor_channels;
     let mut output = Descriptor {
         // 486 bit descriptor
-        vector: vec![0u8; t],
+        vector: vec![0u8; (t + 7) / 8],
     };
     let max_channels = 3usize;
     debug_assert!(options.descriptor_channels <= max_channels);
