@@ -29,6 +29,7 @@ pub fn descriptor_match(
     let start = PreciseTime::now();
     let mut output: Vec<Match> = vec![];
     let mut filtered_by_threshold = 0;
+    let mut filtered_by_lowes = 0;
     let mut mean = 0.;
     let mut max = 0.;
     let mut min = std::f64::MAX;
@@ -65,13 +66,16 @@ pub fn descriptor_match(
             } else {
                 filtered_by_threshold += 1;
             }
+        } else {
+            filtered_by_lowes += 1;
         }
     }
     mean /= (filtered_by_threshold + output.len()) as f64;
     debug!(
-        "{} matches, {} filtered, dist min={}, mean={}, max={}, took {}.",
+        "{} matches, {} filtered by threshold, {} filtered by lowes, dist min={}, mean={}, max={}, took {}.",
         output.len(),
         filtered_by_threshold,
+        filtered_by_lowes,
         min,
         mean,
         max,
