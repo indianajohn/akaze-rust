@@ -323,7 +323,7 @@ fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &[EvolutionStep
         if val > max {
             // store largest orientation
             max = val;
-            keypoint.angle = f32::atan2(sum_x, sum_y) * (PI / 180.0);
+            keypoint.angle = f32::atan2(sum_x, sum_y);
         }
     }
 }
