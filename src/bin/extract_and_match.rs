@@ -65,7 +65,7 @@ fn main() {
         .parse()
         .unwrap();
     info!(
-        "Input image paths are {}/{}, output extractions path is {}, threshols is {}.",
+        "Input image paths are {}/{}, output extractions path is {}, threshold is {}.",
         input_path_0, input_path_1, output_prefix, threshold,
     );
     let options = Config::default();
