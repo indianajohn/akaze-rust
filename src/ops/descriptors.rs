@@ -20,7 +20,8 @@ pub fn extract_descriptors(
     //desc = cv::Mat::zeros(kpts.size(), ceil(t/8.), CV_8UC1);
     let mut output_descriptors: Vec<Descriptor> = vec![];
     for keypoint in keypoints {
-        output_descriptors.push(get_mldb_descriptor(keypoint, evolutions, options));
+        let descriptor = get_mldb_descriptor(keypoint, evolutions, options);
+        output_descriptors.push(descriptor);
     }
     output_descriptors
 }
@@ -41,7 +42,7 @@ fn get_mldb_descriptor(
     let t = (6usize + 36usize + 120usize) * options.descriptor_channels;
     let mut output = Descriptor {
         // 486 bit descriptor
-        vector: vec![0u8; t],
+        vector: vec![0u8; (t + 7) / 8],
     };
     let max_channels = 3usize;
     debug_assert!(options.descriptor_channels <= max_channels);
@@ -105,11 +106,15 @@ fn mldb_fill_values(
             let mut dy = 0f32;
             let mut nsamples = 0usize;
             for k in i..(i + (sample_step as i32)) {
-                for l in i..(j + (sample_step as i32)) {
-                    let sample_y = yf + ((l as f32) * co * scale + (k as f32) * si * scale);
-                    let sample_x = xf + ((-l as f32) * si * scale + (k as f32) * co * scale);
-                    let y1 = f32::round(sample_y) as usize;
-                    let x1 = f32::round(sample_x) as usize;
+                for l in j..(j + (sample_step as i32)) {
+                    let l = l as f32 + 0.5;
+                    let k = k as f32 + 0.5;
+                    let sample_y = yf + (l * co * scale + k * si * scale);
+                    let sample_x = xf + (-l * si * scale + k * co * scale);
+                    let y1 = f32::round(sample_y) as isize;
+                    let x1 = f32::round(sample_x) as isize;
+                    let y1 = y1 as usize;
+                    let x1 = x1 as usize;
                     let ri = evolutions[level].Lt.get(x1, y1);
                     di += ri;
                     if nr_channels > 1 {
@@ -127,6 +132,7 @@ fn mldb_fill_values(
                     nsamples += 1;
                 }
             }
+
             di /= nsamples as f32;
             dx /= nsamples as f32;
             dy /= nsamples as f32;
