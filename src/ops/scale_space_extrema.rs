@@ -291,7 +291,7 @@ fn compute_main_orientation(keypoint: &mut Keypoint, evolutions: &[EvolutionStep
                 let gweight = GAUSS25[id[(i + 6) as usize]][id[(j + 6) as usize]];
                 res_x[idx] = gweight * evolutions[level].Lx.get(ix, iy);
                 res_y[idx] = gweight * evolutions[level].Ly.get(ix, iy);
-                angs[idx] = f32::atan2(res_x[idx], res_y[idx]) * (PI / 180.0f32);
+                angs[idx] = f32::atan2(res_x[idx], res_y[idx]);
                 idx += 1;
             }
         }
