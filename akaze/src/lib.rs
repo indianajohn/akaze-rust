@@ -1,18 +1,5 @@
-extern crate image;
 #[macro_use]
 extern crate log;
-extern crate env_logger;
-extern crate num_cpus;
-extern crate primal;
-extern crate random;
-extern crate scoped_threadpool;
-extern crate time;
-#[macro_use]
-extern crate serde_derive;
-extern crate nalgebra;
-extern crate serde;
-extern crate serde_cbor;
-extern crate serde_json;
 
 use image::GenericImageView;
 use std::path::PathBuf;
@@ -20,11 +7,11 @@ use time::PreciseTime;
 
 pub mod ops;
 pub mod types;
-use crate::ops::estimate_fundamental_matrix::remove_outliers;
-use crate::types::evolution::{Config, EvolutionStep};
-use crate::types::feature_match::Match;
-use crate::types::image::{gaussian_blur, GrayFloatImage, ImageFunctions};
-use crate::types::keypoint::{Descriptor, Keypoint};
+use ops::estimate_fundamental_matrix::remove_outliers;
+use types::evolution::{Config, EvolutionStep};
+use types::feature_match::Match;
+use types::image::{gaussian_blur, GrayFloatImage, ImageFunctions};
+use types::keypoint::{Descriptor, Keypoint};
 
 /// This function computes the Perona and Malik conductivity coefficient g2
 /// g2 = 1 / (1 + dL^2 / k^2)
@@ -175,7 +162,6 @@ fn find_image_keypoints(evolutions: &mut Vec<EvolutionStep>, options: Config) ->
 ///     akaze::extract_features(
 ///       Path::new("test-data/1.jpg").to_owned(),
 ///       options);
-/// akaze::types::keypoint::serialize_to_file(&keypoints, &descriptors, Path::new("extractions.cbor").to_owned());
 /// ```
 ///
 pub fn extract_features(
@@ -219,10 +205,28 @@ pub fn extract_features(
 /// further optimization is out of scope for this repository.
 ///
 /// # Arguments
-/// * `keypoints_0` - The first set of keypoints.
-/// * `descriptors_0` - The first set of descriptors.
-/// * `keypoints_1` - The first set of keypoints.
-/// * `descriptors_1` - The second set of desctiptors.
+/// * `keypoints_0` - The first set of keypoints
+/// * `descriptors_0` - The first set of descriptors
+/// * `keypoints_1` - The first set of keypoints
+/// * `descriptors_1` - The second set of desctiptors
+/// * `lowes_ratio` - The ratio between the best and second-best match L2 norm required
+/// * `ransac_trials` - The number of trials to run RANSAC
+/// * `ransac_epsilon_inliers` - The maximum error to accept for an inlier
+/// 
+/// For a high number of matches with some error, choose:
+/// * `lowes_ratio` - `0.86`
+/// * `ransac_trials` - `1000`
+/// * `ransac_epsilon_inliers` - `3.0`
+/// 
+/// If you have different performance constraints or input imagery,
+/// experiment with the parameters. If you have more points, you may need to
+/// lower the `lowes_ratio` to, at most, about `0.75`. You can also decrease
+/// `ransac_epsilon_inliers` to achieve higher accuracy, but you will loose
+/// some inliers. It seems that lowering the `lowes_ratio` is more effective
+/// to reduce error with more features than modifying `ransac_epsilon_inliers`.
+/// This might help as a starting point, but you should test the recall rate
+/// in your own benchmarks with the data you have because every dataset is
+/// different.
 ///
 /// # Return value
 /// A vector of matches.
@@ -241,8 +245,7 @@ pub fn extract_features(
 ///     akaze::extract_features(
 ///       Path::new("test-data/2.jpg").to_owned(),
 ///       options);
-/// let matches = akaze::match_features(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
-/// akaze::types::feature_match::serialize_to_file(&matches, Path::new("matches.cbor").to_owned());
+/// let matches = akaze::match_features(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1, 0.8, 10000, 0.25);
 /// println!("Got {} matches.", matches.len());
 /// ```
 ///
@@ -251,16 +254,22 @@ pub fn match_features(
     descriptors_0: &[Descriptor],
     keypoints_1: &[Keypoint],
     descriptors_1: &[Descriptor],
+    lowes_ratio: f64,
+    ransac_trials: usize,
+    ransac_epsilon_inliers: f32,
 ) -> Vec<Match> {
-    // 50usize is a level such that no plausible matches will be filtered - effectively
-    // turning this off
-    let distance_threshold = 50usize;
-    // Take all matches that pass Lowe's ratio.
     let output = ops::feature_matching::descriptor_match(
-        &descriptors_0,
+        descriptors_0,
         descriptors_1,
-        distance_threshold,
-        0.7,
+        10000,
+        lowes_ratio,
     );
-    remove_outliers(&keypoints_0, &keypoints_1, &output, 10000, 0.05f32, 0.25f32)
+    remove_outliers(
+        &keypoints_0,
+        &keypoints_1,
+        &output,
+        ransac_trials,
+        0.05,
+        ransac_epsilon_inliers,
+    )
 }

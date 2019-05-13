@@ -8,11 +8,12 @@ extern crate image;
 extern crate serde;
 extern crate serde_json;
 use akaze::types::evolution::{write_evolutions, Config};
-use akaze::types::keypoint::{draw_keypoints_to_image, serialize_to_file};
+use akaze::types::keypoint::{draw_keypoints_to_image};
 use clap::{App, Arg};
 use std::fs::File;
 use std::io::{Read, Write};
 use std::time::SystemTime;
+use akaze_util::*;
 
 fn main() {
     let matches = App::new("KAZE extractor.")
@@ -82,8 +83,9 @@ fn main() {
     }
     let (evolutions, keypoints, descriptors) =
         akaze::extract_features(Path::new(input_path).to_owned(), options);
-    serialize_to_file(&keypoints, &descriptors, Path::new(&output_path).to_owned());
-    info!("Done, extracted {} features.", keypoints.len());
+    let features = Features { keypoints, descriptors };
+    serialize_features_to_file(&features, output_path).expect("failed to write out features");
+    info!("Done, extracted {} features.", features.keypoints.len());
     match matches.value_of("debug_path") {
         Some(val) => {
             info!("Writing scale space since --debug_path/-d option was specified.");
@@ -94,7 +96,7 @@ fn main() {
             let mut input_image = image::open(Path::new(input_path).to_owned())
                 .unwrap()
                 .to_rgb();
-            draw_keypoints_to_image(&mut input_image, &keypoints);
+            draw_keypoints_to_image(&mut input_image, &features.keypoints);
             let mut path_to_keypoint_image = path_to_scale_space_dir.clone();
             path_to_keypoint_image.push("keypoints.png");
             match input_image.save(path_to_keypoint_image.to_owned()) {

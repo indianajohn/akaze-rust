@@ -48,8 +48,17 @@ pub fn descriptor_match(
                 second_to_min_distance = distance;
             }
         }
-        // apply thresholding and Lowe's ratio
-        if (min_distance as f64) < (second_to_min_distance as f64) * lowes_ratio {
+        // Apply thresholding and Lowe's ratio.
+        // We use the lowes ratio squared because if the hamming distance were treated
+        // as an L2 norm like it is with other distance metrics, then the hamming distance
+        // is effectively a squared L2 norm rather than an L1 norm.
+        //
+        // (d0) ^ (1/2) = lowes_ratio * d1 ^ (1/2)
+        // ((d0) ^ (1/2) = lowes_ratio * d1 ^ (1/2)) ^ 2
+        // d0 = lowes_ratio ^ 2 * d1
+        // 
+        // The last reduction step can be done because hamming distance is never negative.
+        if (min_distance as f64) < (second_to_min_distance as f64) * lowes_ratio.powi(2) {
             if min_distance < (distance_threshold as usize) {
                 output.push(Match {
                     index_0: i,

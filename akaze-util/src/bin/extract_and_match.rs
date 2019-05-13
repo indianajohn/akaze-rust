@@ -1,17 +1,12 @@
-extern crate akaze;
-use std::path::Path;
 #[macro_use]
 extern crate log;
-extern crate clap;
-extern crate env_logger;
-extern crate image;
-extern crate serde;
-extern crate serde_json;
+
 use akaze::match_features;
 use akaze::types::evolution::Config;
 use akaze::types::feature_match;
-use akaze::types::keypoint::serialize_to_file;
+use akaze_util::*;
 use clap::{App, Arg};
+use std::path::Path;
 use std::time::SystemTime;
 
 fn main() {
@@ -76,45 +71,56 @@ fn main() {
     extractions_1_path.push_str("-extractions_1.cbor");
     let mut matches_path = prefix_string.clone();
     matches_path.push_str("-matches.cbor");
-    let (_evolutions_0, keypoints_0, descriptors_0) =
+
+    let (_, keypoints, descriptors) =
         akaze::extract_features(Path::new(input_path_0).to_owned(), options);
-    serialize_to_file(
-        &keypoints_0,
-        &descriptors_0,
-        Path::new(&extractions_0_path).to_owned(),
-    );
+    let features_0 = Features {
+        keypoints,
+        descriptors,
+    };
+    serialize_features_to_file(&features_0, extractions_0_path)
+        .expect("failed to write first image features to file");
     info!(
         "Done, extracted {} features from image 0.",
-        keypoints_0.len()
+        features_0.keypoints.len()
     );
-    let (_evolutions_1, keypoints_1, descriptors_1) =
+
+    let (_, keypoints, descriptors) =
         akaze::extract_features(Path::new(input_path_1).to_owned(), options);
-    serialize_to_file(
-        &keypoints_0,
-        &descriptors_0,
-        Path::new(&extractions_1_path).to_owned(),
-    );
+    let features_1 = Features {
+        keypoints,
+        descriptors,
+    };
+    serialize_features_to_file(&features_1, extractions_1_path)
+        .expect("failed to write second image features to file");
     info!(
         "Done, extracted {} features from image 1, proceeding with matching.",
-        keypoints_1.len()
+        features_1.keypoints.len()
     );
-    let output_matches = match_features(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
+
+    let output_matches = match_features(
+        &features_0.keypoints,
+        &features_0.descriptors,
+        &features_1.keypoints,
+        &features_1.descriptors,
+        0.86,
+        1000,
+        3.0,
+    );
     info!("Got {} matches.", output_matches.len());
-    feature_match::serialize_to_file(&output_matches, Path::new(&matches_path).to_owned());
+
+    serialize_matches_to_file(&output_matches, matches_path)
+        .expect("failed to write matches to file");
     match matches.value_of("match_image_path") {
         Some(match_image_path) => {
-            info!("Writing scale space since --debug_path/-d option was specified.");
-            let input_image_0 = image::open(Path::new(input_path_0).to_owned())
-                .unwrap()
-                .to_rgb();
-            let input_image_1 = image::open(Path::new(input_path_1).to_owned())
-                .unwrap()
-                .to_rgb();
+            info!("Writing scale space");
+            let input_image_0 = image::open(input_path_0).unwrap().to_rgb();
+            let input_image_1 = image::open(input_path_1).unwrap().to_rgb();
             let matches_image = feature_match::draw_matches(
                 &input_image_0,
                 &input_image_1,
-                &keypoints_0,
-                &keypoints_1,
+                &features_0.keypoints,
+                &features_1.keypoints,
                 &output_matches,
             );
             match matches_image.save(match_image_path.to_owned()) {

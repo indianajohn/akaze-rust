@@ -3,10 +3,8 @@ extern crate akaze;
 extern crate log;
 extern crate env_logger;
 extern crate image;
-extern crate tempdir;
 use std::path::PathBuf;
 use std::time::SystemTime;
-use tempdir::TempDir;
 
 use akaze::types::evolution::{write_evolutions, Config};
 use akaze::types::feature_match::draw_matches;
@@ -15,10 +13,10 @@ use akaze::types::keypoint::draw_keypoints_to_image;
 /// Test data is included with this repository. This
 /// function helps find it for testing.
 fn locate_test_data() -> PathBuf {
-    let exe_path = ::std::env::current_exe().unwrap();
-    let mut parent_path = exe_path.parent().unwrap().to_owned();
-    parent_path.push("../../../test-data");
-    parent_path
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .join("test-data")
 }
 
 #[test]
@@ -46,12 +44,8 @@ fn extract_features() {
     env_logger::Builder::from_env(env).init();
     let mut test_image_path = locate_test_data();
     test_image_path.push("1.jpg");
-    let tmp_dir = TempDir::new("output_dir").unwrap();
-    let output_path = tmp_dir.path().join("output.json");
     let options = Config::default();
-    let (evolutions, keypoints, descriptors) =
-        akaze::extract_features(test_image_path.clone(), options);
-    akaze::types::keypoint::serialize_to_file(&keypoints, &descriptors, output_path.to_owned());
+    let (evolutions, keypoints, _) = akaze::extract_features(test_image_path.clone(), options);
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {
         Ok(val) => {
             info!("Writing scale space; if you want to skip this step, undefine the env var AKAZE_SCALE_SPACE_DIR");
@@ -72,10 +66,6 @@ fn extract_features() {
             info!("Not writing scale space; do write scale space, define the env var AKAZE_SCALE_SPACE_DIR");
         }
     }
-    match std::fs::remove_file(output_path) {
-        Err(result) => warn!("Could not clean up temp files; returned error {:?}", result),
-        Ok(result) => trace!("Cleaned up temp files with result: {:?}", result),
-    };
     info!("Total duration: {:?}", start.elapsed().unwrap());
 }
 
@@ -86,18 +76,21 @@ fn match_features() {
     test_image_path_0.push("1.jpg");
     let mut test_image_path_1 = locate_test_data();
     test_image_path_1.push("2.jpg");
-    let tmp_dir = TempDir::new("output_dir").unwrap();
-    let output_path = tmp_dir.path().join("features_0.json");
     let options = Config::default();
     let (_evolutions_0, keypoints_0, descriptors_0) =
         akaze::extract_features(test_image_path_0.clone(), options);
-    akaze::types::keypoint::serialize_to_file(&keypoints_0, &descriptors_0, output_path.to_owned());
-    let output_path = tmp_dir.path().join("features_1.json");
     let (_evolutions_1, keypoints_1, descriptors_1) =
         akaze::extract_features(test_image_path_1.clone(), options);
-    akaze::types::keypoint::serialize_to_file(&keypoints_0, &descriptors_0, output_path.to_owned());
     debug!("Beginning matching process.");
-    let matches = akaze::match_features(&keypoints_0, &descriptors_0, &keypoints_1, &descriptors_1);
+    let matches = akaze::match_features(
+        &keypoints_0,
+        &descriptors_0,
+        &keypoints_1,
+        &descriptors_1,
+        0.86,
+        1000,
+        3.0,
+    );
     info!("Got {} matches.", matches.len());
     let start = SystemTime::now();
     match std::env::var("AKAZE_SCALE_SPACE_DIR") {
@@ -126,9 +119,5 @@ fn match_features() {
             info!("Not writing scale space; do write scale space, define the env var AKAZE_SCALE_SPACE_DIR");
         }
     }
-    match std::fs::remove_file(output_path) {
-        Err(result) => warn!("Could not clean up temp files; returned error {:?}", result),
-        Ok(result) => trace!("Cleaned up temp files with result: {:?}", result),
-    };
     info!("Total duration: {:?}", start.elapsed().unwrap());
 }

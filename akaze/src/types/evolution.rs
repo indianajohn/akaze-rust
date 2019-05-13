@@ -1,6 +1,7 @@
 use crate::ops::fed_tau;
 use crate::types::image::save;
 use crate::types::image::{GrayFloatImage, ImageFunctions};
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
@@ -105,10 +106,10 @@ impl EvolutionStep {
             );
         let etime = 0.5 * (esigma * esigma);
         EvolutionStep {
-            etime: etime,
-            esigma: esigma,
-            octave: octave,
-            sublevel: sublevel,
+            etime,
+            esigma,
+            octave,
+            sublevel,
             sigma_size: esigma.round() as u32,
             Lt: GrayFloatImage::new(0, 0),
             Lsmooth: GrayFloatImage::new(0, 0),

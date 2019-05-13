@@ -87,8 +87,8 @@ impl ImageFunctions for GrayFloatImage {
     fn new(width: usize, height: usize) -> Self {
         Self {
             buffer: vec![0f32; width * height],
-            height: height,
-            width: width,
+            height,
+            width,
         }
     }
 

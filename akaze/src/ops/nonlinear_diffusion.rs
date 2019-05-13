@@ -1,7 +1,8 @@
 use crate::types::evolution::EvolutionStep;
 use crate::types::image::{GrayFloatImage, ImageFunctions};
 use nalgebra::Vector4;
-/// This function performs a scalar non-linear diffusion step
+
+/// This function performs a scalar non-linear diffusion step.
 ///
 /// # Arguments
 /// * `Ld` - Output image in the evolution
@@ -16,10 +17,17 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
     let c: &GrayFloatImage = &evolution_step.Lflow;
     let Lstep: &mut GrayFloatImage = &mut evolution_step.Lstep;
     let w = Lstep.width();
-    let h = Lstep.height();
 
-    // Diffusion all the image except borders
-    for y in 1..(h - 1) {
+    // Significant positions and ranges
+    let xbegin = 0;
+    let xmiddle = 1..Lstep.width() - 1;
+    let xend = Lstep.width() - 1;
+    let ybegin = 0;
+    let ymiddle = 1..Lstep.height() - 1;
+    let yend = Lstep.height() - 1;
+
+    // Middle diffusion
+    for y in ymiddle.clone() {
         let mut Ld_yn = Ld.buffer.iter();
         let mut Ld_yn_i = Ld_yn.nth(w * (y - 1) + 1).unwrap();
 
@@ -72,62 +80,60 @@ pub fn calculate_step(evolution_step: &mut EvolutionStep, step_size: f64) {
         }
     }
     // First row
-    for x in 1..(Lstep.width() - 1) {
-        let y = 0;
-        let x_pos = eval(c, Ld, x, y, [0, 1, 1, 0], [0, 0, 0, 0]);
-        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, 1, 1, 0]);
-        let x_neg = eval(c, Ld, x, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
-        Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos - x_neg + y_pos));
+    for x in xmiddle.clone() {
+        let x_pos = eval(c, Ld, x, ybegin, [0, 1, 1, 0], [0, 0, 0, 0]);
+        let y_pos = eval(c, Ld, x, ybegin, [0, 0, 0, 0], [0, 1, 1, 0]);
+        let x_neg = eval(c, Ld, x, ybegin, [-1, 0, 0, -1], [0, 0, 0, 0]);
+        Lstep.put(
+            x,
+            ybegin,
+            0.5 * (step_size as f32) * (x_pos - x_neg + y_pos),
+        );
     }
     {
-        let x = 0;
-        let y = 0;
-        let x_pos = eval(c, Ld, x, y, [0, 1, 1, 0], [0, 0, 0, 0]);
-        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, 1, 1, 0]);
-        Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos + y_pos));
+        let x_pos = eval(c, Ld, xbegin, ybegin, [0, 1, 1, 0], [0, 0, 0, 0]);
+        let y_pos = eval(c, Ld, xbegin, ybegin, [0, 0, 0, 0], [0, 1, 1, 0]);
+        Lstep.put(xbegin, ybegin, 0.5 * (step_size as f32) * (x_pos + y_pos));
     }
     {
-        let x = Lstep.width() - 1;
-        let y = 0;
-        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, 1, 1, 0]);
-        let x_neg = eval(c, Ld, x, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
-        Lstep.put(x, y, 0.5 * (step_size as f32) * (-x_neg + y_pos));
+        let y_pos = eval(c, Ld, xend, ybegin, [0, 0, 0, 0], [0, 1, 1, 0]);
+        let x_neg = eval(c, Ld, xend, ybegin, [-1, 0, 0, -1], [0, 0, 0, 0]);
+        Lstep.put(xend, ybegin, 0.5 * (step_size as f32) * (-x_neg + y_pos));
     }
     // Last row
-    let y = Lstep.height() - 1;
-    for x in 1..(Lstep.width() - 1) {
-        let x_pos = eval(c, Ld, x, y, [0, 1, 1, 0], [0, 0, 0, 0]);
-        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, -1, -1, 0]);
-        let x_neg = eval(c, Ld, x, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
-        Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos - x_neg + y_pos));
+    for x in xmiddle.clone() {
+        let x_pos = eval(c, Ld, x, yend, [0, 1, 1, 0], [0, 0, 0, 0]);
+        let y_pos = eval(c, Ld, x, yend, [0, 0, 0, 0], [0, -1, -1, 0]);
+        let x_neg = eval(c, Ld, x, yend, [-1, 0, 0, -1], [0, 0, 0, 0]);
+        Lstep.put(x, yend, 0.5 * (step_size as f32) * (x_pos - x_neg + y_pos));
     }
     {
-        let x = 0;
-        let x_pos = eval(c, Ld, x, y, [0, 1, 1, 0], [0, 0, 0, 0]);
-        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, -1, -1, 0]);
-        Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos + y_pos));
+        let x_pos = eval(c, Ld, xbegin, yend, [0, 1, 1, 0], [0, 0, 0, 0]);
+        let y_pos = eval(c, Ld, xbegin, yend, [0, 0, 0, 0], [0, -1, -1, 0]);
+        Lstep.put(xbegin, yend, 0.5 * (step_size as f32) * (x_pos + y_pos));
     }
     {
-        let x = Lstep.width() - 1;
-        let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, -1, -1, 0]);
-        let x_neg = eval(c, Ld, x, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
-        Lstep.put(x, y, 0.5 * (step_size as f32) * (-x_neg + y_pos));
+        let y_pos = eval(c, Ld, xend, yend, [0, 0, 0, 0], [0, -1, -1, 0]);
+        let x_neg = eval(c, Ld, xend, yend, [-1, 0, 0, -1], [0, 0, 0, 0]);
+        Lstep.put(xend, yend, 0.5 * (step_size as f32) * (-x_neg + y_pos));
     }
     // First and last columns
-    for y in 1..(Lstep.height() - 1) {
+    for y in ymiddle {
         {
-            let x = 0;
-            let x_pos = eval(c, Ld, x, y, [0, 1, 1, 0], [0, 0, 0, 0]);
-            let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, 1, 1, 0]);
-            let y_neg = eval(c, Ld, x, y, [0, 0, 0, 0], [-1, 0, 0, -1]);
-            Lstep.put(x, y, 0.5 * (step_size as f32) * (x_pos + y_pos - y_neg));
+            let x_pos = eval(c, Ld, xbegin, y, [0, 1, 1, 0], [0, 0, 0, 0]);
+            let y_pos = eval(c, Ld, xbegin, y, [0, 0, 0, 0], [0, 1, 1, 0]);
+            let y_neg = eval(c, Ld, xbegin, y, [0, 0, 0, 0], [-1, 0, 0, -1]);
+            Lstep.put(
+                xbegin,
+                y,
+                0.5 * (step_size as f32) * (x_pos + y_pos - y_neg),
+            );
         }
         {
-            let x = Lstep.width() - 1;
-            let y_pos = eval(c, Ld, x, y, [0, 0, 0, 0], [0, 1, 1, 0]);
-            let x_neg = eval(c, Ld, x, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
-            let y_neg = eval(c, Ld, x, y, [0, 0, 0, 0], [-1, 0, 0, -1]);
-            Lstep.put(x, y, 0.5 * (step_size as f32) * (-x_neg + y_pos - y_neg));
+            let y_pos = eval(c, Ld, xend, y, [0, 0, 0, 0], [0, 1, 1, 0]);
+            let x_neg = eval(c, Ld, xend, y, [-1, 0, 0, -1], [0, 0, 0, 0]);
+            let y_neg = eval(c, Ld, xend, y, [0, 0, 0, 0], [-1, 0, 0, -1]);
+            Lstep.put(xend, y, 0.5 * (step_size as f32) * (-x_neg + y_pos - y_neg));
         }
     }
 

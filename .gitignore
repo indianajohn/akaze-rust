@@ -1,7 +1,14 @@
+# Rust
 /target
 **/*.rs.bk
 Cargo.lock
 
+# Files that can be in the root when messing around.
 /*.txt
 /*.png
 /*.cbor
+/*.bin
+/*.json
+
+# Visualization directory used in README.md
+/visualization

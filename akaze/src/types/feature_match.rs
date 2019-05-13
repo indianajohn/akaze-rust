@@ -1,11 +1,7 @@
 use crate::types::image::{draw_line, random_color};
 use crate::types::keypoint::Keypoint;
 use image::RgbImage;
-use std::fs::File;
-use std::io::{Read, Write};
-use std::path::PathBuf;
-extern crate serde;
-extern crate serde_json;
+use serde::{Serialize, Deserialize};
 
 /// A match between a keypoint in one image and a keypoint
 /// in another image.
@@ -83,52 +79,4 @@ pub fn draw_matches(
         );
     }
     combined_image
-}
-
-/// Serialize matches to a file.
-///
-/// # Arguments
-/// * 'matches' - The matches to serialize.
-/// * `path` - Path to which to write.
-pub fn serialize_to_file(matches: &[Match], path: PathBuf) {
-    debug!("Writing results to {:?}", path);
-    let mut file = File::create(path.clone()).unwrap();
-    let extension = path.extension().unwrap();
-    if extension == "json" {
-        let serialized = serde_json::to_string(&matches).unwrap();
-        file.write_all(serialized.as_bytes()).unwrap();
-    } else if extension == "cbor" {
-        let serialized = serde_cbor::to_vec(&matches).unwrap();
-        file.write_all(&serialized[..]).unwrap();
-    } else {
-        // Default to JSON
-        let serialized = serde_json::to_string(&matches).unwrap();
-        file.write_all(serialized.as_bytes()).unwrap();
-    }
-}
-
-/// Deserialize matches from a file.
-///
-/// # Arguments
-/// * 'path' - Path from which to read.
-/// # Return value
-/// The deserialized results.
-pub fn deserialize_from_file(path: PathBuf) -> Vec<Match> {
-    debug!("Reading results from {:?}", path);
-    let mut file = File::open(path.clone()).unwrap();
-    let extension = path.extension().unwrap();
-    if extension == "json" {
-        let mut buffer = String::new();
-        file.read_to_string(&mut buffer).unwrap();
-        serde_json::from_str(&buffer).unwrap()
-    } else if extension == "cbor" {
-        let mut buffer = Vec::new();
-        file.read_to_end(&mut buffer).unwrap();
-        serde_cbor::from_slice(&buffer[..]).unwrap()
-    } else {
-        // default to JSON
-        let mut buffer = String::new();
-        file.read_to_string(&mut buffer).unwrap();
-        serde_json::from_str(&buffer).unwrap()
-    }
 }

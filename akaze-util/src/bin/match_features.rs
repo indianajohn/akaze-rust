@@ -1,5 +1,4 @@
 extern crate akaze;
-use std::path::Path;
 #[macro_use]
 extern crate log;
 extern crate clap;
@@ -8,8 +7,7 @@ extern crate image;
 extern crate serde;
 extern crate serde_json;
 use akaze::match_features;
-use akaze::types::feature_match;
-use akaze::types::keypoint;
+use akaze_util::*;
 use clap::{App, Arg};
 use std::time::SystemTime;
 
@@ -65,17 +63,20 @@ fn main() {
         "Input extractions: {}/{}, output matches: {}, threshold: {}.",
         input_extractions_0_path, input_extractions_1_path, output_path, threshold
     );
-    let extractions_0 =
-        keypoint::deserialize_from_file(Path::new(input_extractions_0_path).to_owned());
-    let extractions_1 =
-        keypoint::deserialize_from_file(Path::new(input_extractions_1_path).to_owned());
+    let extractions_0 = deserialize_features_from_file(input_extractions_0_path)
+        .expect("failed to read features from first file");
+    let extractions_1 = deserialize_features_from_file(input_extractions_1_path)
+        .expect("failed to read features from second file");
     let matches = match_features(
         &extractions_0.keypoints,
         &extractions_0.descriptors,
         &extractions_1.keypoints,
         &extractions_1.descriptors,
+        0.86,
+        1000,
+        3.0,
     );
-    feature_match::serialize_to_file(&matches, Path::new(output_path).to_owned());
+    serialize_matches_to_file(&matches, output_path).expect("unable to write matches to file");
     debug!(
         "Done, got {} matches, total duration: {:?}",
         matches.len(),

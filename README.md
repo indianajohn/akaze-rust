@@ -57,13 +57,13 @@ println!("Got {} matches.", matches.len());
 # All executables (and your code probably) should be run in release mode, otherwise
 # these can be quite slow.
 # Extraction
-cargo run --release --bin extract_features -- ./test-data/2.jpg ./output.cbor
+cargo run --release --bin extract_features -- test-data/2.jpg output.bin
 
 # Matching
-cargo run --release --bin extract_and_match -- -m ./match_image.png ./test-data/1.jpg ./test-data/2.jpg testname
+cargo run --release --bin extract_and_match -- -m matches.png test-data/1.jpg test-data/2.jpg testname
 
-# Visualizing scale space
-cargo run --release --bin extract_features -- ./test-data/2.jpg ./output.cbor  -d ./scale-space/
+# Output visualizations of detected features and scale space to directory `visualization`.
+cargo run --release --bin extract_features -- test-data/2.jpg output.bin -d visualization
 ```
 
 ## License
