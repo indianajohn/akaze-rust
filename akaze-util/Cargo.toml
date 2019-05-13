@@ -3,6 +3,13 @@ name = "akaze-util"
 version = "0.1.0"
 authors = ["vax <vadixidav@gmail.com>", "John Stalbaum <indianajohn@github>"]
 edition = "2018"
+description = "Utilities for akaze-rust."
+homepage = "https://github.com/indianajohn/akaze-rust/"
+repository = "https://github.com/indianajohn/akaze-rust/"
+readme = "./README.md"
+keywords = ["CV", "vision", "sfm", "features", "descriptors"]
+categories = ["science::robotics", "multimedia::images"]
+license = "MIT"
 
 [dependencies]
 akaze = { version = "0.1.2", path = "../akaze" }
