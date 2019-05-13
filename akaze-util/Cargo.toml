@@ -1,7 +1,7 @@
 [package]
 name = "akaze-util"
 version = "0.1.0"
-authors = ["vax <vadixidav@gmail.com>"]
+authors = ["vax <vadixidav@gmail.com>", "John Stalbaum <indianajohn@github>"]
 edition = "2018"
 
 [dependencies]

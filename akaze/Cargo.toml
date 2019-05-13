@@ -1,8 +1,8 @@
 [package]
 name = "akaze"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2018"
-authors = ["John Stalbaum <indianajohn@github>"]
+authors = ["John Stalbaum <indianajohn@github>", "vax <vadixidav@gmail.com>"]
 description = "A Rust implementation of the A-KAZE algorithm."
 homepage = "https://github.com/indianajohn/akaze-rust/"
 repository = "https://github.com/indianajohn/akaze-rust/"
