@@ -52,6 +52,7 @@ println!("Got {} matches.", matches.len());
 ```
 
 ## Running Demonstrations
+Note: These demonstrations are part of [the akaze-util crate](./akaze-util/README.md).
 
 ```bash
 # All executables (and your code probably) should be run in release mode, otherwise
