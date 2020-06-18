@@ -1,5 +1,14 @@
 # A-KAZE Feature Detector, Extractor, and Matcher for Rust
 
+This repository is deprecated.
+
+This used to be the home for the akaze-rust crate, but I transferred ownership of that crate to
+the rust-cv organization. For the latest version of this code, go here:
+
+https://github.com/rust-cv/akaze
+
+# Original README
+
 This repository contains a Rust implementation of the A-KAZE algorithm. I would like to
 thank the original authors of the A-KAZE algorithm, who provided the
 implementation I used as a reference here:
